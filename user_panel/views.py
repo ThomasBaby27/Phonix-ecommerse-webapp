@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from authentication.models import Product, Category, Brand,Address,Wishlist,Cart,Order,OrderItem,Wallet, Transaction,Variant,ProductImage,Offer,Coupon,CouponUsage
+from authentication.models import Product, Category, Brand,Address,Wishlist,Cart,Order,OrderItem,Wallet, Transaction,Variant,ProductImage,Offer,Coupon,CouponUsage,CustomUser
 from django.contrib.auth.decorators import user_passes_test
 from .decorators import active_user_required
 from .forms import UserEditForm,AddressForm
@@ -29,13 +29,15 @@ from decimal import Decimal
 from django.db.models import DecimalField
 from django.db.models.functions import Cast
 from django.db.models import Min
-from django.db.models import Prefetch, Sum
+from django.db.models import Prefetch, Sum,Min, Max
 from django.db import models
 import razorpay
 from django.conf import settings
 from django.views.decorators.cache import cache_control
 import hmac
 import hashlib
+
+
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -313,92 +315,6 @@ def brand_products(request, brand_id):
     brand = get_object_or_404(Brand, id=brand_id)
     products = Product.objects.filter(brand=brand, status=True)
     return render(request, 'brand_products.html', {'brand': brand, 'products': products})
-
-
-# @active_user_required
-# def mobile_details(request, product_id):
-#     product = get_object_or_404(Product, id=product_id, category__name='Mobile')  # Assuming 'Phones' is the category name for mobiles
-    
-#     # Get offers for this product
-#     offers = Offer.objects.filter(
-#         models.Q(product=product) | models.Q(category=product.category),
-#         status=True,
-#         start_date__lte=timezone.now(),
-#         end_date__gte=timezone.now()
-#     )
-    
-#     # Get the first variant to calculate the price
-#     first_variant = product.variants.first()
-#     original_price = first_variant.price if first_variant else Decimal('0.00')
-
-#     # Calculate the total offer discount
-#     total_offer = Decimal('0.00')
-#     discount_percentage = 0
-#     if offers.exists():
-#         total_offer = Offer.get_total_offer(Offer, product)  # Assuming this method exists in your Offer model
-#         if total_offer > 0 and original_price > 0:
-#             discount_percentage = int((total_offer / original_price) * 100)
-
-#     # Calculate the discounted price
-#     discounted_price = original_price - total_offer if original_price > total_offer else original_price
-
-#     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-#         return JsonResponse({
-#             'quantity': first_variant.stock if first_variant else 0  # Return stock from variant
-#         })
-
-#     return render(request, 'mobile product page.html', {
-#         'product': product,
-#         'offers': offers,
-#         'original_price': original_price,
-#         'discounted_price': discounted_price,
-#         'discount_percentage': discount_percentage,
-#         'is_authenticated': request.user.is_authenticated  
-#     })
-
-
-# @active_user_required
-# def laptop_detail(request, laptop_id):
-    
-#     laptop = get_object_or_404(Product, id=laptop_id, category__name='Laptop')
-    
-#     # Get offers for this laptop
-#     offers = Offer.objects.filter(
-#         models.Q(product=laptop) | models.Q(category=laptop.category),
-#         status=True,
-#         start_date__lte=timezone.now(),
-#         end_date__gte=timezone.now()
-#     )
-    
-#     # Get the first variant to calculate the price
-#     first_variant = laptop.variants.first()
-#     original_price = first_variant.price if first_variant else Decimal('0.00')
-
-#     # Calculate the total offer discount
-#     total_offer = Decimal('0.00')
-#     discount_percentage = 0
-#     if offers.exists():
-#         total_offer = Offer.get_total_offer(Offer, laptop)  # Corrected call
-#         if total_offer > 0 and original_price > 0:
-#             discount_percentage = int((total_offer / original_price) * 100)
-
-#     # Calculate the discounted price
-#     discounted_price = original_price - total_offer if original_price > total_offer else original_price
-
-#     # Get related models - laptops from the same brand
-#     related_models = Product.objects.filter(
-#         category__name='Laptop',
-#         brand=laptop.brand
-#     ).exclude(id=laptop.id)[:4]
-
-#     return render(request, 'laptop_detail page.html', {
-#         'laptop': laptop,
-#         'offers': offers,
-#         'related_models': related_models,
-#         'original_price': original_price,
-#         'discounted_price': discounted_price,
-#         'discount_percentage': discount_percentage
-#     })
     
 def account_profile(request):
     return render(request, 'account_details.html', {'user': request.user})
