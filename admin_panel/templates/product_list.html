@@ -5,40 +5,413 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product List</title>
-    <link rel="stylesheet" href="{% static 'product_listt.css' %}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- jQuery and SweetAlert2 -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <style>
+        /* General Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #1e293b;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li a span {
+            display: none;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.collapsed ul li a {
+            justify-content: center;
+        }
+
+        /* Main Content Styles */
+        .content {
+            margin-left: 250px;
+            padding: 40px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed + .content {
+            margin-left: 70px;
+        }
+
+        .content h1 {
+            font-size: 2.25rem;
+            color: #1e3a8a;
+            margin-bottom: 24px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        /* Header Actions */
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        /* Search Bar Styles */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .search-bar input {
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            width: 100%;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .search-btn {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+        .search-btn:hover {
+            background-color: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .cancel-btn {
+            background-color: #e5e7eb;
+            color: #1e293b;
+        }
+
+        .cancel-btn:hover {
+            background-color: #d1d5db;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .add-product-btn {
+            background-color: #22c55e;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-product-btn:hover {
+            background-color: #16a34a;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #1e3a8a;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        td img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Status and Action Buttons */
+        .status-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .active-btn {
+            background-color: #22c55e;
+            color: #fff;
+        }
+
+        .active-btn:hover {
+            background-color: #16a34a;
+            transform: translateY(-2px);
+        }
+
+        .inactive-btn {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        .inactive-btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .edit-btn {
+            background-color: #2563eb;
+            color: #fff;
+            margin-right: 8px;
+        }
+
+        .edit-btn:hover {
+            background-color: #1e3a8a;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .delete-btn {
+            background-color: #ef4444;
+            color: #fff;
+        }
+
+        .delete-btn:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar h2,
+            .sidebar ul li a span {
+                display: none;
+            }
+
+            .content {
+                margin-left: 70px;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+
+            .search-bar input {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 24px;
+            }
+
+            .content h1 {
+                font-size: 1.75rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 12px;
+            }
+
+            td img {
+                width: 48px;
+                height: 48px;
+            }
+
+            .action-btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Smooth Transitions and Animations */
+        .sidebar,
+        .content,
+        .action-btn,
+        .status-btn {
+            transition: all 0.3s ease;
+        }
+
+        /* Accessibility */
+        a:focus,
+        button:focus,
+        input:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">☰</button>
         <h2>Products</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
 
+    <!-- Main Content -->
     <div class="content">
         <h1>Product List</h1>
         
-        <!-- Search Bar -->
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search products..." onkeyup="searchTable()">
+        <!-- Header Actions -->
+        <div class="header-actions">
+            <div class="search-bar">
+                <form method="GET" action="{% url 'product_list' %}" id="searchForm">
+                    <input type="text" name="search" id="searchInput" placeholder="Search products..." value="{{ request.GET.search|default_if_none:'' }}">
+                    <button type="submit" class="action-btn search-btn">Search</button>
+                    <button type="button" id="clearSearch" class="action-btn cancel-btn" style="display: {% if request.GET.search %}inline-block{% else %}none{% endif %};">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </form>
+            </div>
+            <a href="{% url 'add_product' %}" class="action-btn add-product-btn">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
         </div>
 
         <!-- Product Table -->
@@ -95,25 +468,6 @@
     </div>
 
     <script>
-        // Search functionality
-        function searchTable() {
-            let input = document.getElementById("searchInput").value.toLowerCase();
-            let table = document.getElementById("productTable");
-            let tr = table.getElementsByTagName("tr");
-
-            for (let i = 1; i < tr.length; i++) {
-                let td = tr[i].getElementsByTagName("td");
-                let found = false;
-                for (let j = 0; j < td.length; j++) {
-                    if (td[j] && td[j].innerText.toLowerCase().indexOf(input) > -1) {
-                        found = true;
-                        break;
-                    }
-                }
-                tr[i].style.display = found ? "" : "none";
-            }
-        }
-
         // Toggle product status
         function toggleStatus(productId, currentStatus) {
             Swal.fire({
@@ -187,12 +541,52 @@
             });
         }
 
-        // Sidebar toggle (for responsiveness, if needed)
+        // Sidebar toggle
         function toggleSidebar() {
             document.querySelector('.sidebar').classList.toggle('collapsed');
             document.querySelector('.content').style.marginLeft = 
-                document.querySelector('.sidebar').classList.contains('collapsed') ? '0' : '250px';
+                document.querySelector('.sidebar').classList.contains('collapsed') ? '70px' : '250px';
         }
+
+        // Search bar functionality
+        const searchInput = document.getElementById('searchInput');
+        const clearButton = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', function() {
+            clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
+        });
+
+        clearButton.addEventListener('click', function() {
+            window.location.href = '{% url "product_list" %}';
+        });
+
+        window.onload = function() {
+            clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
+        };
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            {% if messages %}
+                const messages = [
+                    {% for message in messages %}
+                        {
+                            level: "{{ message.tags }}",
+                            text: "{{ message }}"
+                        },
+                    {% endfor %}
+                ];         
+                messages.forEach(message => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-right',
+                        icon: message.level === 'success' ? 'success' : 'error',
+                        title: message.text,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                });
+            {% endif %}
+        });
     </script>
 </body>
 </html>

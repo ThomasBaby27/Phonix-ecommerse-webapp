@@ -236,16 +236,18 @@ LOGGING = {
     },
 }
 
-ACCOUNT_LOGIN_METHODS = {"email"}  # Replace deprecated ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_SIGNUP_FORM_CLASS = None
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 SOCIALACCOUNT_AUTO_SIGNUP = True
 SOCIALACCOUNT_STORE_TOKENS = True
 SOCIALACCOUNT_QUERY_EMAIL = True
 ACCOUNT_ADAPTER = "authentication.adapters.MyAccountAdapter"
 SOCIALACCOUNT_ADAPTER = "authentication.adapters.MySocialAccountAdapter"
-
+SOCIALACCOUNT_LOGIN_ON_GET = True
 TIME_ZONE = 'Asia/Kolkata'  # Change this to your correct timezone
 USE_TZ = True  # Django stores time in UTC but converts it when displayed
 

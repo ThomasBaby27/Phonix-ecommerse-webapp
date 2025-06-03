@@ -1,6 +1,6 @@
 # admin_panel/forms.py
 from django import forms
-from authentication.models import Product, Variant, ProductImage,Offer
+from authentication.models import Product, Variant, ProductImage,Offer,Category, Product
 from django.forms import inlineformset_factory
 from django.utils import timezone
 from django.core.exceptions import ValidationError
@@ -53,6 +53,13 @@ class OfferForm(forms.ModelForm):
             'start_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
             'end_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filter only active and non-deleted categories
+        self.fields['category'].queryset = Category.objects.filter(status=True, is_deleted=False)
+        # Filter only active and non-deleted products
+        self.fields['product'].queryset = Product.objects.filter(status=True, is_deleted=False)
 
     def clean(self):
         cleaned_data = super().clean()

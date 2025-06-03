@@ -5,204 +5,659 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Product</title>
-    <link rel="stylesheet" href="{% static 'add_productt.css' %}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Cropper.js CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-    
+    <style>
+        /* General Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles (same as admin panel) */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li a span {
+            display: none;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.collapsed ul li a {
+            justify-content: center;
+        }
+
+        /* Main Content Styles */
+        .content {
+            margin-left: 250px;
+            padding: 30px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed + .content {
+            margin-left: 70px;
+        }
+
+        /* Form Container Styles */
+        .container {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .container h2 {
+            font-size: 1.8rem;
+            color: #1e3a8a;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        /* Form Section Styles */
+        h3 {
+            font-size: 1.4rem;
+            color: #2563eb;
+            margin: 25px 0 15px;
+            font-weight: 500;
+        }
+
+        /* Form Input Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background-color: #f8fafc;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Variant Section Styles */
+        .variant-section {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+
+        .variant-section h4 {
+            font-size: 1.2rem;
+            color: #1e40af;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .variant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        /* Image Upload Styles */
+        .variant-images {
+            margin-top: 20px;
+        }
+
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        .current-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .image-input {
+            margin-bottom: 15px;
+        }
+
+        .image-input input[type="file"] {
+            display: none;
+        }
+
+        .image-input label {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #2563eb;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s ease;
+            margin-bottom: 10px;
+        }
+
+        .image-input label:hover {
+            background-color: #1d4ed8;
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            min-height: 100px;
+        }
+
+        .image-preview img {
+            max-width: 120px;
+            max-height: 120px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Button Styles */
+        button {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-variant-btn,
+        .delete-variant-btn,
+        .submit-btn,
+        .crop-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border: none;
+        }
+
+        .add-variant-btn {
+            background-color: #10b981;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .add-variant-btn:hover {
+            background-color: #059669;
+        }
+
+        .delete-variant-btn {
+            background-color: #ef4444;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .delete-variant-btn:hover {
+            background-color: #dc2626;
+        }
+
+        .submit-btn {
+            background-color: #2563eb;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1rem;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #1d4ed8;
+        }
+
+        .crop-btn {
+            background-color: #f59e0b;
+            color: white;
+            margin-top: 10px;
+        }
+
+        .crop-btn:hover {
+            background-color: #d97706;
+        }
+
+        /* Messages Styles */
+        .messages {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .messages li {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .messages .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .messages .error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar h2,
+            .sidebar ul li a span {
+                display: none;
+            }
+
+            .content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .toggle-btn {
+                display: block;
+            }
+
+            .variant-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .container h2 {
+                font-size: 1.5rem;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Cropper Modal Styles */
+        .cropper-modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .cropper-view-box {
+            outline: 1px solid #2563eb;
+        }
+
+        .cropper-line {
+            background-color: #2563eb;
+        }
+
+        .cropper-point {
+            background-color: #2563eb;
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sidebar (same as admin panel) -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         <h2>Edit Product</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="#">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
-
-    <div class="container">
-        <h2>Edit Product</h2>
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <form id="productForm" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="hidden" name="removed_images" id="removed_images" value="">
-            <h3>Product Details</h3>
-            <div>
-                <label for="id_name">Product Name:</label>
-                <input type="text" id="id_name" name="name" value="{{ product.name }}" required>
-            </div>
-            <div>
-                <label for="id_description">Description:</label>
-                <textarea id="id_description" name="description" required>{{ product.description }}</textarea>
-            </div>
-            <div>
-                <label for="id_brand">Brand:</label>
-                <select id="id_brand" name="brand" required>
-                    <option value="">Select Brand</option>
-                    {% for brand in brands %}
-                        <option value="{{ brand.id }}" {% if brand.id == product.brand.id %}selected{% endif %}>{{ brand.name }}</option>
+    
+    <!-- Main Content -->
+    <div class="content">
+        <div class="container">
+            <h2>Edit Product</h2>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                     {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="id_category">Category:</label>
-                <select id="id_category" name="category" required>
-                    <option value="">Select Category</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                </ul>
+            {% endif %}
 
-            <h3>Product Variants</h3>
-            <div id="variant-container">
-                {% for variant in variants %}
-                    <div class="variant-section" id="variant-{{ forloop.counter }}">
-                        <h4>Variant {{ forloop.counter }}</h4>
-                        <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
-                        <div>
-                            <label>RAM (GB):</label> <input type="number" name="ram[]" value="{{ variant.ram }}" min="1" required>
+            <form id="productForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="removed_images" id="removed_images" value="">
+                
+                <h3>Product Details</h3>
+                <div class="form-group">
+                    <label for="id_name">Product Name:</label>
+                    <input type="text" id="id_name" name="name" value="{{ product.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_description">Description:</label>
+                    <textarea id="id_description" name="description" required>{{ product.description }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label for="id_brand">Brand:</label>
+                    <select id="id_brand" name="brand" required>
+                        <option value="">Select Brand</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.id }}" {% if brand.id == product.brand.id %}selected{% endif %}>{{ brand.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_category">Category:</label>
+                    <select id="id_category" name="category" required>
+                        <option value="">Select Category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <h3>Product Variants</h3>
+                <div id="variant-container">
+                    {% for variant in variants %}
+                        <div class="variant-section" id="variant-{{ forloop.counter }}">
+                            <h4>Variant {{ forloop.counter }}</h4>
+                            <input type="hidden" name="variant_id[]" value="{{ variant.id }}">
+                            <div class="variant-grid">
+                                <div class="form-group">
+                                    <label>RAM (GB):</label>
+                                    <input type="number" name="ram[]" value="{{ variant.ram }}" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Storage (GB):</label>
+                                    <input type="number" name="storage[]" value="{{ variant.storage }}" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Color:</label>
+                                    <input type="text" name="color[]" value="{{ variant.color }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price:</label>
+                                    <input type="number" name="price[]" value="{{ variant.price }}" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock:</label>
+                                    <input type="number" name="stock[]" value="{{ variant.stock }}" min="0" required>
+                                </div>
+                            </div>
+                            <div class="variant-images">
+                                <label>Current Images:</label>
+                                <div class="image-container">
+                                    {% for image in variant.images.all %}
+                                        <div id="image-container-{{ image.id }}" class="image-wrapper">
+                                            <img src="{{ image.image.url }}" alt="Current Image" class="current-image">
+                                            <button type="button" class="delete-btn" onclick="removeImage('{{ image.id }}')">✖</button>
+                                        </div>
+                                    {% empty %}
+                                        <p>No images for this variant</p>
+                                    {% endfor %}
+                                </div>
+                                <label>Add New Images (Max 6, Min 3 Total Required):</label>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_1">Upload Image 1</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_1" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="1" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-1"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="1" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_2">Upload Image 2</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_2" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="2" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-2"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="2" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_3">Upload Image 3</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_3" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="3" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-3"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="3" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_4">Upload Image 4</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_4" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="4" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-4"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="4" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_5">Upload Image 5</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_5" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="5" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-5"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="5" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_{{ forloop.counter }}_6">Upload Image 6</label>
+                                    <input type="file" id="variant_images_{{ forloop.counter }}_6" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="6" multiple>
+                                    <div class="image-preview" id="variant-preview-{{ forloop.counter }}-6"></div>
+                                    <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="6" style="display: none;">Crop Image</button>
+                                </div>
+                            </div>
+                            <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
                         </div>
-                        <div>
-                            <label>Storage (GB):</label> <input type="number" name="storage[]" value="{{ variant.storage }}" min="1" required>
+                    {% empty %}
+                        <div class="variant-section" id="variant-1">
+                            <h4>Variant 1</h4>
+                            <input type="hidden" name="variant_id[]" value="">
+                            <div class="variant-grid">
+                                <div class="form-group">
+                                    <label>RAM (GB):</label>
+                                    <input type="number" name="ram[]" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Storage (GB):</label>
+                                    <input type="number" name="storage[]" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Color:</label>
+                                    <input type="text" name="color[]" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price:</label>
+                                    <input type="number" name="price[]" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock:</label>
+                                    <input type="number" name="stock[]" min="0" required>
+                                </div>
+                            </div>
+                            <div class="variant-images">
+                                <label>Images (Max 6, Min 3 Required):</label>
+                                <div class="image-input">
+                                    <label for="variant_images_1_1">Upload Image 1</label>
+                                    <input type="file" id="variant_images_1_1" name="variant_images_1[]" accept="image/*" data-index="1" multiple>
+                                    <div class="image-preview" id="variant-preview-1-1"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="1" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_1_2">Upload Image 2</label>
+                                    <input type="file" id="variant_images_1_2" name="variant_images_1[]" accept="image/*" data-index="2" multiple>
+                                    <div class="image-preview" id="variant-preview-1-2"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="2" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_1_3">Upload Image 3</label>
+                                    <input type="file" id="variant_images_1_3" name="variant_images_1[]" accept="image/*" data-index="3" multiple>
+                                    <div class="image-preview" id="variant-preview-1-3"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="3" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_1_4">Upload Image 4</label>
+                                    <input type="file" id="variant_images_1_4" name="variant_images_1[]" accept="image/*" data-index="4" multiple>
+                                    <div class="image-preview" id="variant-preview-1-4"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="4" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_1_5">Upload Image 5</label>
+                                    <input type="file" id="variant_images_1_5" name="variant_images_1[]" accept="image/*" data-index="5" multiple>
+                                    <div class="image-preview" id="variant-preview-1-5"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="5" style="display: none;">Crop Image</button>
+                                </div>
+                                <div class="image-input">
+                                    <label for="variant_images_1_6">Upload Image 6</label>
+                                    <input type="file" id="variant_images_1_6" name="variant_images_1[]" accept="image/*" data-index="6" multiple>
+                                    <div class="image-preview" id="variant-preview-1-6"></div>
+                                    <button type="button" class="crop-btn" data-variant="1" data-index="6" style="display: none;">Crop Image</button>
+                                </div>
+                            </div>
+                            <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
                         </div>
-                        <div>
-                            <label>Color:</label> <input type="text" name="color[]" value="{{ variant.color }}" required>
-                        </div>
-                        <div>
-                            <label>Price:</label> <input type="number" name="price[]" value="{{ variant.price }}" step="0.01" required>
-                        </div>
-                        <div>
-                            <label>Stock:</label> <input type="number" name="stock[]" value="{{ variant.stock }}" min="0" required>
-                        </div>
-                        <div class="variant-images">
-                            <label>Current Images:</label>
-                            <div class="image-container">
-                                {% for image in variant.images.all %}
-                                    <div id="image-container-{{ image.id }}" class="image-wrapper">
-                                        <p>Image URL: {{ image.image.url }}</p>
-                                        <img src="{{ image.image.url }}" alt="Current Image" class="current-image" style="max-width: 100px; border: 1px solid red;" onload="console.log('Loaded: {{ image.image.url }}')" onerror="console.error('Failed: {{ image.image.url }}');">
-                                        <button type="button" class="delete-btn" onclick="removeImage('{{ image.id }}')">✖</button>
-                                    </div>
-                                {% empty %}
-                                    <p>No images for variant {{ variant.id }}</p>
-                                {% endfor %}
-                            </div>
-                            <label>Add New Images (Max 6, Min 3 Total Required):</label>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="1" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-1"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="1" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="2" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-2"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="2" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="3" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-3"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="3" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="4" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-4"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="4" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="5" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-5"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="5" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_{{ forloop.counter }}[]" accept="image/*" data-index="6" multiple>
-                                <div class="image-preview" id="variant-preview-{{ forloop.counter }}-6"></div>
-                                <button type="button" class="crop-btn" data-variant="{{ forloop.counter }}" data-index="6" style="display: none;">Crop</button>
-                            </div>
-                        </div>
-                        <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
-                    </div>
-                {% empty %}
-                    <div class="variant-section" id="variant-1">
-                        <h4>Variant 1</h4>
-                        <input type="hidden" name="variant_id[]" value="">
-                        <div>
-                            <label>RAM (GB):</label> <input type="number" name="ram[]" min="1" required>
-                        </div>
-                        <div>
-                            <label>Storage (GB):</label> <input type="number" name="storage[]" min="1" required>
-                        </div>
-                        <div>
-                            <label>Color:</label> <input type="text" name="color[]" required>
-                        </div>
-                        <div>
-                            <label>Price:</label> <input type="number" name="price[]" step="0.01" required>
-                        </div>
-                        <div>
-                            <label>Stock:</label> <input type="number" name="stock[]" min="0" required>
-                        </div>
-                        <div class="variant-images">
-                            <label>Images (Max 6, Min 3 Required):</label>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="1" multiple>
-                                <div class="image-preview" id="variant-preview-1-1"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="1" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="2" multiple>
-                                <div class="image-preview" id="variant-preview-1-2"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="2" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="3" multiple>
-                                <div class="image-preview" id="variant-preview-1-3"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="3" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="4" multiple>
-                                <div class="image-preview" id="variant-preview-1-4"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="4" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="5" multiple>
-                                <div class="image-preview" id="variant-preview-1-5"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="5" style="display: none;">Crop</button>
-                            </div>
-                            <div class="image-input">
-                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="6" multiple>
-                                <div class="image-preview" id="variant-preview-1-6"></div>
-                                <button type="button" class="crop-btn" data-variant="1" data-index="6" style="display: none;">Crop</button>
-                            </div>
-                        </div>
-                        <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
-                    </div>
-                {% endfor %}
-            </div>
-            <button type="button" class="add-variant-btn" onclick="addVariant()">Add Another Variant</button>
-            <button type="submit" class="submit-btn">Update Product</button>
-        </form>
+                    {% endfor %}
+                </div>
+                <button type="button" class="add-variant-btn" onclick="addVariant()">Add Another Variant</button>
+                <button type="submit" class="submit-btn">Update Product</button>
+            </form>
+        </div>
     </div>
 
+    <!-- JavaScript (same as original with minor adjustments) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         let variantCount = {{ variants|length|default:1 }};
 
@@ -215,58 +670,74 @@
             newVariant.innerHTML = `
                 <h4>Variant ${variantCount}</h4>
                 <input type="hidden" name="variant_id[]" value="">
-                <div>
-                    <label>RAM (GB):</label> <input type="number" name="ram[]" min="1" required>
-                </div>
-                <div>
-                    <label>Storage (GB):</label> <input type="number" name="storage[]" min="1" required>
-                </div>
-                <div>
-                    <label>Color:</label> <input type="text" name="color[]" required>
-                </div>
-                <div>
-                    <label>Price:</label> <input type="number" name="price[]" step="0.01" required>
-                </div>
-                <div>
-                    <label>Stock:</label> <input type="number" name="stock[]" min="0" required>
+                <div class="variant-grid">
+                    <div class="form-group">
+                        <label>RAM (GB):</label>
+                        <input type="number" name="ram[]" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Storage (GB):</label>
+                        <input type="number" name="storage[]" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Color:</label>
+                        <input type="text" name="color[]" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price:</label>
+                        <input type="number" name="price[]" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Stock:</label>
+                        <input type="number" name="stock[]" min="0" required>
+                    </div>
                 </div>
                 <div class="variant-images">
                     <label>Images (Max 6, Min 3 Required):</label>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="1" multiple>
+                        <label for="variant_images_${variantCount}_1">Upload Image 1</label>
+                        <input type="file" id="variant_images_${variantCount}_1" name="variant_images_${variantCount}[]" accept="image/*" data-index="1" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-1"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="1" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="1" style="display: none;">Crop Image</button>
                     </div>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="2" multiple>
+                        <label for="variant_images_${variantCount}_2">Upload Image 2</label>
+                        <input type="file" id="variant_images_${variantCount}_2" name="variant_images_${variantCount}[]" accept="image/*" data-index="2" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-2"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="2" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="2" style="display: none;">Crop Image</button>
                     </div>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="3" multiple>
+                        <label for="variant_images_${variantCount}_3">Upload Image 3</label>
+                        <input type="file" id="variant_images_${variantCount}_3" name="variant_images_${variantCount}[]" accept="image/*" data-index="3" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-3"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="3" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="3" style="display: none;">Crop Image</button>
                     </div>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="4" multiple>
+                        <label for="variant_images_${variantCount}_4">Upload Image 4</label>
+                        <input type="file" id="variant_images_${variantCount}_4" name="variant_images_${variantCount}[]" accept="image/*" data-index="4" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-4"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="4" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="4" style="display: none;">Crop Image</button>
                     </div>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="5" multiple>
+                        <label for="variant_images_${variantCount}_5">Upload Image 5</label>
+                        <input type="file" id="variant_images_${variantCount}_5" name="variant_images_${variantCount}[]" accept="image/*" data-index="5" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-5"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="5" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="5" style="display: none;">Crop Image</button>
                     </div>
                     <div class="image-input">
-                        <input type="file" name="variant_images_${variantCount}[]" accept="image/*" data-index="6" multiple>
+                        <label for="variant_images_${variantCount}_6">Upload Image 6</label>
+                        <input type="file" id="variant_images_${variantCount}_6" name="variant_images_${variantCount}[]" accept="image/*" data-index="6" multiple>
                         <div class="image-preview" id="variant-preview-${variantCount}-6"></div>
-                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="6" style="display: none;">Crop</button>
+                        <button type="button" class="crop-btn" data-variant="${variantCount}" data-index="6" style="display: none;">Crop Image</button>
                     </div>
                 </div>
                 <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
             `;
             container.appendChild(newVariant);
-            attachImageListeners(newVariant.querySelectorAll("input[type='file']"), variantCount);
+            
+            // Attach event listeners to the new file inputs
+            const fileInputs = newVariant.querySelectorAll("input[type='file']");
+            attachImageListeners(fileInputs, variantCount);
         }
 
         function removeVariant(button) {
@@ -285,6 +756,8 @@
                 const inputs = variant.querySelectorAll("input[type='file']");
                 inputs.forEach((input, imgIndex) => {
                     input.name = `variant_images_${index + 1}[]`;
+                    input.id = `variant_images_${index + 1}_${imgIndex + 1}`;
+                    input.previousElementSibling.setAttribute("for", `variant_images_${index + 1}_${imgIndex + 1}`);
                     input.nextElementSibling.id = `variant-preview-${index + 1}-${imgIndex + 1}`;
                     input.nextElementSibling.nextElementSibling.setAttribute("data-variant", index + 1);
                     input.nextElementSibling.nextElementSibling.setAttribute("data-index", imgIndex + 1);

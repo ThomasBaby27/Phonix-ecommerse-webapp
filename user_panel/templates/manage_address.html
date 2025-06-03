@@ -5,17 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Address</title>
-    {% comment %} <link rel="stylesheet" href="{% static 'manage_addresss.css' %}"> {% endcomment %}
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Toastify CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- Toastify JS -->
-    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- SweetAlert2 CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .cart-count, .wishlist-count {
+            
             background-color: #ff4444;
             color: white;
             border-radius: 50%;
@@ -23,6 +25,9 @@
             font-size: 12px;
             margin-left: 5px;
             vertical-align: top;
+            min-width: 18px;
+            text-align: center;
+            line-height: 14px;
         }
 
         /* Reset default styles */
@@ -35,12 +40,12 @@
 
         /* Body */
         body {
-            background-color: #f0f2f5;
+            background-color: #f8f9fa;
             color: #111111;
             line-height: 1.5;
         }
 
-        /* Header */
+        /* Header - Keep original styling */
         header {
             background-color: #131921;
             color: white;
@@ -129,13 +134,13 @@
         }
 
         .cart-count, .wishlist-count {
-            background-color: #ff4444; /* Red background */
-            color: white; /* White text */
-            border-radius: 50%; /* Circular shape */
-            padding: 2px 6px; /* Padding for spacing */
-            font-size: 12px; /* Font size */
-            margin-left: 5px; /* Margin to separate from the icon */
-            vertical-align: top; /* Align with the icon */
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+            vertical-align: top;
         }
 
         .dropdown {
@@ -177,20 +182,42 @@
             display: block;
         }
 
-        /* Container that holds sidebar and content */
-        .container {
-            display: flex;
-            min-height: calc(100vh - 60px);
-            flex-direction: row;
+        /* Responsive Design for Header */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .search-bar {
+                margin: 15px 0;
+                width: 100%;
+            }
+
+            nav {
+                gap: 20px;
+            }
         }
 
-        /* Sidebar Styles - Now with responsive considerations */
+        /* PROFESSIONAL LAYOUT - Same as Account Page */
+        .container-fluid {
+            padding: 0;
+        }
+
+        .content-wrapper {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            background-color: #f8f9fa;
+        }
+
+        /* Professional Sidebar Styles - Same as Account Page */
         .sidebar {
             background-color: #ffffff;
             border-right: 1px solid #e5e7eb;
-            padding: 20px;
-            width: 250px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 25px 15px;
+            width: 280px;
+            min-height: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
 
@@ -201,159 +228,344 @@
         }
 
         .sidebar ul li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .sidebar ul li a {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            color: #1f2937;
+            padding: 14px 18px;
+            color: #495057;
             text-decoration: none;
             font-size: 15px;
             font-weight: 500;
             border-radius: 8px;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .sidebar ul li a:hover {
-            background-color: #f3f4f6;
-            color: #2563eb;
+            background-color: #f1f5f9;
+            color: #0d6efd;
         }
 
         .sidebar ul li a.active {
-            background-color: #e0f2fe;
-            color: #2563eb;
+            background-color: #e7f1ff;
+            color: #0d6efd;
             font-weight: 600;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 18px;
         }
 
         .sidebar .logout-btn {
             width: 100%;
-            padding: 12px 16px;
-            background-color: #dc2626;
-            color: white;
+            padding: 14px 18px;
+            background-color: #f8d7da;
+            color: #dc3545;
             border: none;
             border-radius: 8px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
             text-align: left;
-            transition: background-color 0.2s ease;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .logout-btn i {
+            margin-right: 12px;
+            font-size: 18px;
         }
 
         .sidebar .logout-btn:hover {
-            background-color: #b91c1c;
+            background-color: #f5c2c7;
         }
 
-        /* Responsive Content Area */
+        /* Mobile Sidebar Toggle */
+        .mobile-sidebar-toggle {
+            display: none;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* PROFESSIONAL ADDRESS MANAGEMENT CONTENT */
         .content {
-            flex-grow: 1;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            margin: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            flex: 1;
+            padding: 40px;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
         }
 
         .content h2 {
             font-size: 28px;
             font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 20px;
+            color: #212529;
+            margin-bottom: 30px;
+            letter-spacing: -0.025em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .content h2 i {
+            margin-right: 12px;
+            color: #0d6efd;
+        }
+
+        /* Add Address Button */
+        .add-address-section {
+            margin-bottom: 30px;
         }
 
         .add-address-btn {
-            background-color: #2563eb;
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            padding: 14px 28px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            margin-bottom: 30px;
-            width: auto;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.3);
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .add-address-btn i {
+            margin-right: 10px;
+            font-size: 18px;
         }
 
         .add-address-btn:hover {
-            background-color: #1d4ed8;
+            background: linear-gradient(135deg, #0b5ed7, #0a4fb8);
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4);
+            color: white;
+            text-decoration: none;
         }
 
         .add-address-btn:active {
             transform: translateY(0);
         }
 
-        /* Responsive Address Grid */
-        .address-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+        /* Address Grid Container */
+        .addresses-container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            padding: 30px;
+            margin-bottom: 30px;
         }
 
-        .address-card {
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 20px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
+        .addresses-header {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .addresses-count {
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Address Grid */
+        .address-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        /* Address Card Styling */
+        .address-card {
+            background: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .address-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
         }
 
         .address-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #0d6efd;
         }
 
-        .address-card p {
-            font-size: 14px;
-            color: #4b5563;
-            margin: 0;
+        .address-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
         }
 
-        .address-card p strong {
-            color: #1f2937;
+        .address-type {
+            background: linear-gradient(135deg, #e7f1ff, #cce7ff);
+            color: #0d6efd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .address-card .edit-btn,
-        .address-card .delete-btn {
-            padding: 8px 16px;
-            border-radius: 6px;
+        .address-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .address-field {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .address-field i {
+            color: #6c757d;
+            font-size: 14px;
+            margin-top: 2px;
+            width: 16px;
+        }
+
+        .address-field .label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 80px;
+            font-size: 14px;
+        }
+
+        .address-field .value {
+            color: #212529;
+            font-size: 14px;
+            flex: 1;
+        }
+
+        /* Action Buttons */
+        .address-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f3f4;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s ease;
-            text-align: center;
-            margin-top: 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
         }
 
-        .address-card .edit-btn {
-            background-color: #10b981;
+        .btn-edit {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .btn-edit:hover {
+            background-color: #cce7ff;
+            color: #0a58ca;
+            text-decoration: none;
+        }
+
+        .btn-delete {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: #f1aeb5;
+            color: #b02a37;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .empty-state .add-first-address {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .empty-state .add-first-address:hover {
+            background: linear-gradient(135deg, #0b5ed7, #0a4fb8);
             color: white;
             text-decoration: none;
-            border: none;
+            transform: translateY(-2px);
         }
 
-        .address-card .edit-btn:hover {
-            background-color: #059669;
-        }
-
-        .address-card .delete-btn {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-        }
-
-        .address-card .delete-btn:hover {
-            background-color: #dc2626;
-        }
-
-        /* Footer */
+        /* Footer - Keep original styling */
         footer {
             background-color: #172337;
             color: #ffffff;
@@ -432,11 +644,11 @@
         .social-icons img {
             width: 24px;
             height: 24px;
-            filter: brightness(0) invert(1); /* Makes icons white */
+            filter: brightness(0) invert(1);
         }
 
         .social-icons a:hover img {
-            filter: brightness(0) invert(0.8); /* Slightly dim on hover */
+            filter: brightness(0) invert(0.8);
         }
 
         .footer-section p {
@@ -460,168 +672,111 @@
         }
 
         .footer-section ul li a:hover {
-            color: #00c4b4; /* Matches the teal color of "Privacy Policy" in the screenshot */
+            color: #00c4b4;
         }
 
-        /* Mobile menu toggle button */
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: #1f2937;
-            font-size: 24px;
-            cursor: pointer;
-            position: fixed;
-            top: 80px;
-            left: 10px;
-            z-index: 1001;
-            background-color: #ffffff;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        /* Enhanced Responsive Design */
+        /* Responsive Design */
         @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e5e7eb;
+                padding: 15px;
+            }
+            
+            .mobile-sidebar-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                display: none;
+            }
+            
+            .sidebar.active {
+                display: block;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
             .address-list {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             }
         }
 
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 15px;
-            }
-
-            header h1 a {
-                font-size: 24px;
-            }
-
-            header h2 a {
-                font-size: 16px;
-                margin-left: 15px;
-            }
-
-            .search-bar {
-                margin: 15px 0;
-                width: 100%;
-            }
-
-            nav {
-                gap: 15px;
-                margin-top: 10px;
-            }
-
-            /* Sidebar behavior for mobile */
-            .container {
-                position: relative;
-                flex-direction: column;
-            }
-
-            .mobile-menu-toggle {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .sidebar {
-                position: fixed;
-                left: -260px; /* Hide sidebar by default */
-                top: 0;
-                height: 100%;
-                z-index: 1000;
-                transition: left 0.3s ease;
-                padding-top: 80px;
-                width: 250px;
-            }
-
-            .sidebar.active {
-                left: 0; /* Show sidebar when active */
-            }
-
-            /* Add overlay when sidebar is active */
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 999;
-            }
-
-            .sidebar-overlay.active {
-                display: block;
-            }
-
             .content {
-                margin: 10px;
-                padding: 15px;
-                width: calc(100% - 20px);
+                padding: 20px;
             }
-
+            
             .content h2 {
                 font-size: 24px;
-                margin-bottom: 15px;
             }
-
-            .add-address-btn {
-                width: 100%;
-                margin-bottom: 20px;
+            
+            .addresses-container {
+                padding: 20px;
             }
-
+            
             .address-list {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .address-card {
+                padding: 20px;
+            }
+            
+            .add-address-btn {
+                width: 100%;
+                justify-content: center;
             }
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 576px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100%;
+                width: 280px;
+                z-index: 1001;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+                overflow-y: auto;
+                background-color: #ffffff;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .sidebar ul {
+                flex-direction: column;
+            }
+            
+            .sidebar ul li {
+                width: 100%;
+            }
+            
+            .content {
+                padding: 15px;
+            }
+            
             .address-card {
                 padding: 15px;
             }
-
-            .address-card .edit-btn,
-            .address-card .delete-btn {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-
-            nav a, .dropbtn {
-                font-size: 18px;
-            }
-
-            .search-bar input {
-                padding: 8px;
-                font-size: 14px;
-            }
-
-            .search-bar button {
-                padding: 8px 12px;
-            }
-        }
-
-        /* Footer responsive adjustments */
-        @media (max-width: 768px) {
-            .footer-container {
+            
+            .address-actions {
                 flex-direction: column;
-                align-items: center;
-                text-align: center;
             }
-
-            .footer-section {
-                margin-bottom: 30px;
+            
+            .action-btn {
                 width: 100%;
-            }
-
-            .newsletter {
-                justify-content: center;
-            }
-
-            .social-icons {
-                justify-content: center;
             }
         }
     </style>
@@ -654,51 +809,116 @@
         </nav>
     </header>
 
+    <div class="container-fluid">
+        <div class="content-wrapper">
+            <button class="mobile-sidebar-toggle" id="toggleSidebar">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+            
+            <aside class="sidebar" id="sidebar">
+                <ul>
+                    <li><a href="{% url 'account_profile' %}"><i class="fas fa-user-circle"></i> Account Overview</a></li>
+                    <li><a href="{% url 'order_details' %}"><i class="fas fa-box"></i> Order Details</a></li>
+                    <li><a href="{% url 'manage_address' %}" class="active"><i class="fas fa-map-marker-alt"></i> Manage Address</a></li>
+                    <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+                </ul>
+                <button onclick="location.href='/logout'" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </aside>
 
-    <!-- Mobile menu toggle button -->
-    <button class="mobile-menu-toggle" id="sidebarToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    
-    <!-- Sidebar overlay for mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-
-    <div class="container">
-        <aside class="sidebar" id="sidebar">
-            <ul>
-                <li><a href="{% url 'account_profile' %}">Account Overview</a></li>
-                <li><a href="{% url 'order_details' %}">Order Details</a></li>
-                <li><a href="{% url 'manage_address' %}" class="active">Manage Address</a></li>
-                <li><a href="/wallet">Wallet</a></li>
-                <li><a href="/wishlist">Wishlist</a></li>
-                <li><button onclick="location.href='/logout'" class="logout-btn">Logout</button></li>
-            </ul>
-        </aside>
-
-        <main class="content">
-            <h2>Manage Address</h2>
-            <button onclick="location.href='{% url 'add_address' %}'" class="add-address-btn">Add Address</button>
-
-            <div class="address-list">
-                {% for address in addresses %}
-                <div class="address-card" id="address-{{ address.pk }}">
-                    <p><strong>Name:</strong> {{ address.name }}</p>
-                    <p><strong>City:</strong> {{ address.city }}</p>
-                    <p><strong>District:</strong> {{ address.district }}</p>
-                    <p><strong>State:</strong> {{ address.state }}</p>
-                    <p><strong>Pincode:</strong> {{ address.pincode }}</p>
-                    <p><strong>Phone:</strong> {{ address.phone }}</p>
-                    <p><strong>Alternative Phone:</strong> {{ address.alternative_phone }}</p>
+            <main class="content">
+                <h2><i class="fas fa-map-marker-alt"></i> Manage Address</h2>
                 
-                    <a href="{% url 'edit_address' address.pk %}" class="edit-btn">Edit</a>
-                    <button onclick="deleteAddress({{ address.pk }})" class="delete-btn">Delete</button>
+                <div class="add-address-section">
+                    <a href="{% url 'add_address' %}" class="add-address-btn">
+                        <i class="fas fa-plus"></i> Add New Address
+                    </a>
                 </div>
-                
-                {% empty %}
-                    <p>No addresses found.</p>
-                {% endfor %}
-            </div>
-        </main>
+
+                {% if addresses %}
+                    <div class="addresses-container">
+                        <div class="addresses-header">
+                            <h3>Your Addresses</h3>
+                            <span class="addresses-count">{{ addresses|length }} address{{ addresses|length|pluralize:"es" }}</span>
+                        </div>
+                        
+                        <div class="address-list">
+                            {% for address in addresses %}
+                            <div class="address-card" id="address-{{ address.pk }}">
+                                <div class="address-card-header">
+                                    <div class="address-type">
+                                        <i class="fas fa-home"></i> Address
+                                    </div>
+                                </div>
+                                
+                                <div class="address-details">
+                                    <div class="address-field">
+                                        <i class="fas fa-user"></i>
+                                        <span class="label">Name:</span>
+                                        <span class="value">{{ address.name }}</span>
+                                    </div>
+                                    
+                                    <div class="address-field">
+                                        <i class="fas fa-city"></i>
+                                        <span class="label">City:</span>
+                                        <span class="value">{{ address.city }}</span>
+                                    </div>
+                                    
+                                    <div class="address-field">
+                                        <i class="fas fa-map"></i>
+                                        <span class="label">District:</span>
+                                        <span class="value">{{ address.district }}</span>
+                                    </div>
+                                    
+                                    <div class="address-field">
+                                        <i class="fas fa-flag"></i>
+                                        <span class="label">State:</span>
+                                        <span class="value">{{ address.state }}</span>
+                                    </div>
+                                    
+                                    <div class="address-field">
+                                        <i class="fas fa-mail-bulk"></i>
+                                        <span class="label">Pincode:</span>
+                                        <span class="value">{{ address.pincode }}</span>
+                                    </div>
+                                    
+                                    <div class="address-field">
+                                        <i class="fas fa-phone"></i>
+                                        <span class="label">Phone:</span>
+                                        <span class="value">{{ address.phone }}</span>
+                                    </div>
+                                    
+                                    {% if address.alternative_phone %}
+                                    <div class="address-field">
+                                        <i class="fas fa-phone-alt"></i>
+                                        <span class="label">Alt Phone:</span>
+                                        <span class="value">{{ address.alternative_phone }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="address-actions">
+                                    <a href="{% url 'edit_address' address.pk %}" class="action-btn btn-edit">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button onclick="deleteAddress({{ address.id }})">Delete</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <h3>No Addresses Found</h3>
+                        <p>You haven't added any addresses yet. Add your first address to get started with faster checkout!</p>
+                        <a href="{% url 'add_address' %}" class="add-first-address">
+                            <i class="fas fa-plus"></i> Add Your First Address
+                        </a>
+                    </div>
+                {% endif %}
+            </main>
+        </div>
     </div>
 
     <footer>
@@ -740,6 +960,86 @@
             </div>
         </div>
     </footer>
+    
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Delete address function
+        function deleteAddress(addressId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/delete_address/${addressId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Cache-Control': 'no-cache'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Immediately remove the address element from DOM
+                            const addressElement = document.getElementById(`address-${addressId}`);
+                            if (addressElement) {
+                                addressElement.remove();
+                            }
+                            
+                            // Show success message
+                            Swal.fire(
+                                'Deleted!',
+                                'Your address has been deleted.',
+                                'success'
+                            );
+                            
+                            // Force a fresh reload of the page (bypass cache)
+                            window.location.reload(true);
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message || 'Failed to delete address.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the address.',
+                            'error'
+                        );
+                    });
+                }
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
 
     <!-- CSRF Token -->
     <form style="display: none;">
@@ -807,63 +1107,107 @@
             return cookieValue;
         }
 
-        window.deleteAddress = function(addressId) {  // Make function globally accessible
-            fetch("{% url 'delete_address' 0 %}".replace('0', addressId), {
-                method: 'POST',
-                headers: { 
-                    'X-CSRFToken': getCSRFToken(),
-                    'Content-Type': 'application/json'
-                },
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+        window.deleteAddress = function(addressId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel',
+                position: 'top-end',
+                toast: true,
+                background: '#f8f9fa',
+                customClass: {
+                    popup: 'swal-popup',
+                    htmlContainer: 'swal-content'
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    const addressElement = document.getElementById(`address-${addressId}`);
-                    if (addressElement) {
-                        addressElement.style.transition = 'opacity 0.3s';
-                        addressElement.style.opacity = '0';
-                        setTimeout(() => addressElement.remove(), 300);
-                    }
-                    Toastify({
-                        text: "Address deleted successfully!",
-                        duration: 3000,
-                        close: true,
-                        gravity: "top",
-                        position: "right",
-                        style: {
-                            background: "green",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Initiating delete request for address ID:', addressId);
+                    fetch(`/delete_address/${addressId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCSRFToken(),
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({})
+                    })
+                    .then(response => {
+                        console.log('Response status:', response.status);
+                        console.log('Response headers:', response.headers);
+                        return response.json().then(data => ({ status: response.status, data }));
+                    })
+                    .then(({ status, data }) => {
+                        console.log('Response data:', data);
+                        if (status === 200 && data.success) {
+                            const addressElement = document.getElementById(`address-${addressId}`);
+                            if (addressElement) {
+                                addressElement.style.transition = 'opacity 0.3s';
+                                addressElement.style.opacity = '0';
+                                setTimeout(() => addressElement.remove(), 300);
+                            }
+                            Swal.fire({
+                                icon: 'success',
+                                html: `Address deleted successfully!`,
+                                position: 'top-end',
+                                timer: 1000,
+                                showConfirmButton: false,
+                                toast: true,
+                                background: '#f8f9fa',
+                                customClass: {
+                                    popup: 'swal-popup',
+                                    htmlContainer: 'swal-content'
+                                }
+                            });
+                            const addressesCountElement = document.querySelector('.addresses-count');
+                            if (addressesCountElement) {
+                                let count = parseInt(addressesCountElement.textContent) || 0;
+                                count = Math.max(0, count - 1);
+                                addressesCountElement.textContent = `${count} address${count !== 1 ? 'es' : ''}`;
+                                if (count === 0) {
+                                    const addressesContainer = document.querySelector('.addresses-container');
+                                    const emptyState = document.querySelector('.empty-state');
+                                    if (addressesContainer) addressesContainer.style.display = 'none';
+                                    if (emptyState) emptyState.style.display = 'block';
+                                }
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                html: `${data.message || 'Failed to delete address.'}`,
+                                position: 'top-end',
+                                timer: 1000,
+                                showConfirmButton: false,
+                                toast: true,
+                                background: '#f8f9fa',
+                                customClass: {
+                                    popup: 'swal-popup',
+                                    htmlContainer: 'swal-content'
+                                }
+                            });
                         }
-                    }).showToast();
-                } else {
-                    Toastify({
-                        text: data.message || "Failed to delete address.",
-                        duration: 3000,
-                        close: true,
-                        gravity: "top",
-                        position: "right",
-                        style: {
-                            background: "red",
-                        }
-                    }).showToast();
+                    })
+                    .catch(error => {
+                        console.error('Error deleting address:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            html: `Something went wrong. Please try again.`,
+                            position: 'top-end',
+                            timer: 1000,
+                            showConfirmButton: false,
+                            toast: true,
+                            background: '#f8f9fa',
+                            customClass: {
+                                popup: 'swal-popup',
+                                htmlContainer: 'swal-content'
+                            }
+                        });
+                    });
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Toastify({
-                    text: "Something went wrong. Please try again.",
-                    duration: 3000,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    style: {
-                        background: "orange",
-                    }
-                }).showToast();
             });
         }
 
@@ -874,39 +1218,44 @@
 
         // Cart and wishlist count logic
         function loadInitialCounts() {
+            // Initialize counts to 0 visually
+            updateCartCount(0);
+            updateWishlistCount(0);
+
+            // Fetch cart count
             fetch('/get_cart_count/', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 console.log('Initial cart count response:', data);
-                if (data.cart_count !== undefined) {
-                    updateCartCount(data.cart_count);
-                } else {
-                    console.log('No cart_count in initial response, setting to 0');
-                    updateCartCount(0);
-                }
+                updateCartCount(data.cart_count !== undefined && data.cart_count !== null ? data.cart_count : 0);
             })
-            .catch(error => console.error('Error loading cart count:', error));
+            .catch(error => {
+                console.error('Error loading cart count:', error);
+                updateCartCount(0);
+            });
 
+            // Fetch wishlist count
             fetch('/get_wishlist_count/', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 console.log('Initial wishlist count response:', data);
-                if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
-                    updateWishlistCount(data.wishlist_count);
-                } else {
-                    console.log('No valid wishlist_count in initial response, setting to 0');
-                    updateWishlistCount(0);
-                }
+                updateWishlistCount(data.wishlist_count !== undefined && data.wishlist_count !== null ? data.wishlist_count : 0);
             })
             .catch(error => {
                 console.error('Error loading wishlist count:', error);
@@ -916,15 +1265,18 @@
 
         function updateCartCount(count) {
             const cartCountElement = document.querySelector('.cart-count');
-            cartCountElement.textContent = count || '0';
-            console.log('Updated cart count to:', count || '0');
+            if (cartCountElement) {
+                cartCountElement.textContent = count || '0';
+                cartCountElement.style.display = 'inline-block'; // Always show the badge
+            }
         }
 
         function updateWishlistCount(count) {
             const wishlistCountElement = document.querySelector('.wishlist-count');
-            wishlistCountElement.textContent = count || '0';
-            wishlistCountElement.style.display = 'inline-block';
-            console.log('Updated wishlist count to:', count || '0');
+            if (wishlistCountElement) {
+                wishlistCountElement.textContent = count || '0';
+                wishlistCountElement.style.display = 'inline-block'; // Always show the badge
+            }
         }
 
         loadInitialCounts();

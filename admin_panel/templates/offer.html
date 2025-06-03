@@ -5,204 +5,569 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Offer List</title>
-    <link rel="stylesheet" href="{% static 'offers.css' %}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <!-- jQuery for AJAX -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert for notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* General Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li a span {
+            display: none;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.collapsed ul li a {
+            justify-content: center;
+        }
+
+        /* Main Content Styles */
+        .content {
+            margin-left: 250px;
+            padding: 40px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed + .content {
+            margin-left: 70px;
+        }
+
+        .content h1 {
+            font-size: 2rem;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .content h2 {
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        /* Header Section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        /* Add New Offer Button */
+        .btn-add-new {
+            background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-add-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            color: #fff;
+        }
+
+        .btn-add-new i {
+            font-size: 1rem;
+        }
+
+        /* Tab Styles */
+        .offer-type-tabs {
+            margin-bottom: 20px;
+        }
+
+        .offer-type-tabs .nav-tabs {
+            border: none;
+            display: flex;
+            gap: 10px;
+        }
+
+        .offer-type-tabs .nav-item {
+            margin: 0;
+        }
+
+        .offer-type-tabs .nav-link {
+            color: #6b7280;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #e5e7eb;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .offer-type-tabs .nav-link:hover {
+            background: #d1d5db;
+            color: #1e3a8a;
+        }
+
+        .offer-type-tabs .nav-link.active {
+            background: linear-gradient(90deg, #2563eb 0%, #1e3a8a 100%);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8fafc;
+            color: #1e3a8a;
+            font-weight: 600;
+            padding: 12px;
+        }
+
+        .table td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f9fafb;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .badge.bg-success {
+            background-color: #10b981;
+        }
+
+        .badge.bg-danger {
+            background-color: #ef4444;
+        }
+
+        /* Button Styles */
+        .btn {
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            border-color: #f59e0b;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+            border-color: #d97706;
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            border-color: #ef4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        /* Pagination Styles */
+        .pagination .page-link {
+            color: #2563eb;
+            border: none;
+            padding: 8px 12px;
+            margin: 0 4px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #2563eb;
+            color: #fff;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar h2,
+            .sidebar ul li a span {
+                display: none;
+            }
+
+            .content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .toggle-btn {
+                display: block;
+            }
+
+            .content h1 {
+                font-size: 1.5rem;
+            }
+
+            .offer-type-tabs .nav-link {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            .btn-add-new {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 15px;
+            }
+
+            .content h1 {
+                font-size: 1.25rem;
+            }
+
+            .table th,
+            .table td {
+                font-size: 0.85rem;
+                padding: 8px;
+            }
+
+            .btn {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .offer-type-tabs .nav-link {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+
+            .btn-add-new {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Smooth Transitions and Animations */
+        .sidebar,
+        .content {
+            transition: all 0.3s ease;
+        }
+
+        /* Accessibility */
+        a:focus,
+        button:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">☰</button>
-        <h2>Offer</h2>
+        <h2>Offers</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
-            
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
 
-    <div class="container-fluid">
-        <div class="row">
-            
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Offer Management</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <a href="{% url 'add_offer' %}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-plus"></i> Add New Offer
-                            </a>
-                        </div>
-                    </div>
-                </div>
-    
-                <div class="offer-type-tabs mb-4">
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link {% if offer_type == 'CATEGORY' %}active{% endif %}" 
-                               href="{% url 'offer_management' %}?type=CATEGORY">
-                                Category Offers
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link {% if offer_type == 'PRODUCT' %}active{% endif %}" 
-                               href="{% url 'offer_management' %}?type=PRODUCT">
-                                Product Offers
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-    
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Offer Name</th>
-                                        {% if offer_type == 'CATEGORY' %}
-                                            <th>Category</th>
-                                        {% else %}
-                                            <th>Product</th>
-                                        {% endif %}
-                                        <th>Discount Type</th>
-                                        <th>Discount</th>
-                                        <th>Start Date</th>
-                                        <th>End Date</th>
-                                        <th>Status</th>
-                                        
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for offer in offers %}
-                                        <tr>
-                                            <td>{{ offer.name }}</td>
-                                            <td>
-                                                {% if offer_type == 'CATEGORY' %}
-                                                    {{ offer.category.name }}
-                                                {% else %}
-                                                    {{ offer.product.name }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ offer.get_offer_type_display }}</td>
-                                            <td>
-                                                {% if offer.offer_type == 'PERCENTAGE' %}
-                                                    {{ offer.discount }}%
-                                                {% else %}
-                                                    ₹{{ offer.discount }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ offer.start_date|date:"d-M-Y" }}</td>
-                                            <td>{{ offer.end_date|date:"d-M-Y" }}</td>
-                                            <td>
-                                                {% if offer.status %}
-                                                    <span class="badge bg-success">Active</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">Inactive</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{% url 'edit_offer' offer.id %}" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i> Edit
-                                                    </a>
-                                                    <button type="button" 
-                                                            class="btn btn-sm btn-danger delete-offer" 
-                                                            data-offer-id="{{ offer.id }}">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% empty %}
-                                        <tr>
-                                            <td colspan="8" class="text-center">
-                                                No offers found.
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        {% if offers.has_other_pages %}
-                            <nav aria-label="Offer pagination" class="mt-4">
-                                <ul class="pagination justify-content-center">
-                                    {% if offers.has_previous %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?type={{ offer_type }}&page=1" aria-label="First">
-                                                <span aria-hidden="true">&laquo;&laquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.previous_page_number }}" aria-label="Previous">
-                                                <span aria-hidden="true">&laquo;</span>
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&laquo;&laquo;</span>
-                                        </li>
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&laquo;</span>
-                                        </li>
-                                    {% endif %}
-
-                                    {% for num in offers.paginator.page_range %}
-                                        {% if offers.number == num %}
-                                            <li class="page-item active">
-                                                <span class="page-link">{{ num }}</span>
-                                            </li>
-                                        {% elif num > offers.number|add:'-3' and num < offers.number|add:'3' %}
-                                            <li class="page-item">
-                                                <a class="page-link" href="?type={{ offer_type }}&page={{ num }}">{{ num }}</a>
-                                            </li>
-                                        {% endif %}
-                                    {% endfor %}
-
-                                    {% if offers.has_next %}
-                                        <li class="page-item">
-                                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.next_page_number }}" aria-label="Next">
-                                                <span aria-hidden="true">&raquo;</span>
-                                            </a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.paginator.num_pages }}" aria-label="Last">
-                                                <span aria-hidden="true">&raquo;&raquo;</span>
-                                            </a>
-                                        </li>
-                                    {% else %}
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&raquo;</span>
-                                        </li>
-                                        <li class="page-item disabled">
-                                            <span class="page-link">&raquo;&raquo;</span>
-                                        </li>
-                                    {% endif %}
-                                </ul>
-                            </nav>
-                        {% endif %}
-                    </div>
-                </div>
-            </main>
+    <!-- Main Content -->
+    <div class="content">
+        <div class="header-section">
+            <h1>Offer Management</h1>
+            <a href="{% url 'add_offer' %}" class="btn-add-new">
+                <i class="fas fa-plus"></i> Add New Offer
+            </a>
         </div>
+
+        <div class="offer-type-tabs">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link {% if offer_type == 'CATEGORY' %}active{% endif %}" 
+                       href="{% url 'offer_management' %}?type=CATEGORY">
+                        Category Offers
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if offer_type == 'PRODUCT' %}active{% endif %}" 
+                       href="{% url 'offer_management' %}?type=PRODUCT">
+                        Product Offers
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Offer Name</th>
+                        {% if offer_type == 'CATEGORY' %}
+                            <th>Category</th>
+                        {% else %}
+                            <th>Product</th>
+                        {% endif %}
+                        <th>Discount Type</th>
+                        <th>Discount</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for offer in offers %}
+                        <tr>
+                            <td>{{ offer.name }}</td>
+                            <td>
+                                {% if offer_type == 'CATEGORY' %}
+                                    {{ offer.category.name }}
+                                {% else %}
+                                    {{ offer.product.name }}
+                                {% endif %}
+                            </td>
+                            <td>{{ offer.get_offer_type_display }}</td>
+                            <td>
+                                {% if offer.offer_type == 'PERCENTAGE' %}
+                                    {{ offer.discount }}%
+                                {% else %}
+                                    ₹{{ offer.discount }}
+                                {% endif %}
+                            </td>
+                            <td>{{ offer.start_date|date:"d-M-Y" }}</td>
+                            <td>{{ offer.end_date|date:"d-M-Y" }}</td>
+                            <td>
+                                {% if offer.status %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'edit_offer' offer.id %}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-danger delete-offer" 
+                                            data-offer-id="{{ offer.id }}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">
+                                No offers found.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if offers.has_other_pages %}
+            <nav aria-label="Offer pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if offers.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?type={{ offer_type }}&page=1" aria-label="First">
+                                <span aria-hidden="true">««</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">««</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">«</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in offers.paginator.page_range %}
+                        {% if offers.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > offers.number|add:'-3' and num < offers.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?type={{ offer_type }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if offers.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?type={{ offer_type }}&page={{ offers.paginator.num_pages }}" aria-label="Last">
+                                <span aria-hidden="true">»»</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">»</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">»»</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     </div>
-    
+
     <script>
+        function toggleSidebar() {
+            let sidebar = document.querySelector(".sidebar");
+            let content = document.querySelector(".content");
+            sidebar.classList.toggle("collapsed");
+            content.classList.toggle("sidebar-collapsed");
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Delete offer functionality
             const deleteButtons = document.querySelectorAll('.delete-offer');
@@ -222,7 +587,8 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // AJAX call to delete offer
-                            fetch(`/offer/delete/${offerId}/`, {  // Updated URL to match the defined path                                method: 'POST',
+                            fetch(`/offer/delete/${offerId}/`, {
+                                method: 'POST',
                                 headers: {
                                     'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                     'Content-Type': 'application/json'
@@ -264,48 +630,7 @@
                 });
             });
 
-            function toggleSidebar() {
-                const sidebar = document.querySelector('.sidebar');
-                const container = document.querySelector('.container-fluid');
-    
-                // Toggle the 'collapsed' class on the sidebar
-                sidebar.classList.toggle('collapsed');
-    
-                // Toggle the 'sidebar-collapsed' class on the container to adjust its margin
-                container.classList.toggle('sidebar-collapsed');
-    
-                // On mobile, toggle the 'active' class to show/hide the sidebar
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.toggle('active');
-                }
-            }
-            window.addEventListener('resize', function () {
-                const sidebar = document.querySelector('.sidebar');
-                const container = document.querySelector('.container-fluid');
-    
-                if (window.innerWidth > 768) {
-                    // On larger screens, remove the 'active' class and handle 'collapsed' state
-                    sidebar.classList.remove('active');
-                    if (sidebar.classList.contains('collapsed')) {
-                        container.classList.add('sidebar-collapsed');
-                    } else {
-                        container.classList.remove('sidebar-collapsed');
-                    }
-                } else {
-                    // On smaller screens, ensure the sidebar is hidden by default unless 'active'
-                    if (!sidebar.classList.contains('active')) {
-                        sidebar.classList.add('collapsed');
-                        container.classList.add('sidebar-collapsed');
-                    }
-                }
-            });
-    
-            // Run the resize handler on page load to set the initial state
-            window.dispatchEvent(new Event('resize'));
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
+            // Messages handling
             {% if messages %}
                 const messages = [
                     {% for message in messages %}
@@ -328,6 +653,5 @@
             {% endif %}
         });
     </script>
-
 </body>
 </html>

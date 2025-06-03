@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'checkout.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -526,39 +527,6 @@
             background-color: #0056b3;
         }
 
-        /* Toast Notification */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2000;
-        }
-
-        .toast {
-            background-color: #333;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-        }
-
-        .toast.success {
-            background-color: #28a745;
-        }
-
-        .toast.error {
-            background-color: #dc3545;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .checkout-wrapper {
@@ -838,6 +806,24 @@
             color: #00c4b4;
         }
 
+        .swal2-success .swal2-popup {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-radius: 8px !important;
+        }
+
+        .swal2-error .swal2-popup {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-radius: 8px !important;
+        }
+
+        .swal2-toast {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+            font-family: 'Poppins', sans-serif !important;
+            font-size: 14px !important;
+        }
+
         @media (max-width: 768px) {
             .footer-container {
                 flex-direction: column;
@@ -936,17 +922,25 @@
                 </section>
 
                 <!-- Payment Method -->
-                <section class="payment-section section-card" role= "radiogroup" aria-labelledby="payment-method-heading">
+                <section class="payment-section section-card" role="radiogroup" aria-labelledby="payment-method-heading">
                     <h2 id="payment-method-heading">Payment Method</h2>
                     <div class="payment-option">
-                        <input type="radio" id="cod" name="payment_method" value="cod" checked aria-describedby="cod-description">
-                        <label for="cod" class="payment-label">
+                        <input type="radio" id="cod" name="payment_method" value="cod" 
+                            {% if not cod_allowed %}disabled{% endif %}
+                            {% if cod_allowed %}checked{% else %}aria-disabled="true"{% endif %}
+                            aria-describedby="cod-description">
+                        <label for="cod" class="payment-label" {% if not cod_allowed %}style="opacity: 0.5; cursor: not-allowed;"{% endif %}>
                             <span>Cash on Delivery</span>
+                            {% if not cod_allowed %}
+                                <span style="color: #ff4444; font-size: 12px; margin-left: 10px;">(Not available for orders above ₹1000)</span>
+                            {% endif %}
                         </label>
                         <p id="cod-description" class="sr-only">Pay with cash upon delivery of your order.</p>
                     </div>
                     <div class="payment-option">
-                        <input type="radio" id="razorpay" name="payment_method" value="razorpay" aria-describedby="razorpay-description">
+                        <input type="radio" id="razorpay" name="payment_method" value="razorpay" 
+                            {% if not cod_allowed %}checked{% endif %}
+                            aria-describedby="razorpay-description">
                         <label for="razorpay" class="payment-label">
                             <span>Online Payment (Razorpay)</span>
                         </label>
@@ -1099,7 +1093,7 @@
         </div>
 
         <!-- Toast Container -->
-        <div id="toast-container" class="toast-container"></div>
+        
     </main>
 
     <footer>
@@ -1160,29 +1154,23 @@
         return cookieValue;
     }
 
-    // Toast notification function\
     function showToast(message, type = 'success') {
-        const toastContainer = document.getElementById('toast-container');
-        if (!toastContainer) return;
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <i class="${type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'}"></i> 
-            ${message}
-        `;
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 100);
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                toast.remove();
-            }, 500);
-        }, 3000);
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: type,
+            title: message,
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            },
+            customClass: {
+                popup: type === 'success' ? 'swal2-success' : 'swal2-error'
+            }
+        });
     }
 
     // Coupon-related variables
@@ -1611,36 +1599,23 @@
             })
             .then(response => {
                 console.log('Response Status:', response.status); // Debug: Log status
-                return response.text().then(text => {
-                    console.log('Raw Response Text:', text); // Debug: Log raw response
-                    if (!response.ok) {
+                if (!response.ok) {
+                    return response.text().then(text => {
                         throw new Error(`Network response was not ok: ${response.status} - ${text}`);
-                    }
-                    try {
-                        return JSON.parse(text);
-                    } catch (err) {
-                        // Fallback: Handle plain text responses
-                        if (response.status === 200 && text.trim().toLowerCase() === 'success') {
-                            return {
-                                success: true,
-                                address_id: Date.now() // Temporary ID for UI
-                            };
-                        }
-                        throw new Error(`Failed to parse JSON response: ${err.message} - Raw response: ${text}`);
-                    }
-                });
+                    });
+                }
+                return response.json();
             })
             .then(data => {
                 console.log('Parsed Response Data:', data); // Debug: Log parsed data
-                if (data.success) {
+                if (data.success && data.address && data.address.id) {
                     const addressList = document.getElementById('address-list');
                     const noAddressMsg = addressList.querySelector('.no-address');
                     if (noAddressMsg) {
                         noAddressMsg.remove();
                     }
-
                     // Create new address item
-                    const addressId = data.address_id || Date.now(); // Use server-provided ID or fallback
+                    const addressId = data.address_id ; // Use server-provided ID or fallback
                     const newAddress = document.createElement('div');
                     newAddress.className = 'address-item';
                     newAddress.innerHTML = `
@@ -1653,6 +1628,12 @@
                         </label>
                     `;
                     addressList.appendChild(newAddress);
+
+                    // Programmatically ensure the new radio input is selected
+                    const newRadioInput = document.getElementById(`address_${addressId}`);
+                    if (newRadioInput) {
+                        newRadioInput.checked = true; // Explicitly set checked property
+                    }
 
                     // Uncheck other radios
                     const otherRadios = addressList.querySelectorAll(`input[type="radio"][name="shipping_address"]:not([id="address_${addressId}"])`);
@@ -1667,6 +1648,7 @@
                     addressForm.reset();
                     document.getElementById('addressModal').style.display = "none";
                     document.body.classList.remove("modal-open");
+                    location.reload()
                 } else {
                     showToast(data.message || 'Failed to add address', 'error');
                 }
@@ -1952,16 +1934,22 @@
             const shippingAddress = document.querySelector('input[name="shipping_address"]:checked')?.value;
             const finalPriceText = document.getElementById('totalPrice').textContent.replace('₹', '').trim();
             const finalPrice = Number.parseFloat(finalPriceText) || 0;
+            const codAllowed = {{ cod_allowed|lower }};
 
             console.log('Place Order Clicked - Payment Method:', paymentMethod, 'Shipping Address:', shippingAddress, 'Total Price:', finalPrice);
 
-            if (!shippingAddress) {
-                showToast('Please select a shipping address.', 'error');
+            if (!shippingAddress || shippingAddress === 'undefined' || isNaN(parseInt(shippingAddress))) {
+                showToast('Please select a valid shipping address.', 'error');
                 return;
             }
 
             if (!paymentMethod) {
                 showToast('Please select a payment method.', 'error');
+                return;
+            }
+
+            if (paymentMethod === 'cod' && !codAllowed) {
+                showToast('Cash on Delivery is not available for orders above ₹1000.', 'error');
                 return;
             }
 

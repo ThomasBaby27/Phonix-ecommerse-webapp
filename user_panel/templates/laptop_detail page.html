@@ -1,4 +1,4 @@
-{% load static %}
+{% comment %} {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ laptop.name }} - Laptop Details</title>
     {% comment %} <link rel="stylesheet" href="{% static 'mobile product pagee.css' %}"> {% endcomment %}
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {% endcomment %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -805,6 +805,94 @@
         background-color: #e0e0e0;
     }
 </style>
+<style>
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .cart-count, .wishlist-count {
+            display: inline-block;
+            min-width: 16px;
+            height: 16px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            font-size: 10px;
+            line-height: 16px;
+            text-align: center;
+            position: relative;
+            top: -8px;
+            right: 5px;
+            padding: 0 4px;
+        }
+
+        .cart-count:empty, .wishlist-count:empty {
+            display: none;
+        }
+
+        nav a {
+            position: relative;
+            margin: 0 10px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .variant-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .variant-row:hover {
+            background-color: #f5f5f5;
+        }
+        .variant-row.selected {
+            background-color: #e0e0e0;
+        }
+
+        .product-gallery .main-image {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 456px;
+            cursor: crosshair;
+            display: flex;
+            justify-content: center;
+            overflow: visible;
+            z-index: 10;
+        }
+
+        .product-gallery .main-image img {
+            width: 75%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .product-gallery .zoom-view {
+            width: 600px;
+            height: 456px;
+            border: 1px solid #e5e7eb;
+            display: none;
+            overflow: hidden;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: calc(100% + 20px);
+            z-index: 1000;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .product-gallery .zoom-view {
+                display: none !important;
+            }
+        }
+    </style>
 <body>
     <header>
         <h2><a href="/">Phonix</a></h2>
@@ -1848,4 +1936,4 @@
         }
     </style>
 </body>
-</html>
+</html> {% endcomment %}

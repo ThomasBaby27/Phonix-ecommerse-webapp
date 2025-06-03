@@ -7,6 +7,8 @@ class MyAccountAdapter(DefaultAccountAdapter):
         return False  # Disable the signup form
 
 class MySocialAccountAdapter(DefaultSocialAccountAdapter):
+    def is_open_for_signup(self, request, sociallogin):
+        return True  
     def pre_social_login(self, request, sociallogin):
         user_model = get_user_model()
         user_email = sociallogin.user.email
@@ -18,10 +20,11 @@ class MySocialAccountAdapter(DefaultSocialAccountAdapter):
             existing_user = user_model.objects.get(email=user_email)
             sociallogin.connect(request, existing_user)  # Auto-link the account
         except user_model.DoesNotExist:
-            pass  # Allow Allauth to handle new users
+            pass  # Let Allauth handle new user creation
 
     def save_user(self, request, sociallogin, form=None):
         user = super().save_user(request, sociallogin, form)
         user.is_active = True  # Auto-activate user
         user.save()
         return user
+

@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,36 +5,373 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Coupon</title>
-    <link rel="stylesheet" href="{% static 'coupon.css' %}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* General Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li a span {
+            display: none;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.collapsed ul li a {
+            justify-content: center;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 250px;
+            padding: 40px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed + .main-content {
+            margin-left: 70px;
+        }
+
+        /* Page Title Styling */
+        .page-title {
+            font-size: 2rem;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        /* Search Container */
+        .search-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-container input {
+            height: 45px;
+            border-radius: 25px;
+            padding: 0 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .search-container input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2);
+        }
+
+        .search-container button {
+            height: 45px;
+            border-radius: 25px;
+        }
+
+        /* Card Styling */
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            border: none;
+            background-color: #fff;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        /* Table Styling */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #2563eb;
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            padding: 15px;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+
+        /* Badge Styling */
+        .badge {
+            padding: 6px 10px;
+            font-weight: 500;
+            border-radius: 30px;
+        }
+
+        .bg-info {
+            background-color: #2563eb !important;
+        }
+
+        .bg-success {
+            background-color: #28a745 !important;
+        }
+
+        .bg-danger {
+            background-color: #dc3545 !important;
+        }
+
+        /* Button Styling */
+        .btn {
+            padding: 8px 15px;
+            font-weight: 500;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-primary {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background-color: #f5f7fa;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #eee;
+        }
+
+        /* Pagination Styling */
+        .pagination {
+            margin-top: 30px;
+        }
+
+        .pagination .page-link {
+            color: #2563eb;
+            border: 1px solid #eee;
+            margin: 0 3px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #f5f7fa;
+            border-color: #2563eb;
+        }
+
+        .pagination .page-item:first-child .page-link,
+        .pagination .page-item:last-child .page-link {
+            padding: 0.5rem 0.85rem;
+        }
+
+        /* Coupon-Specific Styles */
+        .coupon-code {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar h2,
+            .sidebar ul li a span {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .table th,
+            .table td {
+                padding: 10px;
+            }
+
+            .card-body {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .btn-group {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .btn-group .btn {
+                margin-bottom: 5px;
+            }
+        }
+
+        /* Smooth Transitions and Animations */
+        .sidebar,
+        .main-content {
+            transition: all 0.3s ease;
+        }
+
+        /* Accessibility */
+        a:focus,
+        button:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sidebar -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">☰</button>
-        <h2>Products</h2>
+        <h2>Add Coupon</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>                     
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
         <div class="container-fluid">
             <!-- Header -->

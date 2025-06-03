@@ -4,139 +4,626 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Product</title>
-    <link rel="stylesheet" href="{% static 'add_productt.css' %}">
+    <title>Add New Product </title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <style>
+        /* Admin Panel Sidebar and Content Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background-color: #f5f7fa;
+    color: #333;
+    overflow-x: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+    color: #fff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    transition: width 0.3s ease;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.sidebar.collapsed {
+    width: 70px;
+}
+
+.sidebar.collapsed h2,
+.sidebar.collapsed ul li a span {
+    display: none;
+}
+
+.sidebar h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 600;
+}
+
+.toggle-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover {
+    transform: rotate(90deg);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    margin: 10px 0;
+}
+
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.sidebar ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.sidebar.collapsed ul li a {
+    justify-content: center;
+}
+
+.content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed + .content {
+    margin-left: 70px;
+}
+
+/* Add Product Form Styles - NEW STYLES */
+.container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    border: 1px solid #e0e6ed;
+}
+
+.container h2 {
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 1.8rem;
+    font-weight: 600;
+    border-bottom: 2px solid #f1f5f9;
+    padding-bottom: 10px;
+}
+
+/* Form section headings */
+h3 {
+    color: #334155;
+    margin: 25px 0 15px;
+    font-size: 1.4rem;
+    font-weight: 500;
+    position: relative;
+    padding-left: 15px;
+}
+
+h3:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    height: 70%;
+    width: 4px;
+    background: #2563eb;
+    border-radius: 4px;
+}
+
+/* Form fields */
+#productForm label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #475569;
+}
+
+#productForm input[type="text"],
+#productForm input[type="number"],
+#productForm textarea,
+#productForm select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f8fafc;
+}
+
+#productForm input[type="text"]:focus,
+#productForm input[type="number"]:focus,
+#productForm textarea:focus,
+#productForm select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    background-color: #fff;
+}
+
+#productForm textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Variant sections */
+.variant-section {
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    background-color: #f8fafc;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.variant-section:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.variant-section h4 {
+    color: #1e40af;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+
+.variant-section h4:before {
+    content: '🟦';
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+/* Image upload styles */
+.variant-images {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed #cbd5e1;
+}
+
+.image-input {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.image-input input[type="file"] {
+    width: auto;
+    padding: 0;
+    background: transparent;
+}
+
+.image-preview {
+    width: 80px;
+    height: 80px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    margin-top: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-color: #f1f5f9;
+    position: relative;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Button styles */
+.add-variant-btn, 
+.delete-variant-btn, 
+.submit-btn, 
+.crop-btn {
+    padding: 10px 20px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.add-variant-btn {
+    background-color: #10b981;
+    color: white;
+    margin-top: 10px;
+}
+
+.add-variant-btn:hover {
+    background-color: #059669;
+    transform: translateY(-1px);
+}
+
+.delete-variant-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+.delete-variant-btn:hover {
+    background-color: #dc2626;
+}
+
+.submit-btn {
+    background-color: #2563eb;
+    color: white;
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    background-color: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.crop-btn {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.crop-btn:hover {
+    background-color: #d97706;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.image-preview:hover .delete-btn {
+    opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
     
+    .variant-section {
+        padding: 15px;
+    }
+    
+    .image-input {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* Add Product Form Styles */
+.container {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.container h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.variant-section {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.variant-images {
+    margin-top: 15px;
+}
+
+.image-input {
+    margin-bottom: 10px;
+}
+
+.image-preview {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    display: inline-block;
+    position: relative;
+}
+
+.image-preview img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.delete-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.add-variant-btn, .delete-variant-btn, .submit-btn, .crop-btn {
+    padding: 8px 15px;
+    margin: 5px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-variant-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-variant-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.submit-btn {
+    background-color: #2196F3;
+    color: white;
+    width: 100%;
+    padding: 10px;
+}
+
+.crop-btn {
+    background-color: #ff9800;
+    color: white;
+}
+
+.messages {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.messages li {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+.messages .success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.messages .error {
+    background-color: #f2dede;
+    color: #a94442;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px;
+    }
+
+    .sidebar h2,
+    .sidebar ul li a span {
+        display: none;
+    }
+
+    .content {
+        margin-left: 70px;
+        padding: 15px;
+    }
+}
+    </style>
 </head>
 <body>
+    <!-- Sidebar (same as admin panel) -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-        <h2>Products</h2>
+        <h2>Add Product</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="#">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
-
-    <div class="container">
-        <h2>Add New Product</h2>
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
-        <form id="productForm" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <h3>Product Details</h3>
-            <div>
-                <label for="id_name">Product Name:</label>
-                <input type="text" id="id_name" name="name" required>
-            </div>
-            <div>
-                <label for="id_description">Description:</label>
-                <textarea id="id_description" name="description" required></textarea>
-            </div>
-            <div>
-                <label for="id_brand">Brand:</label>
-                <select id="id_brand" name="brand" required>
-                    <option value="">Select Brand</option>
-                    {% for brand in brands %}
-                        <option value="{{ brand.id }}">{{ brand.name }}</option>
+    
+    <!-- Main Content (original add product content unchanged) -->
+    <div class="content">
+        <div class="container">
+            <h2>Add New Product</h2>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
                     {% endfor %}
-                </select>
-            </div>
-            <div>
-                <label for="id_category">Category:</label>
-                <select id="id_category" name="category" required>
-                    <option value="">Select Category</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+                </ul>
+            {% endif %}
 
-            <h3>Product Variants</h3>
-            <div id="variant-container">
-                <!-- Variant Template -->
-                <div class="variant-section" id="variant-1">
-                    <h4>Variant 1</h4>
-                    <div>
-                        <label>RAM (GB):</label> <input type="number" name="ram[]" min="1" required>
-                    </div>
-                    <div>
-                        <label>Storage (GB):</label> <input type="number" name="storage[]" min="1" required>
-                    </div>
-                    <div>
-                        <label>Color:</label> <input type="text" name="color[]" required>
-                    </div>
-                    <div>
-                        <label>Price:</label> <input type="number" name="price[]" step="0.01" required>
-                    </div>
-                    <div>
-                        <label>Stock:</label> <input type="number" name="stock[]" min="0" required>
-                    </div>
-                    <div class="variant-images">
-                        <label>Images (Max 6, Min 3 Required):</label>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="1">
-                            <div class="image-preview" id="variant-preview-1-1"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="1" style="display: none;">Crop</button>
-                        </div>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="2">
-                            <div class="image-preview" id="variant-preview-1-2"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="2" style="display: none;">Crop</button>
-                        </div>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="3">
-                            <div class="image-preview" id="variant-preview-1-3"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="3" style="display: none;">Crop</button>
-                        </div>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="4">
-                            <div class="image-preview" id="variant-preview-1-4"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="4" style="display: none;">Crop</button>
-                        </div>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="5">
-                            <div class="image-preview" id="variant-preview-1-5"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="5" style="display: none;">Crop</button>
-                        </div>
-                        <div class="image-input">
-                            <input type="file" name="variant_images_1[]" accept="image/*" data-index="6">
-                            <div class="image-preview" id="variant-preview-1-6"></div>
-                            <button type="button" class="crop-btn" data-variant="1" data-index="6" style="display: none;">Crop</button>
-                        </div>
-                    </div>
-                    <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
+            <form id="productForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h3>Product Details</h3>
+                <div>
+                    <label for="id_name">Product Name:</label>
+                    <input type="text" id="id_name" name="name" required>
                 </div>
-            </div>
-            <button type="button" class="add-variant-btn" onclick="addVariant()">Add Another Variant</button>
+                <div>
+                    <label for="id_description">Description:</label>
+                    <textarea id="id_description" name="description" required></textarea>
+                </div>
+                <div>
+                    <label for="id_brand">Brand:</label>
+                    <select id="id_brand" name="brand" required>
+                        <option value="">Select Brand</option>
+                        {% for brand in brands %}
+                            <option value="{{ brand.id }}">{{ brand.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="id_category">Category:</label>
+                    <select id="id_category" name="category" required>
+                        <option value="">Select Category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <button type="submit" class="submit-btn">Add Product</button>
-        </form>
+                <h3>Product Variants</h3>
+                <div id="variant-container">
+                    <!-- Variant Template -->
+                    <div class="variant-section" id="variant-1">
+                        <h4>Variant 1</h4>
+                        <div>
+                            <label>RAM (GB):</label> <input type="number" name="ram[]" min="1" required>
+                        </div>
+                        <div>
+                            <label>Storage (GB):</label> <input type="number" name="storage[]" min="1" required>
+                        </div>
+                        <div>
+                            <label>Color:</label> <input type="text" name="color[]" required>
+                        </div>
+                        <div>
+                            <label>Price:</label> <input type="number" name="price[]" step="0.01" required>
+                        </div>
+                        <div>
+                            <label>Stock:</label> <input type="number" name="stock[]" min="0" required>
+                        </div>
+                        <div class="variant-images">
+                            <label>Images (Max 6, Min 3 Required):</label>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="1">
+                                <div class="image-preview" id="variant-preview-1-1"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="1" style="display: none;">Crop</button>
+                            </div>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="2">
+                                <div class="image-preview" id="variant-preview-1-2"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="2" style="display: none;">Crop</button>
+                            </div>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="3">
+                                <div class="image-preview" id="variant-preview-1-3"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="3" style="display: none;">Crop</button>
+                            </div>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="4">
+                                <div class="image-preview" id="variant-preview-1-4"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="4" style="display: none;">Crop</button>
+                            </div>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="5">
+                                <div class="image-preview" id="variant-preview-1-5"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="5" style="display: none;">Crop</button>
+                            </div>
+                            <div class="image-input">
+                                <input type="file" name="variant_images_1[]" accept="image/*" data-index="6">
+                                <div class="image-preview" id="variant-preview-1-6"></div>
+                                <button type="button" class="crop-btn" data-variant="1" data-index="6" style="display: none;">Crop</button>
+                            </div>
+                        </div>
+                        <button type="button" class="delete-variant-btn" onclick="removeVariant(this)">Remove Variant</button>
+                    </div>
+                </div>
+                <button type="button" class="add-variant-btn" onclick="addVariant()">Add Another Variant</button>
+
+                <button type="submit" class="submit-btn">Add Product</button>
+            </form>
+        </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         let variantCount = 1;
+        let activeCropper = null;
+
+        function toggleSidebar() {
+            let sidebar = document.querySelector(".sidebar");
+            sidebar.classList.toggle("collapsed");
+        }
 
         function addVariant() {
             variantCount++;
@@ -224,8 +711,6 @@
         }
 
         function attachImageListeners(inputs, variantIndex) {
-            const croppers = {};
-
             inputs.forEach((input, index) => {
                 input.addEventListener("change", function() {
                     const preview = document.getElementById(`variant-preview-${variantIndex}-${index + 1}`);
@@ -244,9 +729,9 @@
                             preview.innerHTML = "";
                             input.value = "";
                             cropBtn.style.display = "none";
-                            if (croppers[`${variantIndex}-${index}`]) {
-                                croppers[`${variantIndex}-${index}`].destroy();
-                                delete croppers[`${variantIndex}-${index}`];
+                            if (activeCropper) {
+                                activeCropper.destroy();
+                                activeCropper = null;
                             }
                         });
                         preview.appendChild(deleteBtn);
@@ -259,7 +744,6 @@
                                 cropBtn.style.display = "block";
                             }
                         });
-                        croppers[`${variantIndex}-${index}`] = cropper;
 
                         cropBtn.addEventListener("click", function() {
                             const croppedCanvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
@@ -308,4 +792,4 @@
         });
     </script>
 </body>
-</html>	
+</html>

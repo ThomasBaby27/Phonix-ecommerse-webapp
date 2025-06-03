@@ -4,13 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand List</title>
+    <title>Order Details - Order #{{ order.id }}</title>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts for Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        /* General Reset and Base Styles */
+        /* Reuse styles from order.html for consistency */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar Styles (same as order.html) */
         .sidebar {
             width: 250px;
             height: 100vh;
@@ -121,92 +121,80 @@
             font-weight: 600;
         }
 
-        /* Add Button Styles */
-        .add-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #2563eb;
-            color: #fff;
-            text-decoration: none;
+        /* Order Details Section */
+        .order-details {
+            background: #fff;
             border-radius: 8px;
-            transition: background-color 0.2s ease;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
         }
 
-        .add-btn:hover {
-            background-color: #1e3a8a;
+        .order-details h3 {
+            font-size: 1.5rem;
+            color: #1e3a8a;
+            margin-bottom: 15px;
         }
 
-        /* Table Styles */
-        table {
+        .order-details p {
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        .order-details p span {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Table Styles for Order Items */
+        .order-items-table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #fff;
+            background: #fff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
         }
 
-        th, td {
+        .order-items-table th, .order-items-table td {
             padding: 15px;
             text-align: left;
             border-bottom: 1px solid #e5e7eb;
         }
 
-        th {
-            background-color: #f9fafb;
-            font-weight: 600;
-            color: #1e3a8a;
-        }
-
-        tr:hover {
-            background-color: #f5f7fa;
-        }
-
-        .edit-btn {
-            padding: 8px 16px;
-            background-color: #2563eb;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-
-        .edit-btn:hover {
+        .order-items-table th {
             background-color: #1e3a8a;
-        }
-
-        /* Pagination Styles */
-        .pagination {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .page-link {
-            padding: 8px 12px;
-            text-decoration: none;
-            color: #2563eb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-
-        .page-link:hover {
-            background-color: #e5e7eb;
-        }
-
-        .page-link.current {
-            background-color: #2563eb;
             color: #fff;
-            border-color: #2563eb;
+            font-weight: 600;
         }
 
-        .page-link.disabled {
-            color: #999;
-            border-color: #e5e7eb;
-            cursor: not-allowed;
+        .order-items-table tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .order-items-table img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        /* Back Button */
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: #1e3a8a;
         }
 
         /* Responsive Design */
@@ -224,8 +212,9 @@
                 margin-left: 70px;
             }
 
-            .toggle-btn {
+            .order-items-table {
                 display: block;
+                overflow-x: auto;
             }
         }
 
@@ -234,23 +223,14 @@
                 padding: 20px;
             }
 
-            .container h2 {
+            .container h2, .order-details h3 {
                 font-size: 1.5rem;
             }
 
-            table {
+            .order-items-table th, .order-items-table td {
                 font-size: 0.9rem;
-            }
-
-            th, td {
                 padding: 10px;
             }
-        }
-
-        /* Smooth Transitions and Animations */
-        .sidebar,
-        .container {
-            transition: all 0.3s ease;
         }
 
         /* Accessibility */
@@ -262,10 +242,10 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar (same as order.html) -->
     <div class="sidebar">
-        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-        <h2>Brand</h2>
+        <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle Sidebar">☰</button>
+        <h2>Orders</h2>
         <ul>
             <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
             <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -281,57 +261,62 @@
             <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
-    
+
     <!-- Main Content -->
     <div class="container">
-        <h2>Brand Management</h2>
-        <a href="{% url 'add_brand' %}" class="add-btn">Add New Brand</a>
-        <table>
+        <a href="{% url 'order_list' %}" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+        <h2>Order Details - Order #{{ order.id }}</h2>
+        <div class="order-details">
+            <h3>Order Information</h3>
+            <p><span>Order ID:</span> {{ order.id }}</p>
+            <p><span>Customer:</span> {{ order.user.username }} ({{ order.user.email }})</p>
+            <p><span>Placed On:</span> {{ order.created_at|date:"Y-m-d h:i A" }}</p>
+            <p><span>Status:</span> {{ order.status }}</p>
+            <p><span>Payment Method:</span> {{ order.payment_method }}</p>
+            <p><span>Total Price:</span> ${{ order.total_price }}</p>
+            <p><span>Shipping Fee:</span> ${{ order.shipping_fee }}</p>
+            <p><span>Shipping Address:</span> {{ order.shipping_address }}</p>
+        </div>
+
+        <h3>Order Items</h3>
+        <table class="order-items-table">
             <thead>
                 <tr>
-                    <th>Brand Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Action</th>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Variant</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
-                {% for brand in brands %}
+                {% for item in order_items %}
                 <tr>
-                    <td>{{ brand.name }}</td>
-                    <td>{{ brand.description }}</td>
-                    <td>{{ brand.status|yesno:"Active,Inactive" }}</td>
                     <td>
-                        <a href="{% url 'edit_brand' brand.id %}" class="edit-btn">Edit</a>
+                        {% if item.variant.images.first %}
+                            <img src="{{ item.variant.images.first.image.url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                            <img src="{% static 'images/default_product.jpg' %}" alt="No image">
+                        {% endif %}
                     </td>
+                    <td>{{ item.product.name }}</td>
+                    <td>
+                        {% if item.variant %}
+                            {{ item.variant.ram }}GB RAM / {{ item.variant.storage }}GB Storage / {{ item.variant.color }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>${{ item.get_total_price }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-        {% if brands.has_other_pages %}
-        <div class="pagination">
-            {% if brands.has_previous %}
-                <a href="?page={{ brands.previous_page_number }}" class="page-link">« Previous</a>
-            {% else %}
-                <span class="page-link disabled">« Previous</span>
-            {% endif %}
-
-            {% for num in brands.paginator.page_range %}
-                {% if brands.number == num %}
-                    <span class="page-link current">{{ num }}</span>
-                {% else %}
-                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if brands.has_next %}
-                <a href="?page={{ brands.next_page_number }}" class="page-link">Next »</a>
-            {% else %}
-                <span class="page-link disabled">Next »</span>
-            {% endif %}
-        </div>
-        {% endif %}
     </div>
+
     <script>
         function toggleSidebar() {
             let sidebar = document.querySelector(".sidebar");

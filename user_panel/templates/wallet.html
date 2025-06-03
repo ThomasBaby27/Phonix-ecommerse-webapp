@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,21 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Wallet</title>
-    {% comment %} <link rel="stylesheet" href="{% static 'account_details.css' %}"> {% endcomment %}
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Keeping original header and footer styles */
         .cart-count, .wishlist-count {
             background-color: #ff4444;
-            color: white;
+            color: white; 
             border-radius: 50%;
-            padding: 2px 6px;
-            font-size: 12px;
-            margin-left: 5px;
-            vertical-align: top;
+            padding: 2px 6px; 
+            font-size: 12px; 
+            margin-left: 5px; 
+            vertical-align: top; 
         }
-
+        
         * {
             margin: 0;
             padding: 0;
@@ -29,12 +28,12 @@
         }
         
         body {
-            background-color: #f8fafc;
+            background-color: #ffffff;
             color: #111111;
             line-height: 1.5;
         }
         
-        /* Header (unchanged) */
+        /* Header */
         header {
             background-color: #131921;
             color: white;
@@ -47,14 +46,14 @@
             top: 0;
             z-index: 1000;
         }
-        
+
         header h1 a {
             color: #ffffff;
             text-decoration: none;
             font-size: 28px;
             font-weight: 700;
         }
-        
+
         header h2 a {
             color: #ffffff;
             text-decoration: none;
@@ -62,12 +61,12 @@
             margin-left: 25px;
             font-weight: 500;
         }
-        
+
         .search-bar {
             flex-grow: 1;
             margin: 0 25px;
         }
-        
+
         .search-bar form {
             display: flex;
             align-items: center;
@@ -76,7 +75,7 @@
             overflow: hidden;
             border: 1px solid #febd69;
         }
-        
+
         .search-bar input {
             border: none;
             outline: none;
@@ -84,7 +83,7 @@
             width: 100%;
             font-size: 15px;
         }
-        
+
         .search-bar button {
             background-color: #febd69;
             border: none;
@@ -94,38 +93,38 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        
+
         .search-bar button:hover {
             background-color: #f3a847;
         }
-        
+
         #clearSearch {
             color: #555555;
             padding: 10px;
             font-size: 14px;
         }
-        
+
         nav {
             display: flex;
             align-items: center;
             gap: 25px;
         }
-        
+
         nav a {
             color: #ffffff;
             font-size: 20px;
             text-decoration: none;
             transition: color 0.2s;
         }
-        
+
         nav a:hover {
             color: #febd69;
         }
-        
+
         .dropdown {
             position: relative;
         }
-        
+
         .dropbtn {
             background: none;
             border: none;
@@ -133,7 +132,7 @@
             font-size: 20px;
             cursor: pointer;
         }
-        
+
         .dropdown-content {
             display: none;
             position: absolute;
@@ -143,7 +142,7 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
             border-radius: 4px;
         }
-        
+
         .dropdown-content a {
             color: #111111;
             padding: 12px 20px;
@@ -151,286 +150,34 @@
             text-decoration: none;
             font-size: 14px;
         }
-        
+
         .dropdown-content a:hover {
             background-color: #f5f5f5;
             color: #e47911;
         }
-        
+
         .dropdown:hover .dropdown-content {
             display: block;
         }
 
-        /* Improved Sidebar */
-        .sidebar {
-            background-color: #ffffff;
-            border-right: 1px solid #e5e7eb;
-            padding: 20px;
-            width: 250px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            height: fit-content;
-        }
+        /* Responsive Design for Header */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 20px;
+            }
 
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
+            .search-bar {
+                margin: 15px 0;
+                width: 100%;
+            }
 
-        .sidebar ul li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar ul li a {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            color: #1f2937;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .sidebar ul li a:hover {
-            background-color: #f3f4f6;
-            color: #2563eb;
-        }
-
-        .sidebar ul li a.active {
-            background-color: #e0f2fe;
-            color: #2563eb;
-            font-weight: 600;
-        }
-
-        .sidebar .logout-btn {
-            width: 100%;
-            padding: 12px 16px;
-            background-color: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: left;
-            transition: background-color 0.2s ease;
-        }
-
-        .sidebar .logout-btn:hover {
-            background-color: #b91c1c;
-        }
-
-        /* Improved Container Layout */
-        .container {
-            display: flex;
-            max-width: 1200px;
-            margin: 20px auto;
-            gap: 20px;
-            padding: 0 15px;
-        }
-
-        .wallet-section {
-            flex-grow: 1;
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .wallet-header {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin-bottom: 32px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .wallet-header h2 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1f2937;
-        }
-
-        .balance {
-            font-size: 36px;
-            font-weight: 700;
-            color: #2563eb;
-            background: linear-gradient(90deg, #2563eb, #3b82f6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .add-money-form {
-            display: flex;
-            gap: 12px;
-            max-width: 400px;
-        }
-
-        .add-money-form input {
-            flex-grow: 1;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-
-        .add-money-form input:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .add-money-form button {
-            padding: 12px 24px;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        .add-money-form button:hover {
-            background-color: #1d4ed8;
-        }
-
-        .transactions h3 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 20px;
-        }
-
-        .transaction-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .transaction-table th,
-        .transaction-table td {
-            padding: 16px;
-            text-align: left;
-            font-size: 14px;
-        }
-
-        .transaction-table th {
-            background-color: #f8fafc;
-            color: #6b7280;
-            font-weight: 500;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .transaction-table td {
-            border-bottom: 1px solid #e5e7eb;
-            color: #1f2937;
-        }
-
-        .transaction-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .transaction-details {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .refund-title {
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .product-details {
-            color: #6b7280;
-            font-size: 13px;
-        }
-
-        .product-item {
-            margin-bottom: 4px;
-        }
-
-        .order-link a {
-            color: #2563eb;
-            text-decoration: none;
-            font-size: 13px;
-            transition: color 0.2s ease;
-        }
-
-        .order-link a:hover {
-            color: #1d4ed8;
-            text-decoration: underline;
-        }
-
-        .transaction-amount {
-            font-weight: 500;
-        }
-
-        .transaction-amount.credit {
-            color: #16a34a;
-        }
-
-        .transaction-amount.debit {
-            color: #dc2626;
-        }
-
-        .no-transactions {
-            text-align: center;
-            padding: 40px;
-            color: #6b7280;
-            font-size: 16px;
-            background-color: #f8fafc;
-            border-radius: 12px;
-        }
-
-        /* Toast Notification */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .toast {
-            background-color: #1f2937;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Success Toast */
-        .toast.success {
-            background-color: #16a34a; /* Green for success */
-            color: white;
-        }
-
-        /* Failure Toast */
-        .toast.failure {
-            background-color: #dc2626; /* Red for failure */
-            color: white;
+            nav {
+                gap: 20px;
+            }
         }
         
-        /* Footer (unchanged) */
+        /* Footer */
         footer {
             background-color: #172337;
             color: #ffffff;
@@ -539,139 +286,505 @@
         .footer-section ul li a:hover {
             color: #00c4b4;
         }
+        
+        /* PROFESSIONAL WALLET PAGE STYLING - MATCHING ACCOUNT DETAILS */
+        
+        /* Enhanced Container Layout */
+        .container-fluid {
+            padding: 0;
+        }
 
-        /* Mobile Menu Toggle for Sidebar */
-        .mobile-menu-toggle {
+        .content-wrapper {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar Styles - Professional Update (Same as Account Details) */
+        .sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            padding: 25px 15px;
+            width: 280px;
+            min-height: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #f1f5f9;
+            color: #0d6efd;
+        }
+
+        .sidebar ul li a.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .sidebar .logout-btn {
+            width: 100%;
+            padding: 14px 18px;
+            background-color: #f8d7da;
+            color: #dc3545;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .logout-btn i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .sidebar .logout-btn:hover {
+            background-color: #f5c2c7;
+        }
+
+        /* Mobile Sidebar Toggle */
+        .mobile-sidebar-toggle {
             display: none;
-            background-color: #2563eb;
+            background-color: #0d6efd;
             color: white;
             border: none;
             border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            font-weight: 500;
+            padding: 12px 18px;
+            margin: 15px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        /* Improved Responsive Design */
-        @media (max-width: 991px) {
-            .container {
+        /* Content Styles - Professional Wallet Design */
+        .content {
+            flex: 1;
+            padding: 40px;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 30px;
+            letter-spacing: -0.025em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        /* Professional Wallet Card */
+        .wallet-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+
+        .wallet-header {
+            position: relative;
+            z-index: 2;
+        }
+
+        .wallet-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .wallet-balance {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .wallet-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Add Money Section */
+        .add-money-section {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .add-money-section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 20px;
+        }
+
+        .add-money-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .add-money-form .form-group {
+            flex: 1;
+        }
+
+        .add-money-form label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .add-money-form input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .add-money-form input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            outline: none;
+        }
+
+        .add-money-form button {
+            padding: 12px 30px;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+        }
+
+        .add-money-form button:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.4);
+        }
+
+        /* Transaction History Section */
+        .transactions-section {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .transactions-section h3 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .transactions-section h3 i {
+            margin-right: 10px;
+            color: #0d6efd;
+        }
+
+        /* Professional Transaction Table */
+        .transaction-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .transaction-table th {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            padding: 18px 16px;
+            text-align: left;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .transaction-table td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f3f4;
+            color: #495057;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .transaction-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .transaction-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .transaction-date {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .transaction-details {
+            max-width: 300px;
+        }
+
+        .refund-title {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        .product-details {
+            color: #6c757d;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .product-item {
+            margin-bottom: 4px;
+            padding: 4px 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border-left: 3px solid #e9ecef;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            font-size: 15px;
+            text-align: right;
+        }
+
+        .transaction-amount.credit {
+            color: #198754;
+        }
+
+        .transaction-amount.credit::before {
+            content: '+';
+        }
+
+        .transaction-amount.debit {
+            color: #dc3545;
+        }
+
+        .transaction-amount.debit::before {
+            content: '-';
+        }
+
+        /* No Transactions State */
+        .no-transactions {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-transactions i {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .no-transactions h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #495057;
+        }
+
+        .no-transactions p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+
+        .toast {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid #198754;
+        }
+
+        .toast.failure {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-body {
+            padding: 16px 20px;
+            font-weight: 500;
+        }
+
+        /* Responsive Design Improvements */
+        @media (max-width: 992px) {
+            .content-wrapper {
                 flex-direction: column;
             }
             
             .sidebar {
                 width: 100%;
                 border-right: none;
-                margin-bottom: 20px;
+                border-bottom: 1px solid #e5e7eb;
+                padding: 15px;
             }
             
-            .mobile-menu-toggle {
+            .mobile-sidebar-toggle {
                 display: block;
             }
             
-            .sidebar-menu {
+            .sidebar {
                 display: none;
             }
             
-            .sidebar-menu.show {
+            .sidebar.active {
                 display: block;
+            }
+            
+            .content {
+                padding: 25px;
             }
         }
 
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
-                padding: 15px;
-            }
-
-            header h2 {
-                margin-bottom: 10px;
-            }
-
-            .search-bar {
-                margin: 10px 0;
-                width: 100%;
-            }
-
-            nav {
-                width: 100%;
-                justify-content: space-around;
-                margin-top: 10px;
+            .wallet-card {
+                padding: 20px;
+                margin: 0 10px 20px;
             }
             
-            .wallet-header h2 {
-                font-size: 22px;
-            }
-            
-            .balance {
-                font-size: 28px;
+            .wallet-balance {
+                font-size: 32px;
             }
             
             .add-money-form {
                 flex-direction: column;
-                max-width: 100%;
-            }
-            
-            .add-money-form input {
-                width: 100%;
-                margin-bottom: 10px;
+                gap: 15px;
             }
             
             .add-money-form button {
                 width: 100%;
             }
+            
+            .transaction-table {
+                font-size: 12px;
+            }
+            
+            .transaction-table th,
+            .transaction-table td {
+                padding: 12px 8px;
+            }
         }
-        
+
         @media (max-width: 576px) {
-            .wallet-section {
+            .content {
                 padding: 15px;
+            }
+            
+            .content h2 {
+                font-size: 24px;
+            }
+            
+            .wallet-balance {
+                font-size: 28px;
+            }
+            
+            .add-money-section,
+            .transactions-section {
+                padding: 20px;
+                margin: 0 0 20px;
             }
             
             .transaction-table {
                 display: block;
                 overflow-x: auto;
-            }
-            
-            .transaction-table th,
-            .transaction-table td {
-                padding: 10px;
-                font-size: 12px;
-            }
-            
-            .transaction-details {
-                font-size: 12px;
-            }
-        }
-
-        @media (max-width: 425px) {
-            .balance {
-                font-size: 24px;
-            }
-            
-            .transactions h3 {
-                font-size: 18px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .footer-container {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .footer-section {
-                margin-bottom: 30px;
-            }
-
-            .newsletter {
-                justify-content: center;
-            }
-
-            .social-icons {
-                justify-content: center;
+                white-space: nowrap;
             }
         }
     </style>
@@ -680,6 +793,7 @@
     <header>
         <h2><a href="/">Phonix</a></h2>
         <h2><a href="{% url 'shop_page' %}">Shop</a></h2>
+
         <div class="search-bar">
             <form action="{% url 'search_products' %}" method="GET" id="searchForm">
                 <input type="text" name="query" placeholder="Search products..." value="{{ query|default:'' }}" id="searchInput">
@@ -689,108 +803,140 @@
                 </button>
             </form>
         </div>
+
         <nav>
-            <a href="{% url 'cart' %}"><i class="fas fa-shopping-cart"></i> <span class="cart-count">0</span></a>
-            <a href="{% url 'wishlist' %}"><i class="fas fa-heart"></i> <span class="wishlist-count">0</span></a>
+            <a href="/cart"><i class="fas fa-shopping-cart"></i><span class="cart-count"></span></a>
+            <a href="/wishlist"><i class="fas fa-heart"></i><span class="wishlist-count"></span></a>
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-user"></i></button>
                 <div class="dropdown-content">
-                    <a href="{% url 'account_profile' %}">Profile</a>
-                    <a href="/logout">Logout</a>
+                    <a href="{% url 'account_profile' %}">Profile</a> 
+                    <a href="{% url 'logout' %}">Logout</a>
                 </div>
             </div>
         </nav>
     </header>
-
-    <div class="container">
-        <aside class="sidebar">
-            <button class="mobile-menu-toggle" id="toggleSidebar">
+    
+    <div class="container-fluid">
+        <div class="content-wrapper">
+            <button class="mobile-sidebar-toggle" id="toggleSidebar">
                 <i class="fas fa-bars"></i> Menu
             </button>
-            <ul class="sidebar-menu" id="sidebarMenu">
-                <li><a href="{% url 'account_profile' %}">Account Overview</a></li>
-                <li><a href="{% url 'order_details' %}">Order Details</a></li>
-                <li><a href="{% url 'manage_address' %}">Manage Address</a></li>
-                <li><a href="/wallet" class="active">Wallet</a></li>
-                <li><a href="/wishlist">Wishlist</a></li>
-                <li><button onclick="location.href='/logout'" class="logout-btn">Logout</button></li>
-            </ul>
-        </aside>
-
-        <div class="wallet-section">
-            <div class="wallet-header">
+            
+            <aside class="sidebar" id="sidebar">
+                <ul>
+                    <li><a href="{% url 'account_profile' %}"><i class="fas fa-user-circle"></i> Account Overview</a></li>
+                    <li><a href="{% url 'order_details' %}"><i class="fas fa-box"></i> Order Details</a></li>
+                    <li><a href="{% url 'manage_address' %}"><i class="fas fa-map-marker-alt"></i> Manage Address</a></li>
+                    <li><a href="/wallet" class="active"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+                </ul>
+                <button onclick="location.href='/logout'" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </aside>
+            
+            <main class="content" id="mainContent">
                 <h2>My Wallet</h2>
-                <div class="balance">₹{{ wallet.balance|floatformat:2 }}</div>
-                <form class="add-money-form" id="addMoneyForm" action="{% url 'add_to_wallet' %}" method="POST">
-                    {% csrf_token %}
-                    <input type="number" name="amount" placeholder="Enter amount" min="1" step="0.01" required>
-                    <button type="submit">Add Money</button>
-                </form>
-            </div>
-            <div class="transactions">
-                <h3>Transaction History</h3>
-                {% if transactions %}
-                    <div class="table-responsive">
-                        <table class="transaction-table">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Description</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for transaction in transactions %}
-                                    <tr class="transaction-row">
-                                        <td class="transaction-date">{{ transaction.created_at|date:"d M Y, H:i" }}</td>
-                                        <td class="transaction-details">
-                                            {% if transaction.order and transaction.order.status == 'Returned' and transaction.transaction_type == 'CREDIT' %}
-                                                <div class="refund-title">Refund for Order #{{ transaction.order.id }}</div>
-                                                <div class="product-details">
-                                                    {% for item in transaction.order.items.all %}
-                                                        <div class="product-item">
-                                                            {{ item.product.name }}
-                                                            {% if item.variant %}
-                                                                ({{ item.variant.ram }}/{{ item.variant.storage }}/{{ item.variant.color }})
-                                                            {% endif %}
-                                                            × {{ item.quantity }}
-                                                            {% if item.price %} - ₹{{ item.get_total_price|floatformat:2 }}{% endif %}
-                                                        </div>
-                                                    {% empty %}
-                                                        <div class="no-items">No product details available</div>
-                                                    {% endfor %}
-                                                </div>
-                                                <div class="order-link">
-                                                    <a href="{% url 'order_detail' transaction.order.id %}">View Order Details</a>
-                                                </div>
-                                            {% else %}
-                                                <div>{{ transaction.description }}</div>
-                                                {% if transaction.order %}
-                                                    <div class="order-link">
-                                                        <a href="{% url 'order_detail' transaction.order.id %}">View Order #{{ transaction.order.id }}</a>
+                
+                <!-- Professional Wallet Card -->
+                <div class="wallet-card">
+                    <div class="wallet-header">
+                        <div class="wallet-title">Current Balance</div>
+                        <div class="wallet-balance">₹{{ wallet.balance|floatformat:2 }}</div>
+                        <div class="wallet-info">
+                            <span><i class="fas fa-user"></i> {{ user.username }}</span>
+                            <span><i class="fas fa-calendar"></i> {{ wallet.created_at|date:"M Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Money Section -->
+                <div class="add-money-section">
+                    <h3><i class="fas fa-plus-circle"></i> Add Money to Wallet</h3>
+                    <form class="add-money-form" id="addMoneyForm" action="{% url 'add_to_wallet' %}" method="POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" name="amount" placeholder="Enter amount" min="1" step="0.01" required>
+                        </div>
+                        <button type="submit"><i class="fas fa-credit-card"></i> Add Money</button>
+                    </form>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="transactions-section">
+                    <h3><i class="fas fa-history"></i> Transaction History</h3>
+                    {% if transactions %}
+                        <div class="table-responsive">
+                            <table class="transaction-table">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Transaction Details</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for transaction in transactions %}
+                                        <tr class="transaction-row">
+                                            <td class="transaction-date">
+                                                <div>{{ transaction.created_at|date:"d M Y" }}</div>
+                                                <small style="color: #6c757d;">{{ transaction.created_at|date:"H:i" }}</small>
+                                            </td>
+                                            <td class="transaction-details">
+                                                {% if transaction.order and transaction.order.status == 'Returned' and transaction.transaction_type == 'CREDIT'%}
+                                                    <div class="refund-title">
+                                                        <i class="fas fa-undo text-success"></i> Refund for Order #{{ transaction.order.id }}
+                                                    </div>
+                                                    <div class="product-details">
+                                                        {% for item in transaction.order.items.all %}
+                                                            <div class="product-item">
+                                                                {% if item.product %}
+                                                                    <strong>{{ item.product.name }}</strong>
+                                                                    {% if item.variant %}
+                                                                        <br><small>{{ item.variant.ram }}/{{ item.variant.storage }}/{{ item.variant.color }}</small>
+                                                                    {% endif %}
+                                                                    <br><small>Qty: {{ item.quantity }} × ₹{{ item.get_total_price|floatformat:2 }}</small>
+                                                                {% else %}
+                                                                    <small>Product details unavailable</small>
+                                                                {% endif %}
+                                                            </div>
+                                                        {% empty %}
+                                                            <small class="text-muted">No product details available</small>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% elif transaction.order %}
+                                                    <div>
+                                                        <i class="fas fa-shopping-cart text-primary"></i> Payment for Order #{{ transaction.order.id }}
+                                                    </div>
+                                                {% else %}
+                                                    <div>
+                                                        <i class="fas fa-plus-circle text-success"></i> {{ transaction.description }}
                                                     </div>
                                                 {% endif %}
-                                            {% endif %}
-                                        </td>
-                                        <td class="transaction-amount {% if transaction.transaction_type == 'CREDIT' %}credit{% else %}debit{% endif %}">
-                                            {% if transaction.transaction_type == 'CREDIT' %}+{% else %}-{% endif %}₹{{ transaction.amount|floatformat:2 }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="no-transactions">
-                        <p>No transactions yet.</p>
-                    </div>
-                {% endif %}
-            </div>
+                                            </td>
+                                            <td class="transaction-amount {% if transaction.transaction_type == 'CREDIT' %}credit{% else %}debit{% endif %}">
+                                                ₹{{ transaction.amount|floatformat:2 }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="no-transactions">
+                            <i class="fas fa-receipt"></i>
+                            <h4>No Transactions Yet</h4>
+                            <p>Your transaction history will appear here once you start using your wallet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </main>
         </div>
     </div>
 
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
-
+    
     <footer>
         <div class="footer-container">
             <div class="footer-section connect">
@@ -830,6 +976,7 @@
             </div>
         </div>
     </footer>
+    
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
@@ -856,16 +1003,21 @@
 
         // Toast notification
         function showToast(message, type = 'success') {
-            const toastContainer = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.classList.add('toast', type); // Add 'success' or 'failure' class
-            toast.textContent = message;
-            toastContainer.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: type,
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                background: type === 'success' ? '#16a34a' : '#dc2626',
+                color: '#ffffff',
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer);
+                    toast.addEventListener('mouseleave', Swal.resumeTimer);
+                }
+            });
         }
 
         // Add money to wallet
@@ -882,18 +1034,28 @@
                     'X-CSRFToken': getCookie('csrftoken')
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                // Log the response status for debugging
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                // Log the response data for debugging
+                console.log('Response data:', data);
                 if (data.success) {
-                    document.querySelector('.balance').textContent = `₹${data.new_balance}`;
+                    // Update the balance display
+                    document.querySelector('.wallet-balance').textContent = `₹${parseFloat(data.new_balance).toFixed(2)}`;
                     
-                    // Check if we need to reload the page to show the new transaction
+                    // If no transactions exist, reload the page
                     if (document.querySelector('.no-transactions')) {
                         window.location.reload();
                         return;
                     }
                     
-                    // If we have a transaction table, add the new transaction at the top
+                    // Add new transaction to the table
                     const transactionTable = document.querySelector('.transaction-table tbody');
                     if (transactionTable) {
                         const newRow = document.createElement('tr');
@@ -902,16 +1064,17 @@
                         const dateCell = document.createElement('td');
                         dateCell.classList.add('transaction-date');
                         const now = new Date();
-                        const dateStr = `${now.getDate().toString().padStart(2, '0')} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()]} ${now.getFullYear()}, ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-                        dateCell.textContent = dateStr;
+                        const dateStr = `${now.getDate().toString().padStart(2, '0')} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.getMonth()]} ${now.getFullYear()}`;
+                        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                        dateCell.innerHTML = `<div>${dateStr}</div><small style="color: #6c757d;">${timeStr}</small>`;
                         
                         const detailsCell = document.createElement('td');
                         detailsCell.classList.add('transaction-details');
-                        detailsCell.innerHTML = '<div>Funds added to wallet</div>';
+                        detailsCell.innerHTML = '<div><i class="fas fa-plus-circle text-success"></i> Funds added to wallet</div>';
                         
                         const amountCell = document.createElement('td');
                         amountCell.classList.add('transaction-amount', 'credit');
-                        amountCell.textContent = `+₹${parseFloat(amount).toFixed(2)}`;
+                        amountCell.textContent = `₹${parseFloat(amount).toFixed(2)}`;
                         
                         newRow.appendChild(dateCell);
                         newRow.appendChild(detailsCell);
@@ -923,12 +1086,12 @@
                     showToast('Funds added successfully!', 'success');
                     form.reset();
                 } else {
-                    showToast(data.message || 'Failed to add funds.', 'failure');
+                    showToast(data.message || 'Failed to add funds.', 'error');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showToast('An error occurred while adding funds.', 'failure');
+                console.error('Fetch error:', error);
+                showToast('An error occurred while adding funds. Please try again.', 'error');
             });
         });
 

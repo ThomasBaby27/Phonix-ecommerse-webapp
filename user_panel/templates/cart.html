@@ -733,7 +733,7 @@
                         <div class="cart-items">
                             {% for enhanced_item in enhanced_cart_items %}
                             {% with item=enhanced_item.cart_item %}
-                            <div class="cart-item" data-product-id="{{ item.variant.product.id }}" data-stock="{{ item.variant.stock }}">
+                            <div class="cart-item" data-variant-id="{{ item.variant.id }}" data-stock="{{ item.variant.stock }}">
                                 {% if item.variant.images.exists %}
                                     {% with first_image=item.variant.images.first %}
                                         <img src="{{ first_image.image.url }}" alt="{{ item.variant.product.name }}" class="product-image">
@@ -765,7 +765,7 @@
                                         data-action="increase">➕</a>
                                     </div>
                                     <!-- Remove Button -->
-                                    <a href="#" class="remove-btn" data-product-id="{{ item.variant.product.id }}">Remove</a>
+                                    <a href="#" class="remove-btn" data-variant-id="{{ item.variant.id }}">Remove</a>
                                 </div>
                             </div>      
                             {% endwith %}
@@ -849,6 +849,21 @@
                 const checkoutBtn = document.querySelector('.checkout-btn:not([disabled])');
                 if (checkoutBtn) {
                     checkoutBtn.addEventListener('click', function(e) {
+                        const inactiveItems = document.querySelectorAll('.cart-item[data-product-status="inactive"]');
+                        if (inactiveItems.length > 0) {
+                            e.preventDefault();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Unavailable Products',
+                                text: 'Some products in your cart are unavailable. Please remove them to proceed to checkout.',
+                                timer: 3000,
+                                timerProgressBar: true,
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false
+                            });
+                            return false;
+                        }
                         // Only intervene if it's an anchor tag
                         if (this.tagName === 'A') {
                             console.log("Checkout button clicked - proceeding to checkout");
@@ -949,30 +964,78 @@
                         const decreaseBtn = cartItem.querySelector('.quantity-btn[data-action="decrease"]');
                         const increaseBtn = cartItem.querySelector('.quantity-btn[data-action="increase"]');
                         const stock = parseInt(cartItem.getAttribute('data-stock') || '999'); // Fallback if data-stock not set
-                        // Set initial button states
-                        if (quantity <= 1) {
+                        const productStatus = cartItem.getAttribute('data-product-status');
+                        const productName = cartItem.querySelector('.product-details h3').textContent;
+                        
+                        // *** FIX: Use centralized button state function ***
+                        updateButtonStates(quantity, stock, decreaseBtn, increaseBtn);
+                        
+                        // Handle inactive products separately
+                        if (productStatus === 'inactive') {
                             decreaseBtn.classList.add('disabled');
-                        }
-                            
-                        if (quantity >= stock) {
                             increaseBtn.classList.add('disabled');
                         }
-        
+
                         // Add click handlers
                         decreaseBtn.addEventListener('click', function(e) {
                             e.preventDefault();
+                            
+                            if (productStatus === 'inactive') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Product Unavailable',
+                                    text: `${productName} is currently unavailable. Please remove it from the cart.`,
+                                    timer: 2500,
+                                    timerProgressBar: true,
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false
+                                });
+                                return;
+                            }
                             if (!this.classList.contains('disabled')) {
-                                const productId = cartItem.getAttribute('data-product-id');
+                                const variantId = cartItem.getAttribute('data-variant-id');
                                 this.classList.add('processing');
-                                updateQuantity(productId, 'decrease', cartItem);
+                                updateQuantity(variantId, 'decrease', cartItem);
                             }
                         });
+                        
                         increaseBtn.addEventListener('click', function(e) {
                             e.preventDefault();
+                            if (productStatus === 'inactive') {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Product Unavailable',
+                                    text: `${productName} is currently unavailable. Please remove it from the cart.`,
+                                    timer: 2500,
+                                    timerProgressBar: true,
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false
+                                });
+                                return;
+                            }
+                            const currentQuantity = parseInt(cartItem.querySelector('.quantity').textContent);
+            
+                            if (currentQuantity >= 5) {
+                                // Show alert immediately when trying to increase beyond 5
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Cart Limit Reached',
+                                    text: `You can only add up to 5 units of ${productName} to your cart.`,
+                                    timer: 2500,
+                                    timerProgressBar: true,
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false
+                                });
+                                return;
+                            }
+
                             if (!this.classList.contains('disabled')) {
-                                const productId = cartItem.getAttribute('data-product-id');
+                                const variantId = cartItem.getAttribute('data-variant-id');
                                 this.classList.add('processing');
-                                updateQuantity(productId, 'increase', cartItem);
+                                updateQuantity(variantId, 'increase', cartItem);
                             }
                         });
                     });
@@ -1004,14 +1067,33 @@
             });
         
             // Update quantity via AJAX with stock validation
-            function updateQuantity(productId, action, cartItem) {
+            function updateQuantity(variantId, action, cartItem) {
                 const quantityElement = cartItem.querySelector('.quantity');
                 const currentQuantity = parseInt(quantityElement.textContent);
                 const decreaseBtn = cartItem.querySelector('.quantity-btn[data-action="decrease"]');
                 const increaseBtn = cartItem.querySelector('.quantity-btn[data-action="increase"]');
                 const productName = cartItem.querySelector('.product-details h3').textContent;
-            
-                fetch(`/update_cart_quantity/${productId}/${action}/`, {
+                const productStatus = cartItem.getAttribute('data-product-status');
+
+                // Client-side check for inactive product
+                if (productStatus === 'inactive') {
+                    cartItem.querySelectorAll('.quantity-btn').forEach(btn => btn.classList.remove('processing'));
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Product Unavailable',
+                        text: `${productName} is currently unavailable. Please remove it from the cart.`,
+                        timer: 2500,
+                        timerProgressBar: true,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false
+                    });
+                    return;
+                }
+
+                // *** FIX: Removed the client-side quantity check here since it's handled in click handler ***
+
+                fetch(`/update_cart_quantity/${variantId}/${action}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1027,7 +1109,7 @@
                 })
                 .then(data => {
                     cartItem.querySelectorAll('.quantity-btn').forEach(btn => btn.classList.remove('processing'));
-            
+
                     if (data.success) {
                         // Update quantity display
                         if (data.quantity > 0) {
@@ -1037,13 +1119,15 @@
                             cartItem.remove();
                             updateCartVisibility();
                             updateCheckoutButton();
+                            return; // Exit early since item is removed
                         }
-            
-                        // Update button states
+
+                        // Update button states based on new quantity
+                        updateButtonStates(data.quantity, data.stock, decreaseBtn, increaseBtn);
+
+                        // Show appropriate success messages
                         if (action === 'increase') {
                             if (data.quantity >= data.stock) {
-                                increaseBtn.classList.add('disabled');
-                                // Show SweetAlert for reaching stock limit
                                 Swal.fire({
                                     icon: 'warning',
                                     title: 'Stock Limit Reached',
@@ -1055,7 +1139,6 @@
                                     showConfirmButton: false
                                 });
                             } else {
-                                // Show SweetAlert for successful increase
                                 Swal.fire({
                                     icon: 'success',
                                     title: 'Quantity Increased',
@@ -1067,9 +1150,7 @@
                                     showConfirmButton: false
                                 });
                             }
-                            decreaseBtn.classList.remove('disabled');
                         } else if (action === 'decrease') {
-                            // Show SweetAlert for successful decrease
                             Swal.fire({
                                 icon: 'info',
                                 title: 'Quantity Decreased',
@@ -1080,39 +1161,20 @@
                                 position: 'top-end',
                                 showConfirmButton: false
                             });
-                            
-                            if (data.quantity <= 1) {
-                                decreaseBtn.classList.add('disabled');
-                            }
-                            increaseBtn.classList.remove('disabled');
                         }
-            
+
                         // Update order summary using the new function
                         updateOrderSummary(data.subtotal, data.delivery_charge, data.total_price);
-                        {% comment %} updateCartCount(data.cart_count); {% endcomment %}
-                        // IMPORTANT: Update cart count in the header
+                        
+                        // Update cart count in the header
                         if (typeof data.cart_count !== 'undefined') {
                             console.log('Received cart count from server:', data.cart_count);
                             window.updateCartCount(data.cart_count);
                         } else {
                             console.warn('Cart count not received from server');
-                            // Fallback: refresh cart count from server
                             fetchCartCount();
                         }
 
-                        if (data.quantity === 0) {
-                            // Show SweetAlert for product removed
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Product Removed',
-                                text: `${productName} removed from cart`,
-                                timer: 2000,
-                                timerProgressBar: true,
-                                toast: true,
-                                position: 'top-end',
-                                showConfirmButton: false
-                            });
-                        }
                     } else {
                         // Show SweetAlert for error
                         Swal.fire({
@@ -1144,6 +1206,21 @@
                     });
                 });
             }
+
+            function updateButtonStates(quantity, stock, decreaseBtn, increaseBtn) {
+                // Reset button states first
+                decreaseBtn.classList.remove('disabled');
+                increaseBtn.classList.remove('disabled');
+                
+                // Apply disable conditions
+                if (quantity <= 1) {
+                    decreaseBtn.classList.add('disabled');
+                }
+                
+                if (quantity >= 5 || quantity >= stock) {
+                    increaseBtn.classList.add('disabled');
+                }
+            }
         
             // Setup remove controls with AJAX
             function setupRemoveControls() {
@@ -1151,7 +1228,7 @@
                     button.addEventListener('click', function(event) {
                         event.preventDefault();
                         console.log("Remove button clicked!"); 
-                        const productId = this.getAttribute('data-product-id');
+                        const productId = this.getAttribute('data-variant-id');
                         const cartItem = this.closest('.cart-item');
                         const productName = cartItem.querySelector('.product-details h3').textContent;
                         this.classList.add('processing');
@@ -1160,8 +1237,8 @@
                 });
             }
         
-            function removeItem(productId, cartItem, productName) {
-                console.log(`Attempting to remove product ID: ${productId}`);
+            function removeItem(variantId, cartItem, productName) {
+                console.log(`Attempting to remove product ID: ${variantId}`);
                 
                 const csrfToken = getCookie('csrftoken');
                 if (!csrfToken) {
@@ -1179,7 +1256,7 @@
                     return;
                 }
             
-                fetch(`/remove_from_cart/${productId}/`, {
+                fetch(`/remove_from_cart/${variantId}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

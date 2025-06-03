@@ -10,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* Keeping original header and footer styles */
         .cart-count, .wishlist-count {
             background-color: #ff4444;
             color: white; 
@@ -186,239 +187,7 @@
                 gap: 20px;
             }
         }
-        /* Enhanced Responsive Container Layout */
-        .container-fluid {
-            padding: 0;
-        }
-
-        .content-wrapper {
-            display: flex;
-            min-height: calc(100vh - 200px);
-        }
-
-        /* Responsive Sidebar Styles */
-        .sidebar {
-            background-color: #ffffff;
-            border-right: 1px solid #e5e7eb;
-            padding: 20px;
-            width: 250px;
-            min-height: 100%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar ul li {
-            margin-bottom: 10px;
-        }
-
-        .sidebar ul li a {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            color: #1f2937;
-            text-decoration: none;
-            font-size: 15px;
-            font-weight: 500;
-            border-radius: 8px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-
-        .sidebar ul li a:hover {
-            background-color: #f3f4f6;
-            color: #2563eb;
-        }
-
-        .sidebar ul li a.active {
-            background-color: #e0f2fe;
-            color: #2563eb;
-            font-weight: 600;
-        }
-
-        .sidebar .logout-btn {
-            width: 100%;
-            padding: 12px 16px;
-            background-color: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: left;
-            transition: background-color 0.2s ease;
-        }
-
-        .sidebar .logout-btn:hover {
-            background-color: #b91c1c;
-        }
-
-        /* Mobile Sidebar Toggle */
-        .mobile-sidebar-toggle {
-            display: none;
-            background-color: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Content Styles */
-        .content {
-            flex: 1;
-            padding: 30px;
-            background-color: #f9fafb;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .content h2 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 20px;
-            letter-spacing: -0.025em;
-        }
-
-        .profile-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-
-        .profile-pic {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #ffffff;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .profile-pic:hover {
-            transform: scale(1.05);
-        }
-
-        #displayDetails, #editDetails {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            max-width: 500px;
-            margin: 0 auto;
-            transition: all 0.3s ease;
-        }
-
-        #displayDetails p {
-            font-size: 16px;
-            color: #4b5563;
-            margin: 15px 0;
-            line-height: 1.6;
-        }
-
-        #displayDetails p strong {
-            color: #1f2937;
-            font-weight: 600;
-        }
-
-        #editDetails label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
-
-        #editDetails input[type="text"],
-        #editDetails input[type="email"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #1f2937;
-            background-color: #f9fafb;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        #editDetails input[type="text"]:focus,
-        #editDetails input[type="email"]:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            outline: none;
-        }
-
-        #editDetails input[type="file"] {
-            display: none;
-        }
-
-        .edit-profile-pic {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #f3f4f6;
-            color: #4b5563;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 10px 0;
-            transition: background-color 0.2s ease;
-        }
-
-        .edit-profile-pic:hover {
-            background-color: #e5e7eb;
-        }
-
-        #editButton, #editDetails button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-        }
-
-        #editButton {
-            background-color: #2563eb;
-            color: #ffffff;
-        }
-
-        #editButton:hover {
-            background-color: #1d4ed8;
-            transform: translateY(-1px);
-        }
-
-        #editDetails button[type="submit"] {
-            background-color: #16a34a;
-            color: #ffffff;
-            margin-right: 10px;
-        }
-
-        #editDetails button[type="submit"]:hover {
-            background-color: #15803d;
-            transform: translateY(-1px);
-        }
-
-        #cancelEdit {
-            background-color: #e5e7eb;
-            color: #4b5563;
-        }
-
-        #cancelEdit:hover {
-            background-color: #d1d5db;
-            transform: translateY(-1px);
-        }
-
+        
         /* Footer */
         footer {
             background-color: #172337;
@@ -528,8 +297,315 @@
         .footer-section ul li a:hover {
             color: #00c4b4; /* Matches the teal color of "Privacy Policy" in the screenshot */
         }
+        
+        /* NEW PROFESSIONAL ACCOUNT PAGE STYLING */
+        
+        /* Enhanced Container Layout */
+        .container-fluid {
+            padding: 0;
+        }
 
-        /* Enhanced Responsive Design */
+        .content-wrapper {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            background-color: #f8f9fa;
+        }
+
+        /* Sidebar Styles - Professional Update */
+        .sidebar {
+            background-color: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            padding: 25px 15px;
+            width: 280px;
+            min-height: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 12px;
+        }
+
+        .sidebar ul li a {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            color: #495057;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: #f1f5f9;
+            color: #0d6efd;
+        }
+
+        .sidebar ul li a.active {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            font-weight: 600;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .sidebar .logout-btn {
+            width: 100%;
+            padding: 14px 18px;
+            background-color: #f8d7da;
+            color: #dc3545;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .logout-btn i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        .sidebar .logout-btn:hover {
+            background-color: #f5c2c7;
+        }
+
+        /* Mobile Sidebar Toggle */
+        .mobile-sidebar-toggle {
+            display: none;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            margin: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Content Styles - Professional Update */
+        .content {
+            flex: 1;
+            padding: 40px;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 30px;
+            letter-spacing: -0.025em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        /* Profile Section - Professional Update */
+        .profile-card {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0;
+            margin-top: -60px;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            background-color: #f8f9fa;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.05);
+        }
+
+        #displayDetails, #editDetails {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        #displayDetails {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #displayDetails p {
+            font-size: 16px;
+            color: #495057;
+            margin: 12px 0;
+            line-height: 1.6;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #e9ecef;
+        }
+
+        #displayDetails p strong {
+            color: #212529;
+            font-weight: 600;
+            display: inline-block;
+            width: 100px;
+        }
+
+        #editButton {
+            margin-top: 25px;
+            padding: 12px 30px;
+            background-color: #0d6efd;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+        }
+
+        #editButton:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.4);
+        }
+
+        /* Edit Form - Professional Update */
+        #editDetails {
+            padding: 30px;
+        }
+
+        #editDetails label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+
+        #editDetails input[type="text"],
+        #editDetails input[type="email"] {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            font-size: 15px;
+            color: #212529;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
+            transition: all 0.2s ease;
+        }
+
+        #editDetails input[type="text"]:focus,
+        #editDetails input[type="email"]:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            outline: none;
+            background-color: #fff;
+        }
+
+        #editDetails input[type="file"] {
+            display: none;
+        }
+
+        .edit-profile-pic {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: #e7f1ff;
+            color: #0d6efd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 10px 0 20px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .edit-profile-pic:hover {
+            background-color: #d0e3ff;
+        }
+
+        .edit-profile-pic i {
+            margin-right: 8px;
+        }
+
+        #editDetails button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+
+        #editDetails button[type="submit"] {
+            background-color: #198754;
+            color: #ffffff;
+            box-shadow: 0 2px 5px rgba(25, 135, 84, 0.3);
+        }
+
+        #editDetails button[type="submit"]:hover {
+            background-color: #157347;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(25, 135, 84, 0.4);
+        }
+
+        #cancelEdit {
+            background-color: #f8f9fa;
+            color: #6c757d;
+            border: 1px solid #ced4da !important;
+        }
+
+        #cancelEdit:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        /* Responsive Design Improvements */
         @media (max-width: 992px) {
             .content-wrapper {
                 flex-direction: column;
@@ -542,31 +618,36 @@
                 padding: 15px;
             }
             
-            .sidebar ul {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+            .mobile-sidebar-toggle {
+                display: block;
             }
             
-            .sidebar ul li {
-                width: calc(50% - 5px);
-                margin-bottom: 5px;
+            .sidebar {
+                display: none;
             }
             
-            .sidebar ul li a {
-                justify-content: center;
-                text-align: center;
-                padding: 10px;
-                font-size: 14px;
+            .sidebar.active {
+                display: block;
             }
             
-            .sidebar .logout-btn {
-                text-align: center;
-                margin-top: 10px;
-                width: 100%;
+            .content {
+                padding: 25px;
             }
         }
 
+        @media (max-width: 768px) {
+            .profile-card {
+                margin: 0 10px;
+            }
+            
+            .profile-header {
+                padding: 20px;
+            }
+            
+            #displayDetails, #editDetails {
+                padding: 20px;
+            }
+        }
         
         @media (max-width: 576px) {
             .profile-pic {
@@ -574,32 +655,28 @@
                 height: 100px;
             }
             
+            .content h2 {
+                font-size: 24px;
+            }
+            
             #displayDetails p {
                 font-size: 14px;
+                flex-direction: column;
+            }
+            
+            #displayDetails p strong {
+                width: 100%;
+                margin-bottom: 5px;
             }
             
             .edit-profile-pic {
                 width: 100%;
-                text-align: center;
             }
             
-            .footer-container {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .footer-section {
-                margin-bottom: 30px;
+            #editDetails button {
                 width: 100%;
-            }
-
-            .newsletter {
-                justify-content: center;
-            }
-
-            .social-icons {
-                justify-content: center;
+                margin-bottom: 10px;
+                margin-right: 0;
             }
         }
     </style>
@@ -640,52 +717,58 @@
             
             <aside class="sidebar" id="sidebar">
                 <ul>
-                    <li><a href="{% url 'account_profile' %}" class="active">Account Overview</a></li>
-                    <li><a href="{% url 'order_details' %}">Order Details</a></li>
-                    <li><a href="{% url 'manage_address' %}">Manage Address</a></li>
-                    <li><a href="/wallet">Wallet</a></li>
-                    <li><a href="/wishlist">Wishlist</a></li>
-                    <li><button onclick="location.href='/logout'" class="logout-btn">Logout</button></li>
+                    <li><a href="{% url 'account_profile' %}" class="active"><i class="fas fa-user-circle"></i> Account Overview</a></li>
+                    <li><a href="{% url 'order_details' %}"><i class="fas fa-box"></i> Order Details</a></li>
+                    <li><a href="{% url 'manage_address' %}"><i class="fas fa-map-marker-alt"></i> Manage Address</a></li>
+                    <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
                 </ul>
+                <button onclick="location.href='/logout'" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </aside>
             
             <main class="content" id="mainContent">
                 <h2>Account Overview</h2>
                 <div id="userDetails">
                     {% if user.is_authenticated %}
-                        <div class="profile-container">
-                            {% if user.profile_image and user.profile_image.url %}
-                                <img src="{{ user.profile_image.url }}" alt="Profile Image" class="profile-pic" id="profileImage">
-                            {% else %}
-                                <img src="{% static 'default.jpg' %}" alt="Profile Image" class="profile-pic" id="profileImage">
-                            {% endif %}
-                        </div>
-                
-                        <form method="POST" id="editForm" enctype="multipart/form-data">
-                            {% csrf_token %}
+                        <div class="profile-card">
+                            <div class="profile-header">
+                                <h3>Welcome, {{ user.username }}!</h3>
+                            </div>
                             
-                            <div id="displayDetails">
-                                <p><strong>Username:</strong> <span id="usernameDisplay">{{ user.username }}</span></p>
-                                <p><strong>Email:</strong> <span id="emailDisplay">{{ user.email }}</span></p>
-                                <button type="button" id="editButton">Edit</button>
+                            <div class="profile-container">
+                                {% if user.profile_image and user.profile_image.url %}
+                                    <img src="{{ user.profile_image.url }}" alt="Profile Image" class="profile-pic" id="profileImage">
+                                {% else %}
+                                    <img src="{% static 'default.jpg' %}" alt="Profile Image" class="profile-pic" id="profileImage">
+                                {% endif %}
                             </div>
-                        
-                            <div id="editDetails" style="display: none;">
-                                <label><strong>Username:</strong></label>
-                                <input type="text" id="usernameInput" name="username" value="{{ user.username }}" required>
-                        
-                                <label><strong>Email:</strong></label>
-                                <input type="email" id="emailInput" name="email" value="{{ user.email }}" required>
-                        
-                                <label><strong>Profile Image:</strong></label>
-                                <input type="file" id="profileUpload" name="profile_image" accept="image/*" style="display: none;">
-                                <label for="profileUpload" class="edit-profile-pic">Upload Image</label>
-                        
-                                <button type="submit">Save Changes</button>
-                                <button type="button" id="cancelEdit">Cancel</button>
-                            </div>
-                        </form>
-                        
+                    
+                            <form method="POST" id="editForm" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div id="displayDetails">
+                                    <p><strong>Username:</strong> <span id="usernameDisplay">{{ user.username }}</span></p>
+                                    <p><strong>Email:</strong> <span id="emailDisplay">{{ user.email }}</span></p>
+                                    <button type="button" id="editButton"><i class="fas fa-edit"></i> Edit Profile</button>
+                                </div>
+                            
+                                <div id="editDetails" style="display: none;">
+                                    <label><strong>Username:</strong></label>
+                                    <input type="text" id="usernameInput" name="username" value="{{ user.username }}" required>
+                            
+                                    <label><strong>Email:</strong></label>
+                                    <input type="email" id="emailInput" name="email" value="{{ user.email }}" required>
+                            
+                                    <label for="profileUpload" class="edit-profile-pic">
+                                        <i class="fas fa-camera"></i> Change Profile Picture
+                                    </label>
+                                    <input type="file" id="profileUpload" name="profile_image" accept="image/*">
+                            
+                                    <button type="submit"><i class="fas fa-save"></i> Save Changes</button>
+                                    <button type="button" id="cancelEdit"><i class="fas fa-times"></i> Cancel</button>
+                                </div>
+                            </form>
+                        </div>
                     {% else %}
                         <p>Please <a href="/login">login</a> to view your account details.</p>
                     {% endif %}
@@ -733,6 +816,38 @@
             </div>
         </div>
     </footer>
+    
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Edit profile functionality
+        document.getElementById('editButton').addEventListener('click', function() {
+            document.getElementById('displayDetails').style.display = 'none';
+            document.getElementById('editDetails').style.display = 'block';
+        });
+        
+        document.getElementById('cancelEdit').addEventListener('click', function() {
+            document.getElementById('displayDetails').style.display = 'flex';
+            document.getElementById('displayDetails').style.flexDirection = 'column';
+            document.getElementById('displayDetails').style.alignItems = 'center';
+            document.getElementById('editDetails').style.display = 'none';
+        });
+        
+        // Preview uploaded image
+        document.getElementById('profileUpload').addEventListener('change', function(event) {
+            if (event.target.files && event.target.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+        });
+    </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -893,16 +1008,25 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial wishlist count response:', data);
+                console.log('Initial counts response:', data);
+                // Update cart count
+                if (data.cart_count !== undefined && data.cart_count !== null) {
+                    updateCartCount(data.cart_count);
+                } else {
+                    console.log('No valid cart_count in response, setting to 0');
+                    updateCartCount(0);
+                }
+                // Update wishlist count
                 if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                     updateWishlistCount(data.wishlist_count);
                 } else {
-                    console.log('No valid wishlist_count in initial response, setting to 0');
+                    console.log('No valid wishlist_count in response, setting to 0');
                     updateWishlistCount(0);
                 }
             })
             .catch(error => {
-                console.error('Error loading wishlist count:', error);
+                console.error('Error loading counts:', error);
+                updateCartCount(0);
                 updateWishlistCount(0);
             });
         }
@@ -920,9 +1044,14 @@
 
         function updateWishlistCount(count) {
             const wishlistCountElement = document.querySelector('.wishlist-count');
-            wishlistCountElement.textContent = count || '0';
-            wishlistCountElement.style.display = 'inline-block'; // Ensure visibility
-            console.log('Updated wishlist count to:', count || '0');
+            if (wishlistCountElement) {
+                const displayCount = (count !== undefined && count !== null && count >= 0) ? count : '0';
+                wishlistCountElement.textContent = displayCount;
+                wishlistCountElement.style.display = displayCount === '0' ? 'none' : 'inline-block'; // Hide if count is 0
+                console.log('Updated wishlist count to:', displayCount);
+            } else {
+                console.error('Wishlist count element not found in DOM');
+            }
         }
 
         // Load counts on page load

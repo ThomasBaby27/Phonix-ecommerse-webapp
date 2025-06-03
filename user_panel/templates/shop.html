@@ -687,128 +687,70 @@
             </select>
         </div>
 
-        <!-- Mobiles Section -->
-        <section class="products">
-            <h2>Mobiles</h2>
-            <div class="product-list">
-                {% if mobiles %}
-                    {% for mobile in mobiles %}
-                    <div class="product">
-                        <a href="{% url 'mobile_detail' mobile.id %}">
-                            {% with first_variant=mobile.variants.first %}
-                                {% if first_variant and first_variant.images.exists %}
-                                    <img src="{{ first_variant.images.first.image.url }}" alt="{{ mobile.name }}">
-                                {% else %}
-                                    <p>No images available</p>
-                                {% endif %}
-                                <h3>{{ mobile.name }}</h3>
-                            {% endwith %}
-                        </a>
-                        {% with first_variant=mobile.variants.first %}
-                            <p class="price">₹{{ first_variant.price|default:'N/A' }}</p>
-                        {% endwith %}
-                        <div class="product-details">
-                            {% if mobile.brand %}
-                                <p class="brand">{{ mobile.brand.name }}</p>
-                            {% endif %}
-                            {% if mobile.ram or mobile.storage %}
-                                <p class="specs">{{ mobile.ram }} | {{ mobile.storage }}</p>
-                            {% endif %}
-                            {% if mobile.description %}
-                                <p>{{ mobile.description|truncatewords:20 }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="product-actions">
-                            {% comment %} <a href="{% url 'add_to_cart' mobile.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
-                            <a href="{% url 'add_to_wishlist' mobile.id %}" class="action-btn"><i class="fas fa-heart"></i></a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% else %}
-                    <p class="no-products">No mobiles available at the moment.</p>
-                {% endif %}
-            </div>
-            {% if mobiles.paginator.num_pages > 1 %}
-                <div class="pagination">
-                    <span>Page {{ mobiles.number }} of {{ mobiles.paginator.num_pages }}</span>
-                    {% if mobiles.has_previous %}
-                        <a href="?page_mobiles={{ mobiles.previous_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Previous</a>
-                    {% endif %}
-                    {% for num in mobiles.paginator.page_range %}
-                        <a href="?page_mobiles={{ num }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}" {% if mobiles.number == num %}class="current"{% endif %}>{{ num }}</a>
-                    {% endfor %}
-                    {% if mobiles.has_next %}
-                        <a href="?page_mobiles={{ mobiles.next_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Next</a>
+        <!-- Dynamic Categories Section -->
+        {% for category, products in category_products.items %}
+            <section class="products">
+                <h2>{{ category.name }}</h2>
+                <div class="product-list">
+                    {% if products %}
+                        {% for product in products %}
+                            <div class="product">
+                                <a href="{% url 'product_detail' product_id=product.id %}">
+                                    {% with first_variant=product.variants.first %}
+                                        {% if first_variant and first_variant.images.exists %}
+                                            <img src="{{ first_variant.images.first.image.url }}" alt="{{ product.name }}">
+                                        {% else %}
+                                            <p>No images available</p>
+                                        {% endif %}
+                                        <h3>{{ product.name }}</h3>
+                                        <p class="price">₹{{ first_variant.price|default:'N/A' }}</p>
+                                    {% endwith %}
+                                </a>
+                                <div class="product-details">
+                                    {% if product.brand %}
+                                        <p class="brand">{{ product.brand.name }}</p>
+                                    {% endif %}
+                                    {% if product.description %}
+                                        <p>{{ product.description|truncatewords:20 }}</p>
+                                    {% endif %}
+                                    {% if product.ram or product.storage %}
+                                        <p class="specs">{{ product.ram }} | {{ product.storage }}</p>
+                                    {% endif %}
+                                </div>
+                                <div class="product-actions">
+                                    {% comment %} <a href="{% url 'add_to_cart' product.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
+                                    <a href="{% url 'add_to_wishlist' product.id %}" class="action-btn"><i class="fas fa-heart"></i></a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="no-products">No {{ category.name|lower }} available at the moment.</p>
                     {% endif %}
                 </div>
-            {% else %}
-                {% if mobiles %}
+                {% if products.paginator.num_pages > 1 %}
                     <div class="pagination">
-                        <span>Page 1 of 1</span>
+                        <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+                        {% if products.has_previous %}
+                            <a href="?page_{{ category.id }}={{ products.previous_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Previous</a>
+                        {% endif %}
+                        {% for num in products.paginator.page_range %}
+                            <a href="?page_{{ category.id }}={{ num }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}" {% if products.number == num %}class="current"{% endif %}>{{ num }}</a>
+                        {% endfor %}
+                        {% if products.has_next %}
+                            <a href="?page_{{ category.id }}={{ products.next_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Next</a>
+                        {% endif %}
                     </div>
-                {% endif %}
-            {% endif %}
-        </section>
-
-        <!-- Laptops Section -->
-        <section class="products">
-            <h2>Laptops</h2>
-            <div class="product-list">
-                {% if laptops %}
-                    {% for laptop in laptops %}
-                    <div class="product">
-                        <a href="{% url 'laptop_detail' laptop.id %}">
-                            {% with first_variant=laptop.variants.first %}
-                                {% if first_variant and first_variant.images.exists %}
-                                    <img src="{{ first_variant.images.first.image.url }}" alt="{{ laptop.name }}">
-                                {% else %}
-                                    <p>No images available</p>
-                                {% endif %}
-                                <h3>{{ laptop.name }}</h3>
-                            {% endwith %}
-                        </a>
-                        {% with first_variant=laptop.variants.first %}
-                            <p class="price">₹{{ first_variant.price|default:'N/A' }}</p>
-                        {% endwith %}
-                        <div class="product-details">
-                            {% if laptop.brand %}
-                                <p class="brand">{{ laptop.brand.name }}</p>
-                            {% endif %}
-                            {% if laptop.description %}
-                                <p>{{ laptop.description|truncatewords:20 }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="product-actions">
-                            {% comment %} <a href="{% url 'add_to_cart' laptop.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
-                            <a href="{% url 'add_to_wishlist' laptop.id %}" class="action-btn"><i class="fas fa-heart"></i></a>
-                        </div>
-                    </div>
-                    {% endfor %}
                 {% else %}
-                    <p class="no-products">No laptops available at the moment.</p>
-                {% endif %}
-            </div>
-            {% if laptops.paginator.num_pages > 1 %}
-                <div class="pagination">
-                    <span>Page {{ laptops.number }} of {{ laptops.paginator.num_pages }}</span>
-                    {% if laptops.has_previous %}
-                        <a href="?page_laptops={{ laptops.previous_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Previous</a>
+                    {% if products %}
+                        <div class="pagination">
+                            <span>Page 1 of 1</span>
+                        </div>
                     {% endif %}
-                    {% for num in laptops.paginator.page_range %}
-                        <a href="?page_laptops={{ num }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}" {% if laptops.number == num %}class="current"{% endif %}>{{ num }}</a>
-                    {% endfor %}
-                    {% if laptops.has_next %}
-                        <a href="?page_laptops={{ laptops.next_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}">Next</a>
-                    {% endif %}
-                </div>
-            {% else %}
-                {% if laptops %}
-                    <div class="pagination">
-                        <span>Page 1 of 1</span>
-                    </div>
                 {% endif %}
-            {% endif %}
-        </section>
+            </section>
+        {% empty %}
+            <p>No products available for the selected filters.</p>
+        {% endfor %}
     </main>
 
     <footer>

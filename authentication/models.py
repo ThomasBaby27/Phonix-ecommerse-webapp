@@ -109,6 +109,10 @@ class Product(models.Model):
     class Meta:
         ordering = ['-created_at']
     
+    @property
+    def first_variant(self):
+        return self.variants.first()
+    
 class Variant(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
     ram = models.IntegerField()  # Changed to IntegerField to match HTML number input
@@ -201,13 +205,15 @@ class Cart(models.Model):
 class Wishlist(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="wishlist_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, blank=True, related_name="wishlist_items")
     added_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
+        variant_info = f" (Variant: {self.variant})" if self.variant else ""
+        return f"{self.user.username} - {self.product.name}{variant_info}"
 
     class Meta:
-        unique_together = ('user', 'product')  # Prevent duplicate wishlist entries
+        unique_together = ('user', 'product', 'variant')  # Updated to include variant
         ordering = ['-added_at']
 
 class Order(models.Model):
@@ -245,16 +251,30 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-created_at']
 
     def update_total_price(self):
-        """Update total_price based on OrderItems"""
+        """Update total_price based on non-returned OrderItems"""
         self.total_price = sum(
-            item.get_total_price() if item.price is not None else 0
+            item.get_total_price() if item.price is not None and not item.is_returned else 0
             for item in self.items.all()
         )
+        self.save()
+
+    def check_all_items_returned(self):
+        """Check if all items in the order are returned and update status"""
+        if self.items.exists() and all(item.is_returned for item in self.items.all()):
+            self.status = 'Returned'
+            self.process_return()
+        self.save()
+
+    def delete(self, *args, **kwargs):
+        """Soft delete by setting is_deleted=True and updating status"""
+        self.is_deleted = True
+        self.status = 'Canceled'  # Optionally set status to Canceled
         self.save()
 
     def save(self, *args, **kwargs):
@@ -279,21 +299,14 @@ class Order(models.Model):
             print(f"[RETURN] Order #{self.id} not in 'Returned' status, skipping")
             return
         
-        txn = None  # Rename to avoid shadowing 'transaction' module
         try:
-            print(f"[RETURN] Entering try block for Order #{self.id}")
-            with transaction.atomic():  # Use the module 'transaction' here
-                # Build product details
+            with transaction.atomic():
+                # Build product details for transaction description
                 product_details = ""
-                items = self.items.all()
-                print(f"[RETURN] Order #{self.id} has {items.count()} items")
-                for item in items:
-                    variant_info = ""
-                    if item.variant:  # Safe variant handling
-                        variant_info = f" ({item.variant.ram or 'N/A'}/{item.variant.storage or 'N/A'}/{item.variant.color or 'N/A'})"
+                for item in self.items.filter(is_returned=True):
+                    variant_info = f" ({item.variant.ram}/{item.variant.storage}/{item.variant.color})" if item.variant else ""
                     product_details += f"{item.product.name}{variant_info} × {item.quantity}, "
-                    
-                    # Update variant or product stock
+                    # Update stock for returned items
                     if item.variant:
                         item.variant.stock += item.quantity
                         item.variant.save()
@@ -306,36 +319,31 @@ class Order(models.Model):
                 product_details = product_details.rstrip(", ") or "No items"
                 print(f"[RETURN] Product details: {product_details}")
                 
-                # Update wallet
-                wallet, created = Wallet.objects.get_or_create(user=self.user)
-                print(f"[RETURN] Wallet before: {wallet.balance}, Total Price: {self.total_price}")
-                wallet.balance += Decimal(str(self.total_price))
-                wallet.save()
-                print(f"[RETURN] Wallet after: {wallet.balance}")
-                
-                # Force create transaction, even if previous transactions exist
-                # Use a unique identifier to prevent duplicate transactions
-                import uuid
-                unique_ref = str(uuid.uuid4())
-                
-                txn = Transaction.objects.create(
-                    wallet=wallet,
-                    amount=self.total_price,
-                    transaction_type='CREDIT',
-                    description=f"Refund for returned order #{self.id}: {product_details}",
-                    order=self
+                # Update wallet for returned items
+                total_returned_amount = sum(
+                    item.get_total_price() for item in self.items.filter(is_returned=True)
                 )
-                print(f"[RETURN] Transaction created: ID {txn.id}")
+                if total_returned_amount > 0:
+                    wallet, created = Wallet.objects.get_or_create(user=self.user)
+                    print(f"[RETURN] Wallet before: {wallet.balance}, Total Returned Amount: {total_returned_amount}")
+                    wallet.balance += Decimal(str(total_returned_amount))
+                    wallet.save()
+                    print(f"[RETURN] Wallet after: {wallet.balance}")
+                    
+                    # Create transaction record
+                    import uuid
+                    unique_ref = str(uuid.uuid4())
+                    txn = Transaction.objects.create(
+                        wallet=wallet,
+                        amount=total_returned_amount,
+                        transaction_type='CREDIT',
+                        description=f"Refund for returned items in order #{self.id}: {product_details}",
+                        order=self
+                    )
+                    print(f"[RETURN] Transaction created: ID {txn.id}")
         except Exception as e:
             print(f"[RETURN] Error in process_return for Order #{self.id}: {str(e)}")
-            raise  # Re-raise to see full traceback
-        else:
-            print(f"[RETURN] Try block completed successfully for Order #{self.id}")
-        finally:
-            if txn:
-                print(f"[RETURN] Refund completed for Order #{self.id} with Transaction ID {txn.id}")
-            else:
-                print(f"[RETURN] Refund failed for Order #{self.id} - No transaction created")
+            raise
    
     
     def calculate_total_price(self):
@@ -351,7 +359,9 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     variant = models.ForeignKey(Variant, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Price at purchase time
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
+    is_returned = models.BooleanField(default=False)  
+    return_reason = models.TextField(blank=True, null=True)
 
     def get_total_price(self):
         """Calculate the total price for this item"""
@@ -360,6 +370,7 @@ class OrderItem(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.order.update_total_price()
+        self.order.check_all_items_returned()
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity} pcs"

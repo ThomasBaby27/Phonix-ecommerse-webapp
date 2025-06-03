@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brand List</title>
+    <title>Transaction Details</title>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts for Inter -->
@@ -103,110 +103,26 @@
         }
 
         /* Main Content Styles */
-        .container {
+        .content {
             margin-left: 250px;
             padding: 40px;
             min-height: 100vh;
             transition: margin-left 0.3s ease;
         }
 
-        .sidebar.collapsed + .container {
+        .sidebar.collapsed + .content {
             margin-left: 70px;
         }
 
-        .container h2 {
+        .content h1 {
             font-size: 2rem;
             color: #1e3a8a;
-            margin-bottom: 20px;
-            font-weight: 600;
+            margin-bottom: 10px;
         }
 
-        /* Add Button Styles */
-        .add-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #2563eb;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: background-color 0.2s ease;
-            margin-bottom: 20px;
-        }
-
-        .add-btn:hover {
-            background-color: #1e3a8a;
-        }
-
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        th {
-            background-color: #f9fafb;
-            font-weight: 600;
-            color: #1e3a8a;
-        }
-
-        tr:hover {
-            background-color: #f5f7fa;
-        }
-
-        .edit-btn {
-            padding: 8px 16px;
-            background-color: #2563eb;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-
-        .edit-btn:hover {
-            background-color: #1e3a8a;
-        }
-
-        /* Pagination Styles */
-        .pagination {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .page-link {
-            padding: 8px 12px;
-            text-decoration: none;
-            color: #2563eb;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            transition: background-color 0.2s ease;
-        }
-
-        .page-link:hover {
-            background-color: #e5e7eb;
-        }
-
-        .page-link.current {
-            background-color: #2563eb;
-            color: #fff;
-            border-color: #2563eb;
-        }
-
-        .page-link.disabled {
-            color: #999;
-            border-color: #e5e7eb;
-            cursor: not-allowed;
+        .content p {
+            color: #666;
+            font-size: 1.1rem;
         }
 
         /* Responsive Design */
@@ -220,7 +136,7 @@
                 display: none;
             }
 
-            .container {
+            .content {
                 margin-left: 70px;
             }
 
@@ -230,26 +146,22 @@
         }
 
         @media (max-width: 480px) {
-            .container {
+            .content {
                 padding: 20px;
             }
 
-            .container h2 {
+            .content h1 {
                 font-size: 1.5rem;
             }
 
-            table {
-                font-size: 0.9rem;
-            }
-
-            th, td {
-                padding: 10px;
+            .content p {
+                font-size: 1rem;
             }
         }
 
         /* Smooth Transitions and Animations */
         .sidebar,
-        .container {
+        .content {
             transition: all 0.3s ease;
         }
 
@@ -259,13 +171,58 @@
             outline: 2px solid #2563eb;
             outline-offset: 2px;
         }
+
+        /* Table Styles for Consistency */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1e3a8a;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        button, a.button {
+            background-color: #2563eb;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover, a.button:hover {
+            background-color: #1e3a8a;
+        }
     </style>
+    <script>
+        function toggleSidebar() {
+            let sidebar = document.querySelector(".sidebar");
+            sidebar.classList.toggle("collapsed");
+        }
+    </script>
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-        <h2>Brand</h2>
+        <h2>Transaction </h2>
         <ul>
             <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
             <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
@@ -283,60 +240,58 @@
     </div>
     
     <!-- Main Content -->
-    <div class="container">
-        <h2>Brand Management</h2>
-        <a href="{% url 'add_brand' %}" class="add-btn">Add New Brand</a>
+    <div class="content">
+        <h1>Transaction Details</h1>
+        
+        <h3>User Details</h3>
         <table>
-            <thead>
-                <tr>
-                    <th>Brand Name</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for brand in brands %}
-                <tr>
-                    <td>{{ brand.name }}</td>
-                    <td>{{ brand.description }}</td>
-                    <td>{{ brand.status|yesno:"Active,Inactive" }}</td>
-                    <td>
-                        <a href="{% url 'edit_brand' brand.id %}" class="edit-btn">Edit</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tr>
+                <th>Username</th>
+                <td>{{ user.username }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user.email }}</td>
+            </tr>
+            
         </table>
-        {% if brands.has_other_pages %}
-        <div class="pagination">
-            {% if brands.has_previous %}
-                <a href="?page={{ brands.previous_page_number }}" class="page-link">« Previous</a>
-            {% else %}
-                <span class="page-link disabled">« Previous</span>
-            {% endif %}
-
-            {% for num in brands.paginator.page_range %}
-                {% if brands.number == num %}
-                    <span class="page-link current">{{ num }}</span>
-                {% else %}
-                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if brands.has_next %}
-                <a href="?page={{ brands.next_page_number }}" class="page-link">Next »</a>
-            {% else %}
-                <span class="page-link disabled">Next »</span>
-            {% endif %}
-        </div>
-        {% endif %}
+        
+        <h3>Transaction Information</h3>
+        <table>
+            <tr>
+                <th>Transaction ID</th>
+                <td>{{ transaction.id }}</td>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <td>{{ transaction.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            <tr>
+                <th>Type</th>
+                <td>{{ transaction.get_transaction_type_display }}</td>
+            </tr>
+            <tr>
+                <th>Amount</th>
+                <td>₹{{ transaction.amount }}</td>
+            </tr>
+            <tr>
+                <th>Transaction Source</th>
+                <td>
+                    {% if transaction.order %}
+                        Order #{{ transaction.order.id }} ({{ transaction.order.status }})
+                        <a href="{% url 'order_detail' transaction.order.id %}" class="button">View Order Details</a>
+                    {% else %}
+                        No associated order
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ transaction.description|default:"No description provided" }}</td>
+            </tr>
+        </table>
+        
+        <a href="{% url 'wallet_management' %}" class="button">Back to Wallet Management</a>
     </div>
-    <script>
-        function toggleSidebar() {
-            let sidebar = document.querySelector(".sidebar");
-            sidebar.classList.toggle("collapsed");
-        }
-    </script>
 </body>
 </html>

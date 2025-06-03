@@ -312,7 +312,7 @@
 
         .product-actions {
             display: flex;
-            justify-content: flex-start;
+            justify-content: center;
             gap: 15px;
             margin-top: 15px;
         }
@@ -459,6 +459,47 @@
             color: #00c4b4;
         }
 
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 10px 0;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            color: #2c3e50;
+            text-decoration: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: #007bff;
+            transition: background-color 0.3s, color 0.3s;
+            font-weight: 500;
+        }
+
+        .pagination a:hover {
+            background-color: #2c3e50;
+            color: #ffffff;
+        }
+
+        .pagination .current {
+            background-color: #2c3e50;
+            color: #ffffff;
+            border-color: #2c3e50;
+        }
+
+        @media (max-width: 768px) {
+            .pagination {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .pagination a, .pagination span {
+                margin: 5px 0;
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 1024px) {
             .product-list {
@@ -584,8 +625,9 @@
             <label for="category">Category:</label>
             <select name="category" id="category" onchange="window.location.href='?category=' + this.value + '&sort={{ sort|default:'' }}&brand={{ brand|default:'' }}&query={{ query|default:'' }}'">
                 <option value="" {% if not category %}selected{% endif %}>All</option>
-                <option value="Mobile" {% if category == 'Mobile' %}selected{% endif %}>Mobile</option>
-                <option value="Laptop" {% if category == 'Laptop' %}selected{% endif %}>Laptop</option>
+                {% for cat in unique_categories %}
+                    <option value="{{ cat.name }}" {% if category == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
             </select>
 
             <label for="brand">Brand:</label>
@@ -599,96 +641,73 @@
 
         {% if query %}
             <h2>Search Results for "{{ query }}"</h2>
-
-            <!-- Mobiles Section -->
-            <section class="products">
-                <h2>Mobiles</h2>
-                <div class="product-list">
-                    {% if mobiles %}
-                        {% for mobile in mobiles %}
-                        <div class="product">
-                            <a href="{% url 'mobile_detail' mobile.id %}">
-                                {% with variant=mobile.variants.first %}
-                                    {% with first_image=variant.images.first %}
-                                        {% if first_image %}
-                                            <img src="{{ first_image.image.url }}" alt="{{ mobile.name }}">
-                                        {% else %}
-                                            <img src="{% static 'images/placeholder.png' %}" alt="No Image Available">
+            {% for category, products in category_products.items %}
+                <section class="products">
+                    <h2>{{ category.name }}</h2>
+                    <div class="product-list">
+                        {% if products %}
+                            {% for product in products %}
+                                <div class="product" >
+                                    <a href="{% url 'product_detail' product_id=product.id %}">
+                                        {% with variant=product.variants.first %}
+                                            {% with first_image=variant.images.first %}
+                                                {% if first_image %}
+                                                    <img src="{{ first_image.image.url }}" alt="{{ product.name }}">
+                                                {% else %}
+                                                    <img src="{% static 'images/placeholder.png' %}" alt="No Image Available">
+                                                {% endif %}
+                                            {% endwith %}
+                                            <h3>{{ product.name }}</h3>
+                                            <p class="price">₹{{ variant.price|default:'N/A' }}</p>
+                                        {% endwith %}
+                                    </a>
+                                    <div class="product-details">
+                                        {% if product.brand %}
+                                            <p class="brand">{{ product.brand.name }}</p>
                                         {% endif %}
-                                    {% endwith %}
-                                {% endwith %}
-                                <h3>{{ mobile.name }}</h3>
-                            </a>
-                            <p class="price">₹{{ mobile.get_display_price }}</p>
-                            <div class="product-details">
-                                {% if mobile.brand %}
-                                    <p class="brand">{{ mobile.brand.name }}</p>
-                                {% endif %}
-                                {% with variant=mobile.variants.first %}
-                                    {% if variant.ram or variant.storage %}
-                                        <p class="specs">{{ variant.ram }}GB | {{ variant.storage }}GB</p>
-                                    {% endif %}
-                                {% endwith %}
-                                {% if mobile.description %}
-                                    <p>{{ mobile.description|truncatewords:20 }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="product-actions">
-                                {% comment %} <a href="{% url 'add_to_cart' mobile.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
-                                {% comment %} <a href="{% url 'add_to_wishlist' mobile.id %}" class="action-btn"><i class="fas fa-heart"></i></a> {% endcomment %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="no-products">No mobile products found.</p>
-                    {% endif %}
-                </div>
-            </section>
-
-            <!-- Laptops Section -->
-            <section class="products">
-                <h2>Laptops</h2>
-                <div class="product-list">
-                    {% if laptops %}
-                        {% for laptop in laptops %}
-                        <div class="product">
-                            <a href="{% url 'laptop_detail' laptop.id %}">
-                                {% with variant=laptop.variants.first %}
-                                    {% with first_image=variant.images.first %}
-                                        {% if first_image %}
-                                            <img src="{{ first_image.image.url }}" alt="{{ laptop.name }}">
-                                        {% else %}
-                                            <img src="{% static 'images/placeholder.png' %}" alt="No Image Available">
+                                        {% with variant=product.variants.first %}
+                                            {% if variant.ram or variant.storage %}
+                                                <p class="specs">{{ variant.ram|default:'' }}GB | {{ variant.storage|default:'' }}GB</p>
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% if product.description %}
+                                            <p>{{ product.description|truncatewords:20 }}</p>
                                         {% endif %}
-                                    {% endwith %}
-                                {% endwith %}
-                                <h3>{{ laptop.name }}</h3>
-                            </a>
-                            <p class="price">₹{{ laptop.get_display_price }}</p>
-                            <div class="product-details">
-                                {% if laptop.brand %}
-                                    <p class="brand">{{ laptop.brand.name }}</p>
-                                {% endif %}
-                                {% with variant=laptop.variants.first %}
-                                    {% if variant.ram or variant.storage %}
-                                        <p class="specs">{{ variant.ram }}GB | {{ variant.storage }}GB</p>
-                                    {% endif %}
-                                {% endwith %}
-                                {% if laptop.description %}
-                                    <p>{{ laptop.description|truncatewords:20 }}</p>
-                                {% endif %}
-                            </div>
-                            <div class="product-actions">
-                                {% comment %} <a href="{% url 'add_to_cart' laptop.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
-                                {% comment %} <a href="{% url 'add_to_wishlist' laptop.id %}" class="action-btn"><i class="fas fa-heart"></i></a> {% endcomment %}
-                            </div>
+                                    </div>
+                                    <div class="product-actions">
+                                        {% comment %} <a href="{% url 'add_to_cart' product.id %}" class="action-btn"><i class="fas fa-shopping-cart"></i></a> {% endcomment %}
+                                        <a href="{% url 'add_to_wishlist' product.id %}" class="action-btn"><i class="fas fa-heart"></i></a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-products">No {{ category.name|lower }} products found for the selected filters.</p>
+                        {% endif %}
+                    </div>
+                    {% if products.paginator.num_pages > 1 %}
+                        <div class="pagination">
+                            <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+                            {% if products.has_previous %}
+                                <a href="?page_{{ category.id }}={{ products.previous_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}&query={{ query|default:'' }}">Previous</a>
+                            {% endif %}
+                            {% for num in products.paginator.page_range %}
+                                <a href="?page_{{ category.id }}={{ num }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}&query={{ query|default:'' }}" {% if products.number == num %}class="current"{% endif %}>{{ num }}</a>
+                            {% endfor %}
+                            {% if products.has_next %}
+                                <a href="?page_{{ category.id }}={{ products.next_page_number }}&sort={{ sort|default:'' }}&category={{ category|default:'' }}&brand={{ brand|default:'' }}&query={{ query|default:'' }}">Next</a>
+                            {% endif %}
                         </div>
-                        {% endfor %}
                     {% else %}
-                        <p class="no-products">No laptop products found.</p>
+                        {% if products %}
+                            <div class="pagination">
+                                <span>Page 1 of 1</span>
+                            </div>
+                        {% endif %}
                     {% endif %}
-                </div>
-            </section>
+                </section>
+            {% empty %}
+                <p class="no-products">No products found for "{{ query }}"{% if category or brand %} with the selected filters{% endif %}.</p>
+            {% endfor %}
         {% else %}
             <p class="no-products">Enter a search term above to find products.</p>
         {% endif %}
@@ -739,36 +758,37 @@
         document.addEventListener("DOMContentLoaded", function () {
             const searchInput = document.getElementById('searchInput');
             const clearButton = document.getElementById('clearSearch');
-        
+
             // Show/hide the clear button based on input
             searchInput.addEventListener('input', function () {
                 clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
             });
-        
+
             // Clear search and redirect to shop page
             clearButton.addEventListener('click', function () {
                 searchInput.value = '';
                 window.location.href = '{% url "shop_page" %}';
             });
-        
+
             // Initial check on page load
             clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
-        
+
             // Load initial wishlist count
             loadInitialCounts();
-        
-            // Handle "Add to Wishlist" clicks using event delegation on document
-            {% comment %} document.addEventListener('click', function(event) {
+
+            // Handle "Add to Wishlist" clicks using event delegation
+            document.addEventListener('click', function(event) {
                 let link = event.target.closest('.product-actions a[href*="add_to_wishlist"]');
                 if (!link && event.target.tagName === 'I' && event.target.classList.contains('fa-heart')) {
-                    link = event.target.closest('.product-actions').querySelector('a[href*="add_to_wishlist"]');
+                    link = event.target.closest('a');
                 }
                 if (!link) {
                     return; // Exit if not a wishlist link
                 }
-        
+
                 event.preventDefault(); // Prevent default link navigation
-        
+                event.stopPropagation();
+
                 if (!isAuthenticated) {
                     Swal.fire({
                         icon: 'warning',
@@ -784,16 +804,18 @@
                     });
                     return;
                 }
-        
+
                 const url = link.getAttribute('href');
                 // Extract product ID from URL
                 const productId = url.split('/').filter(Boolean).pop();
+                const productElement = link.closest('.product');
+                const productName = productElement.querySelector('h3').textContent.trim();
+            
+                addToWishlist(productId, link, productName);
                 
-                // Fix: Use add-to-wishlist URL path to match your URL patterns
-                // The URL in the href attribute doesn't match your actual endpoint
-                addToWishlist(productId, link);
-            }); {% endcomment %}
-        
+                
+            });
+
             // Handle Wishlist navigation click
             const wishlistNav = document.querySelector('nav a[href="/wishlist"]');
             if (wishlistNav) {
@@ -855,30 +877,48 @@
                 }
             })
             .catch(error => console.error('Error loading wishlist count:', error));
+
+            fetch('/get_cart_count/', {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.cart_count !== undefined) {
+                    updateCartCount(data.cart_count);
+                }
+            })
+            .catch(error => console.error('Error loading cart count:', error));
         }
-        
+
         function updateWishlistCount(count) {
             const wishlistCountElement = document.querySelector('.wishlist-count');
             if (wishlistCountElement) {
                 wishlistCountElement.textContent = count || '0';
             }
         }
-        
-        function addToWishlist(productId, element) {
-            // CRITICAL FIX: The URL format needs to match your view function URL pattern
+
+        function updateCartCount(count) {
+            const cartCountElement = document.querySelector('.cart-count');
+            if (cartCountElement) {
+                cartCountElement.textContent = count || '0';
+            }
+        }
+
+        function addToWishlist(productId, element,productName) {
             fetch(`/add-to-wishlist/${productId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken') // Add CSRF token
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
-                body: JSON.stringify({ product_id: productId })
+                body: JSON.stringify({}) // Empty body since variant_id is optional
             })
             .then(response => {
                 if (!response.ok) {
                     return response.json().then(err => {
-                        throw new Error(`HTTP error! Status: ${response.status}, Message: ${err.message || 'Unknown error'}`);
+                        throw new Error(err.message || 'Request failed');
                     });
                 }
                 return response.json();
@@ -886,37 +926,43 @@
             .then(data => {
                 if (data.success) {
                     Swal.fire({
-                        icon: 'success',
-                        title: data.message.includes('Added') ? 'Added to Wishlist' : 'Removed from Wishlist',
-                        text: data.message,
-                        timer: 1500,
-                        showConfirmButton: false
+                        toast: true,
+                        position: 'top-end',
+                        icon: data.message.includes('Added') ? 'success' : 'info',
+                        title: data.message.includes('Added') 
+                            ? `${productName} Added to Wishlist!`
+                            : `${productName} Removed from Wishlist!`,
+                        showConfirmButton: false,
+                        timer: 1500
                     });
                     updateWishlistCount(data.wishlist_count);
-                    if (data.message.includes('Added')) {
-                        element.classList.add('added');
-                    } else {
-                        element.classList.remove('added');
-                    }
+                    element.classList.toggle('added', data.message.includes('Added'));
                 } else {
-                    Swal.fire({
+                        Swal.fire({
+                        toast: true,
+                        position: 'top-end',
                         icon: 'error',
                         title: 'Error',
-                        text: data.message || 'Failed to update wishlist.'
+                        text: data.message || 'Failed to update wishlist.',
+                        showConfirmButton: false,
+                        timer: 2000
                     });
                 }
             })
             .catch(error => {
                 console.error('Error updating wishlist:', error);
                 Swal.fire({
+                    toast: true,
+                    position: 'top-end',
                     icon: 'error',
                     title: 'Error',
-                    text: 'An error occurred while updating the wishlist.'
+                    text: error.message || 'An error occurred while updating the wishlist.',
+                    showConfirmButton: false,
+                    timer: 2000
                 });
             });
         }
-        
-        // Helper function to get CSRF token from cookies
+
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {

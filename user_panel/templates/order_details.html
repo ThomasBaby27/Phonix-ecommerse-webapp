@@ -21,7 +21,7 @@
 
         /* Body */
         body {
-            background-color: #f0f2f5;
+            background-color: #f8f9fa;
             color: #111111;
             line-height: 1.5;
             min-height: 100vh;
@@ -29,7 +29,7 @@
             flex-direction: column;
         }
 
-        /* Header */
+        /* Header - Keep original styling */
         header {
             background-color: #131921;
             color: white;
@@ -118,13 +118,13 @@
         }
 
         .cart-count, .wishlist-count {
-            background-color: #ff4444; /* Red background */
-            color: white; /* White text */
-            border-radius: 50%; /* Circular shape */
-            padding: 2px 6px; /* Padding for spacing */
-            font-size: 12px; /* Font size */
-            margin-left: 5px; /* Margin to separate from the icon */
-            vertical-align: top; /* Align with the icon */
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            margin-left: 5px;
+            vertical-align: top;
         }
 
         .dropdown {
@@ -166,40 +166,43 @@
             display: block;
         }
 
-        /* Layout Container - Improved with flexbox */
+        /* Responsive Design for Header */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 20px;
+            }
+
+            .search-bar {
+                margin: 15px 0;
+                width: 100%;
+            }
+
+            nav {
+                gap: 20px;
+            }
+        }
+
+        /* PROFESSIONAL LAYOUT - Same as Account Page */
         .container-fluid {
-            flex: 1;
-            display: flex;
             padding: 0;
         }
 
-        /* Sidebar Styles - Improved for responsiveness */
+        .content-wrapper {
+            display: flex;
+            min-height: calc(100vh - 200px);
+            background-color: #f8f9fa;
+        }
+
+        /* Professional Sidebar Styles - Same as Account Page */
         .sidebar {
             background-color: #ffffff;
             border-right: 1px solid #e5e7eb;
-            padding: 20px;
-            width: 250px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 25px 15px;
+            width: 280px;
+            min-height: 100%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
-        }
-
-        .sidebar.collapsed {
-            width: 60px;
-        }
-
-        .sidebar-toggle {
-            display: none;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 999;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .sidebar ul {
@@ -209,242 +212,401 @@
         }
 
         .sidebar ul li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .sidebar ul li a {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            color: #1f2937;
+            padding: 14px 18px;
+            color: #495057;
             text-decoration: none;
             font-size: 15px;
             font-weight: 500;
             border-radius: 8px;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .sidebar ul li a:hover {
-            background-color: #f3f4f6;
-            color: #2563eb;
+            background-color: #f1f5f9;
+            color: #0d6efd;
         }
 
         .sidebar ul li a.active {
-            background-color: #e0f2fe;
-            color: #2563eb;
+            background-color: #e7f1ff;
+            color: #0d6efd;
             font-weight: 600;
+            border-left: 4px solid #0d6efd;
+        }
+
+        .sidebar ul li a i {
+            margin-right: 12px;
+            font-size: 18px;
         }
 
         .sidebar .logout-btn {
             width: 100%;
-            padding: 12px 16px;
-            background-color: #dc2626;
-            color: white;
+            padding: 14px 18px;
+            background-color: #f8d7da;
+            color: #dc3545;
             border: none;
             border-radius: 8px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
             text-align: left;
-            transition: background-color 0.2s ease;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidebar .logout-btn i {
+            margin-right: 12px;
+            font-size: 18px;
         }
 
         .sidebar .logout-btn:hover {
-            background-color: #b91c1c;
+            background-color: #f5c2c7;
         }
 
-        /* Main content area - Improved for responsiveness */
-        main.order-list {
-            flex: 1;
-            padding: 30px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin: 20px;
-            overflow-x: auto; /* For table overflow on smaller screens */
-            transition: all 0.3s ease;
-        }
-
-        .order-list h2 {
-            font-size: 28px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 10px;
-        }
-
-        /* Responsive table styles */
-        .order-list .table-responsive {
-            overflow-x: auto;
+        /* Mobile Sidebar Toggle */
+        .mobile-sidebar-toggle {
+            display: none;
+            background-color: #0d6efd;
+            color: white;
+            border: none;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            padding: 12px 18px;
+            margin: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .order-list table {
+        /* PROFESSIONAL ORDER DETAILS CONTENT */
+        .content {
+            flex: 1;
+            padding: 40px;
+            background-color: #f8f9fa;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 30px;
+            letter-spacing: -0.025em;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        /* Orders Container */
+        .orders-container {
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        /* Table Styles - Professional Update */
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .orders-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             background-color: #ffffff;
-            border-radius: 8px;
-            overflow: hidden;
+            margin: 0;
         }
 
-        .order-list table th,
-        .order-list table td {
-            padding: 15px;
+        .orders-table th {
+            background: linear-gradient(135deg, #0d6efd, #0a58ca);
+            color: #ffffff;
+            padding: 18px 15px;
             text-align: left;
             font-size: 14px;
-            color: #1f2937;
-        }
-
-        .order-list table th {
-            background-color: #f9fafb;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #e5e7eb;
+            letter-spacing: 0.5px;
+            border: none;
         }
 
-        .order-list table td {
-            border-bottom: 1px solid #f3f4f6;
-            transition: background-color 0.2s ease;
+        .orders-table th:first-child {
+            border-radius: 0;
         }
 
-        .order-list table tr:hover td {
-            background-color: #f9fafb;
+        .orders-table th:last-child {
+            border-radius: 0;
         }
 
-        .order-list table tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Status styling */
-        .order-list table td:nth-child(4) {
-            font-weight: 500;
-        }
-
-        .order-list table td:nth-child(4):before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 8px;
+        .orders-table td {
+            padding: 18px 15px;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 14px;
+            color: #495057;
             vertical-align: middle;
         }
 
-        .order-list table td:nth-child(4)[data-status="Pending"]:before,
-        .order-list table td:nth-child(4)[data-status="Confirmed"]:before,
-        .order-list table td:nth-child(4)[data-status="Shipped"]:before {
-            background-color: #f59e0b;
+        .orders-table tr:hover td {
+            background-color: #f8f9fa;
         }
 
-        .order-list table td:nth-child(4)[data-status="Delivered"]:before {
-            background-color: #10b981;
+        .orders-table tr:last-child td {
+            border-bottom: none;
         }
 
-        .order-list table td:nth-child(4)[data-status="Cancelled"]:before,
-        .order-list table td:nth-child(4)[data-status="Returned"]:before,
-        .order-list table td:nth-child(4)[data-status="Return Requested"]:before {
-            background-color: #ef4444;
+        /* Order ID Styling */
+        .order-id {
+            font-weight: 600;
+            color: #0d6efd;
+            font-family: 'Courier New', monospace;
         }
 
-        /* Button and link styles */
-        .order-list a,
-        .order-list button {
-            text-decoration: none;
-            font-size: 14px;
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-pending, .status-confirmed, .status-shipped {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-pending::before, .status-confirmed::before, .status-shipped::before {
+            background-color: #ffc107;
+        }
+
+        .status-delivered {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .status-delivered::before {
+            background-color: #198754;
+        }
+
+        .status-cancelled, .status-returned, .status-return-requested {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-cancelled::before, .status-returned::before, .status-return-requested::before {
+            background-color: #dc3545;
+        }
+
+        /* Action Buttons */
+        .action-btn {
             padding: 8px 16px;
+            border: none;
             border-radius: 6px;
-            transition: all 0.2s ease;
-            display: inline-block;
+            font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+            margin: 2px;
         }
 
-        .order-list a[href*='order_fulldetail_view'] {
-            color: #2563eb;
+        .btn-view {
+            background-color: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .btn-view:hover {
+            background-color: #cce7ff;
+            color: #0a58ca;
+            text-decoration: none;
+        }
+
+        .btn-cancel {
+            background-color: #f8d7da;
+            color: #dc3545;
+        }
+
+        .btn-cancel:hover {
+            background-color: #f1aeb5;
+            color: #b02a37;
+        }
+
+        .btn-return {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .btn-return:hover {
+            background-color: #ffecb5;
+            color: #664d03;
+        }
+
+        .btn-invoice {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .btn-invoice:hover {
+            background-color: #bee5eb;
+            color: #062c33;
+        }
+
+        /* Mobile Order Cards */
+        .order-cards {
+            display: none;
+        }
+
+        .order-card {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #0d6efd;
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .order-card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #212529;
+            margin: 0;
+        }
+
+        .order-card-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+
+        .order-card-detail span:first-child {
             font-weight: 500;
+            color: #6c757d;
         }
 
-        .order-list a[href*='order_fulldetail_view']:hover {
-            color: #1d4ed8;
-            background-color: #eff6ff;
-        }
-
-        .cancel-btn {
-            background-color: #fef2f2;
-            color: #dc2626;
-            border: none;
+        .order-card-detail span:last-child {
             font-weight: 500;
+            color: #212529;
         }
 
-        .cancel-btn:hover {
-            background-color: #fee2e2;
-            color: #b91c1c;
+        .order-card-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
         }
 
-        .return-btn {
-            background-color: #fff7ed;
-            color: #f59e0b;
-            border: none;
-            font-weight: 500;
+        .order-card-buttons .action-btn {
+            flex: 1;
+            min-width: calc(50% - 4px);
+            text-align: center;
         }
 
-        .return-btn:hover {
-            background-color: #ffedd5;
-            color: #d97706;
-        }
-
-        .download-invoice-btn {
-            background-color: #e0f2fe;
-            color: #0284c7;
-            font-weight: 500;
-        }
-
-        .download-invoice-btn:hover {
-            background-color: #bae6fd;
-            color: #026395;
-        }
-
-        /* Pagination styles */
-        .pagination {
+        /* Pagination Styles */
+        .pagination-container {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 10px;
             margin-top: 30px;
-            font-size: 14px;
-            flex-wrap: wrap;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .pagination a,
         .pagination span {
-            padding: 10px 16px;
+            padding: 10px 15px;
             border-radius: 6px;
             text-decoration: none;
-            color: #1f2937;
-            background-color: #f3f4f6;
+            color: #495057;
+            font-weight: 500;
             transition: all 0.2s ease;
         }
 
+        .pagination a {
+            background-color: #f8f9fa;
+        }
+
         .pagination a:hover {
-            background-color: #2563eb;
+            background-color: #0d6efd;
             color: #ffffff;
+            text-decoration: none;
         }
 
         .pagination span {
-            background-color: #e0f2fe;
-            color: #2563eb;
-            font-weight: 500;
+            background-color: #0d6efd;
+            color: #ffffff;
         }
 
-        /* Footer */
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 24px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        /* Footer - Keep original styling */
         footer {
             background-color: #172337;
             color: #ffffff;
             padding: 40px 20px;
-            margin-top: 0; /* Changed from 40px */
+            margin-top: 0;
         }
 
         .footer-container {
@@ -550,50 +712,9 @@
             color: #00c4b4;
         }
 
-        /* Card style for mobile view */
-        .order-card {
-            display: none;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        
-        .order-card-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .order-card-detail {
-            margin-bottom: 8px;
-        }
-        
-        .order-card-detail span:first-child {
-            font-weight: 500;
-            color: #4b5563;
-        }
-        
-        .order-card-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        /* Improved Responsive Design */
-        @media (max-width: 1200px) {
-            .sidebar {
-                width: 220px;
-            }
-        }
-
+        /* Responsive Design */
         @media (max-width: 992px) {
-            .container-fluid {
+            .content-wrapper {
                 flex-direction: column;
             }
             
@@ -601,62 +722,41 @@
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid #e5e7eb;
-                position: relative;
-                height: auto;
                 padding: 15px;
             }
             
-            .sidebar ul {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
+            .mobile-sidebar-toggle {
+                display: block;
             }
             
-            .sidebar ul li {
-                margin-bottom: 0;
-                flex-grow: 1;
-                width: calc(33.333% - 10px);
-                min-width: 200px;
+            .sidebar {
+                display: none;
             }
             
-            .sidebar .logout-btn {
-                width: auto;
+            .sidebar.active {
+                display: block;
             }
             
-            main.order-list {
-                margin: 15px;
+            .content {
+                padding: 25px;
             }
         }
 
         @media (max-width: 768px) {
-            header {
-                flex-direction: column;
+            .content {
                 padding: 20px;
             }
-
-            .search-bar {
-                margin: 15px 0;
-                width: 100%;
-            }
-
-            nav {
-                gap: 20px;
-            }
             
-            .sidebar ul li {
-                width: calc(50% - 10px);
-            }
-
-            main.order-list {
-                padding: 15px;
-                margin: 10px;
-            }
-            
-            .order-list h2 {
+            .content h2 {
                 font-size: 24px;
             }
             
+            .orders-container {
+                border-radius: 10px;
+            }
+            
             .pagination {
+                flex-wrap: wrap;
                 gap: 5px;
             }
             
@@ -665,44 +765,20 @@
                 padding: 8px 12px;
                 font-size: 13px;
             }
-            
-            .footer-container {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .footer-section {
-                margin-bottom: 30px;
-            }
-
-            .newsletter {
-                justify-content: center;
-            }
-
-            .social-icons {
-                justify-content: center;
-            }
         }
 
         @media (max-width: 576px) {
-            .sidebar-toggle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
             .sidebar {
                 position: fixed;
                 left: 0;
                 top: 0;
                 height: 100%;
-                width: 250px;
+                width: 280px;
                 z-index: 1001;
                 transform: translateX(-100%);
                 transition: transform 0.3s ease-in-out;
                 overflow-y: auto;
-                background-color: #ffffff; /
+                background-color: #ffffff;
             }
             
             .sidebar.show {
@@ -717,9 +793,8 @@
                 width: 100%;
             }
             
-            /* Hide table and show cards on small screens */
-            .order-list table, 
-            .order-list .table-responsive {
+            /* Hide table and show cards on mobile */
+            .table-responsive {
                 display: none;
             }
             
@@ -727,21 +802,13 @@
                 display: block;
             }
             
-            .order-card {
-                display: block;
+            .content {
+                padding: 15px;
             }
             
-            .order-card-buttons .cancel-btn,
-            .order-card-buttons .return-btn,
-            .order-card-buttons .download-invoice-btn,
-            .order-card-buttons a[href*='order_fulldetail_view'] {
-                width: 48%;
-                text-align: center;
+            .order-card-buttons .action-btn {
+                min-width: 100%;
                 margin-bottom: 5px;
-            }
-            
-            .pagination {
-                flex-wrap: wrap;
             }
         }
     </style>
@@ -775,125 +842,152 @@
     </header>
     
     <div class="container-fluid">
-        <aside class="sidebar" id="sidebar">
-            <ul>
-                <li><a href="{% url 'account_profile' %}">Account Overview</a></li>
-                <li><a href="{% url 'order_details' %}" class="active">Order Details</a></li>
-                <li><a href="{% url 'manage_address' %}">Manage Address</a></li>
-                <li><a href="/wallet">Wallet</a></li>
-                <li><a href="/wishlist">Wishlist</a></li>
-                <li><button onclick="location.href='/logout'" class="logout-btn">Logout</button></li>
-            </ul>
-        </aside>
-        
-        <button id="sidebar-toggle" class="sidebar-toggle">
-            <i class="fas fa-bars"></i>
-        </button>
-    
-        <main class="order-list">
-            {% if user.is_authenticated %}
-                <h2>Your Orders</h2>
-                
-                {% if page_obj %}
-                    <!-- Table view for larger screens -->
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Date</th>
-                                    <th>Total Price</th>
-                                    <th>Status</th>
-                                    <th>Details</th>
-                                    <th>Action</th>
-                                    <th>Invoice</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for order in page_obj %}
-                                <tr>
-                                    <td>#{{ order.id }}</td>
-                                    <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                    <td>₹{{ order.total_price }}</td>
-                                    <td data-status="{{ order.status }}">{{ order.status }}</td>
-                                    <td><a href="{% url 'order_fulldetail_view' order.id %}">View Details</a></td>
-                                    <td>
-                                        {% if order.status in "Pending,Confirmed,Shipped" %}
-                                            <button class="cancel-btn" data-order-id="{{ order.id }}">Cancel</button>
-                                        {% endif %}
-                                        {% if order.status == "Delivered" %}
-                                            <button class="return-btn" data-order-id="{{ order.id }}">Return</button>
-                                        {% endif %}
-                                        {% if order.status == "Returned" or order.status == "Return Requested" %}
-                                            <!-- No action buttons -->
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'generate_invoice_pdf' order.id %}" class="download-invoice-btn" data-order-id="{{ order.id }}">Download Invoice</a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+        <div class="content-wrapper">
+            <button class="mobile-sidebar-toggle" id="toggleSidebar">
+                <i class="fas fa-bars"></i> Menu
+            </button>
+            
+            <aside class="sidebar" id="sidebar">
+                <ul>
+                    <li><a href="{% url 'account_profile' %}"><i class="fas fa-user-circle"></i> Account Overview</a></li>
+                    <li><a href="{% url 'order_details' %}" class="active"><i class="fas fa-box"></i> Order Details</a></li>
+                    <li><a href="{% url 'manage_address' %}"><i class="fas fa-map-marker-alt"></i> Manage Address</a></li>
+                    <li><a href="/wallet"><i class="fas fa-wallet"></i> Wallet</a></li>
+                    <li><a href="/wishlist"><i class="fas fa-heart"></i> Wishlist</a></li>
+                </ul>
+                <button onclick="location.href='/logout'" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </aside>
+            
+            <main class="content">
+                {% if user.is_authenticated %}
+                    <h2><i class="fas fa-shopping-bag"></i> Your Orders</h2>
                     
-                    <!-- Card view for mobile screens -->
-                    <div class="order-cards">
-                        {% for order in page_obj %}
-                        <div class="order-card">
-                            <div class="order-card-header">
-                                <h3>Order #{{ order.id }}</h3>
-                                <span data-status="{{ order.status }}">{{ order.status }}</span>
-                            </div>
-                            
-                            <div class="order-card-detail">
-                                <span>Date: </span>
-                                <span>{{ order.created_at|date:"M d, Y" }}</span>
-                            </div>
-                            
-                            <div class="order-card-detail">
-                                <span>Total: </span>
-                                <span>₹{{ order.total_price }}</span>
-                            </div>
-                            
-                            <div class="order-card-buttons">
-                                <a href="{% url 'order_fulldetail_view' order.id %}" class="btn">View Details</a>
-                                
-                                {% if order.status in "Pending,Confirmed,Shipped" %}
-                                    <button class="cancel-btn" data-order-id="{{ order.id }}">Cancel</button>
-                                {% endif %}
-                                
-                                {% if order.status == "Delivered" %}
-                                    <button class="return-btn" data-order-id="{{ order.id }}">Return</button>
-                                {% endif %}
-                                
-                                <a href="{% url 'generate_invoice_pdf' order.id %}" class="download-invoice-btn" data-order-id="{{ order.id }}">Download Invoice</a>
+                    {% if page_obj %}
+                        <div class="orders-container">
+                            <!-- Table view for larger screens -->
+                            <div class="table-responsive">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-hashtag"></i> Order ID</th>
+                                            <th><i class="fas fa-calendar"></i> Date</th>
+                                            <th><i class="fas fa-rupee-sign"></i> Total Price</th>
+                                            <th><i class="fas fa-info-circle"></i> Status</th>
+                                            <th><i class="fas fa-eye"></i> Details</th>
+                                            <th><i class="fas fa-cog"></i> Action</th>
+                                            <th><i class="fas fa-file-invoice"></i> Invoice</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in page_obj %}
+                                        <tr>
+                                            <td><span class="order-id">#{{ order.id }}</span></td>
+                                            <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                            <td><strong>₹{{ order.total_price }}</strong></td>
+                                            <td>
+                                                <span class="status-badge status-{{ order.status|lower }}">
+                                                    {{ order.status }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'order_fulldetail_view' order.id %}" class="action-btn btn-view">
+                                                    <i class="fas fa-eye"></i> View Details
+                                                </a>
+                                            </td>
+                                            <td>
+                                                {% if order.status in "Pending,Confirmed,Shipped" %}
+                                                    <button class="action-btn btn-cancel cancel-btn" data-order-id="{{ order.id }}">
+                                                        <i class="fas fa-times"></i> Cancel
+                                                    </button>
+                                                {% endif %}
+                                                {% if order.status == "Delivered" %}
+                                                    <button class="action-btn btn-return return-btn" data-order-id="{{ order.id }}">
+                                                        <i class="fas fa-undo"></i> Return
+                                                    </button>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'generate_invoice_pdf' order.id %}" class="action-btn btn-invoice download-invoice-btn" data-order-id="{{ order.id }}">
+                                                    <i class="fas fa-download"></i> Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
-                        {% endfor %}
-                    </div>
-        
-                    <!-- Pagination Controls -->
-                    <div class="pagination">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1">« First</a>
-                            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                        {% endif %}
-        
-                        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}">Next</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">Last »</a>
-                        {% endif %}
-                    </div>
+                        
+                        <!-- Card view for mobile screens -->
+                        <div class="order-cards">
+                            {% for order in page_obj %}
+                            <div class="order-card">
+                                <div class="order-card-header">
+                                    <h3><span class="order-id">#{{ order.id }}</span></h3>
+                                    <span class="status-badge status-{{ order.status|lower }}">{{ order.status }}</span>
+                                </div>
+                                
+                                <div class="order-card-detail">
+                                    <span><i class="fas fa-calendar"></i> Date:</span>
+                                    <span>{{ order.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                
+                                <div class="order-card-detail">
+                                    <span><i class="fas fa-rupee-sign"></i> Total:</span>
+                                    <span><strong>₹{{ order.total_price }}</strong></span>
+                                </div>
+                                
+                                <div class="order-card-buttons">
+                                    <a href="{% url 'order_fulldetail_view' order.id %}" class="action-btn btn-view">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                    
+                                    {% if order.status in "Pending,Confirmed,Shipped" %}
+                                        <button class="action-btn btn-cancel cancel-btn" data-order-id="{{ order.id }}">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    {% endif %}
+                                    
+                                    <a href="{% url 'generate_invoice_pdf' order.id %}" class="action-btn btn-invoice download-invoice-btn" data-order-id="{{ order.id }}">
+                                        <i class="fas fa-download"></i> Invoice
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+            
+                        <!-- Pagination Controls -->
+                        <div class="pagination-container">
+                            <div class="pagination">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page=1"><i class="fas fa-angle-double-left"></i> First</a>
+                                    <a href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i> Previous</a>
+                                {% endif %}
+            
+                                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}">Next <i class="fas fa-angle-right"></i></a>
+                                    <a href="?page={{ page_obj.paginator.num_pages }}">Last <i class="fas fa-angle-double-right"></i></a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-shopping-bag"></i>
+                            <h3>No Orders Found</h3>
+                            <p>You haven't placed any orders yet. Start shopping to see your orders here!</p>
+                        </div>
+                    {% endif %}
                 {% else %}
-                    <p>No orders found for this user.</p>
+                    <div class="empty-state">
+                        <i class="fas fa-user-lock"></i>
+                        <h3>Please Login</h3>
+                        <p>Please <a href="/login" style="color: #0d6efd;">login</a> to view your order details.</p>
+                    </div>
                 {% endif %}
-            {% else %}
-                <p>Please login to view your Order details.</p>
-            {% endif %}
-        </main>
+            </main>
+        </div>
     </div>
     
     <footer>
@@ -935,7 +1029,31 @@
             </div>
         </div>
     </footer>
-
+    
+    <script>
+        // Toggle sidebar on mobile
+        document.getElementById('toggleSidebar').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+        
+        // Cancel order functionality
+        document.querySelectorAll('.cancel-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order-id');
+                // Add your cancel order logic here
+                console.log('Cancel order:', orderId);
+            });
+        });
+        
+        // Return order functionality
+        document.querySelectorAll('.return-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-order-id');
+                // Add your return order logic here
+                console.log('Return order:', orderId);
+            });
+        });
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -1109,29 +1227,51 @@
                         console.log("Polled statuses:", data.statuses);
                         const currentRows = document.querySelectorAll('tbody tr');
                         currentRows.forEach(row => {
-                            const orderId = row.cells[0].textContent.slice(1); // Remove '#'
+                            const orderId = row.cells[0].textContent.slice(1);
                             const currentStatus = row.cells[3].textContent.trim();
                             const newStatus = data.statuses[orderId];
                             if (newStatus && newStatus !== currentStatus) {
                                 console.log(`Order #${orderId} updating from ${currentStatus} to ${newStatus}`);
                                 row.cells[3].textContent = newStatus;
+                                row.cells[3].setAttribute('data-status', newStatus);
                                 const actionCell = row.cells[5];
                                 actionCell.innerHTML = '';
-                                if (["Cancelled", "Returned", "Return Requested"].includes(newStatus)) {
-                                    // No buttons
-                                } else if (newStatus === "Delivered") {
-                                    actionCell.innerHTML = `<button class="return-btn" data-order-id="${orderId}">Return</button>`;
-                                } else if (["Pending", "Confirmed", "Shipped"].includes(newStatus)) {
+                                if (["Pending", "Confirmed", "Shipped"].includes(newStatus)) {
                                     actionCell.innerHTML = `<button class="cancel-btn" data-order-id="${orderId}">Cancel</button>`;
                                 }
                                 attachButtonListeners(actionCell);
+                            }
+                        });
+                        // Update card view
+                        const cardHeaders = document.querySelectorAll('.order-card-header');
+                        cardHeaders.forEach(header => {
+                            const orderId = header.querySelector('h3').textContent.split('#')[1];
+                            const currentStatus = header.querySelector('span').textContent.trim();
+                            const newStatus = data.statuses[orderId];
+                            if (newStatus && newStatus !== currentStatus) {
+                                header.querySelector('span').textContent = newStatus;
+                                header.querySelector('span').setAttribute('data-status', newStatus);
+                                const buttonsDiv = header.parentElement.querySelector('.order-card-buttons');
+                                buttonsDiv.innerHTML = `
+                                    <a href="/order/${orderId}/" class="btn">View Details</a>
+                                    <a href="/generate-invoice/${orderId}/" class="download-invoice-btn" data-order-id="${orderId}">Download Invoice</a>
+                                `;
+                                if (["Pending", "Confirmed", "Shipped"].includes(newStatus)) {
+                                    buttonsDiv.innerHTML = `
+                                        <a href="/order/${orderId}/" class="btn">View Details</a>
+                                        <button class="cancel-btn" data-order-id="${orderId}">Cancel</button>
+                                        <a href="/generate-invoice/${orderId}/" class="download-invoice-btn" data-order-id="${orderId}">Download Invoice</a>
+                                    `;
+                                }
+                                attachButtonListeners(buttonsDiv);
                             }
                         });
                     } else {
                         console.error("Polling failed:", data.error);
                     }
                 })
-                .catch(error => console.error('Polling error:', error));            }
+                .catch(error => console.error('Polling error:', error));
+            }
         
             // 🔹 Download Invoice Functionality (unchanged)
             document.querySelectorAll(".download-invoice-btn").forEach(link => {

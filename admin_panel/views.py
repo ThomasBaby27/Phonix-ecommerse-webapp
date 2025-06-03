@@ -14,7 +14,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from authentication.models import Category,Product,Brand,Variant,ProductImage,Order,Offer,Coupon,CouponUsage
+from authentication.models import Category,Product,Brand,Variant,ProductImage,Order,Offer,Coupon,CouponUsage,OrderItem
 from .forms import ProductForm,VariantForm,VariantImageFormSet,OfferForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -26,7 +26,7 @@ from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.views.decorators.cache import never_cache
 from django.utils import timezone
-from django.db.models import Sum, Count, Q,Avg
+from django.db.models import Sum, Count, Q,Avg,F
 from datetime import timedelta
 import pandas as pd
 from reportlab.lib import colors
@@ -37,12 +37,15 @@ from io import BytesIO
 from django.db.models.functions import TruncDay, TruncWeek, TruncMonth, TruncYear
 from reportlab.lib.styles import ParagraphStyle
 import openpyxl
-
+import json
+from authentication.models import Transaction, Wallet, Order
+from django.views.decorators.cache import cache_control
 
 
 User = get_user_model()  # Get the custom user model
  
 #this view for admin login
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_login(request):
     if request.method == "POST":
         email = request.POST.get("email")  
@@ -78,6 +81,7 @@ def admin_login(request):
     return render(request, "admin_login.html")
 
 #this view for admin panel
+from django.views.decorators.cache import cache_control
 def admin_panel(request):
     if not request.user.is_staff:
         return redirect("admin_login")
@@ -87,7 +91,147 @@ def admin_panel(request):
 def dashboard_view(request):
     if not request.user.is_staff:
         return redirect("admin_login")
-    return render(request, "dashboard.html")
+
+    # Get filter parameter (default to 'yearly')
+    filter_type = request.GET.get('filter', 'yearly')
+    
+    # Set common end_date for all filter types
+    now = timezone.now()
+    end_date = now
+    
+    # Determine time range and truncation
+    if filter_type == 'yearly':
+        start_date = datetime(2023, 1, 1, tzinfo=timezone.get_current_timezone())
+        date_trunc = TruncYear('created_at')
+        labels_format = '%Y'
+    elif filter_type == 'monthly':
+        start_date = now - timedelta(days=365)
+        date_trunc = TruncMonth('created_at')
+        labels_format = '%b %Y'
+    elif filter_type == 'weekly':
+        start_date = now - timedelta(days=90)
+        date_trunc = TruncWeek('created_at')
+        labels_format = 'Week %U, %Y'
+    else:  # daily
+        start_date = now - timedelta(days=30)
+        date_trunc = TruncDay('created_at')
+        labels_format = '%Y-%m-%d'
+
+    # Sales data for chart
+    sales_data = (
+        Order.objects.filter(
+            created_at__gte=start_date,
+            created_at__lte=end_date,
+            status__in=['Confirmed', 'Shipped', 'Delivered']
+        )
+        .annotate(date=date_trunc)
+        .values('date')
+        .annotate(total_sales=Sum('total_price'))
+        .order_by('date')
+    )
+
+    # Generate all periods between start_date and end_date
+    labels = []
+    sales = []
+    if filter_type == 'yearly':
+        current_year = start_date.year
+        end_year = end_date.year
+        sales_dict = {entry['date'].year: float(entry['total_sales']) for entry in sales_data}
+        
+        while current_year <= end_year:
+            labels.append(str(current_year))
+            sales.append(sales_dict.get(current_year, 0.0))
+            current_year += 1
+    elif filter_type == 'monthly':
+        current_date = start_date
+        sales_dict = {entry['date'].strftime('%b %Y'): float(entry['total_sales']) for entry in sales_data}
+        
+        while current_date <= end_date:
+            label = current_date.strftime('%b %Y')
+            labels.append(label)
+            sales.append(sales_dict.get(label, 0.0))
+            next_month = current_date.month % 12 + 1
+            next_year = current_date.year + (current_date.month // 12)
+            current_date = current_date.replace(year=next_year, month=next_month, day=1)
+    elif filter_type == 'weekly':
+        current_date = start_date
+        sales_dict = {entry['date'].strftime('Week %U, %Y'): float(entry['total_sales']) for entry in sales_data}
+        
+        while current_date <= end_date:
+            label = current_date.strftime('Week %U, %Y')
+            labels.append(label)
+            sales.append(sales_dict.get(label, 0.0))
+            current_date += timedelta(days=7)
+    else:  # daily
+        current_date = start_date
+        sales_dict = {entry['date'].strftime('%Y-%m-%d'): float(entry['total_sales']) for entry in sales_data}
+        
+        while current_date <= end_date:
+            label = current_date.strftime('%Y-%m-%d')
+            labels.append(label)
+            sales.append(sales_dict.get(label, 0.0))
+            current_date += timedelta(days=1)
+
+    # Top 10 best-selling products
+    top_products = (
+        OrderItem.objects.filter(
+            order__status__in=['Confirmed', 'Shipped', 'Delivered'],
+            order__created_at__gte=start_date
+        )
+        .values('product__name')
+        .annotate(total_quantity=Sum('quantity'), total_revenue=Sum(F('quantity') * F('price')))
+        .order_by('-total_quantity')[:10]
+    )
+    
+    top_products_labels = [item['product__name'] for item in top_products]
+    top_products_data = [item['total_quantity'] for item in top_products]
+
+    # Top 10 best-selling categories
+    top_categories = (
+        OrderItem.objects.filter(
+            order__status__in=['Confirmed', 'Shipped', 'Delivered'],
+            order__created_at__gte=start_date
+        )
+        .values('product__category__name')
+        .annotate(total_quantity=Sum('quantity'), total_revenue=Sum(F('quantity') * F('price')))
+        .order_by('-total_quantity')[:10]
+    )
+    
+    top_categories_labels = [item['product__category__name'] for item in top_categories]
+    top_categories_data = [item['total_quantity'] for item in top_categories]
+
+    # Top 10 best-selling brands
+    top_brands = (
+        OrderItem.objects.filter(
+            order__status__in=['Confirmed', 'Shipped', 'Delivered'],
+            order__created_at__gte=start_date
+        )
+        .values('product__brand__name')
+        .annotate(total_quantity=Sum('quantity'), total_revenue=Sum(F('quantity') * F('price')))
+        .order_by('-total_quantity')[:10]
+    )
+
+    top_brands_labels = [item['product__brand__name'] for item in top_brands]
+    top_brands_data = [item['total_quantity'] for item in top_brands]
+
+    context = {
+        'chart_data': {
+            'labels': labels,
+            'sales': sales,
+        },
+        'top_products': top_products,
+        'top_products_labels': top_products_labels,
+        'top_products_data': top_products_data,
+        'top_categories': top_categories,
+        'top_categories_labels': top_categories_labels,
+        'top_categories_data': top_categories_data,
+        'top_brands': top_brands,
+        'top_brands_labels': top_brands_labels,
+        'top_brands_data': top_brands_data,
+        'filter_type': filter_type,
+    }
+
+    return render(request, "dashboard.html", context)
 
 #this view for displaying all users 
 def users_view(request):
@@ -532,7 +676,7 @@ def delete_product(request, product_id):
             "error": str(e)
         }, status=500)
     
-import json
+
 
 #this view for toggle-status list
 @require_POST
@@ -661,8 +805,17 @@ def approve_return(request, order_id):
     
 #this view for seeing all orders details
 def order_detail(request, order_id):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+    
     order = get_object_or_404(Order, id=order_id)
-    return render(request, 'order_fulldetail.html', {'order': order})
+    order_items = order.items.all()
+    
+    context = {
+        'order': order,
+        'order_items': order_items,
+    }
+    return render(request, 'order_detail.html', context)
 
 #this view for updating stock for the varients
 def get_product_quantities(request):
@@ -742,7 +895,12 @@ def edit_offer(request, offer_id):
         offer.name = request.POST.get('name')
         offer.scope = request.POST.get('scope')
         offer.offer_type = request.POST.get('offer_type')
-        offer.discount = request.POST.get('discount')
+        discount_str = request.POST.get('discount')
+        try:
+            offer.discount = float(discount_str) if discount_str else None
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid discount value. Please enter a valid number.")
+            return redirect('edit_offer', offer_id=offer.id)
         start_date_str = request.POST.get('start_date')
         end_date_str = request.POST.get('end_date')
         offer.start_date = datetime.strptime(start_date_str, '%Y-%m-%dT%H:%M') if start_date_str else None
@@ -1414,6 +1572,43 @@ def generate_excel_report(context):
     workbook.save(response)
     return response
     
+def wallet_management(request):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+    
+    # Fetch all wallets, unchanged
+    wallets = Wallet.objects.all().select_related('user')
+    
+    # Fetch transactions and apply pagination
+    transactions = Transaction.objects.all().select_related('wallet__user', 'order').order_by('-created_at')  # Optional: order by date
+    paginator = Paginator(transactions, 5)  # 5 transactions per page
+    
+    page = request.GET.get('page')  # Get the page number from the query string
+    try:
+        transactions_paginated = paginator.page(page)
+    except PageNotAnInteger:
+        transactions_paginated = paginator.page(1)
+    except EmptyPage:
+        transactions_paginated = paginator.page(paginator.num_pages)
+    
+    context = {
+        'wallets': wallets,
+        'transactions': transactions_paginated,  
+    }
+    return render(request, 'wallet_management.html', context)
+
+def transaction_detail(request, transaction_id):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+    transaction = get_object_or_404(Transaction, id=transaction_id)
+    
+    context = {
+        'transaction': transaction,
+        'user': transaction.wallet.user,
+        'order': transaction.order,  
+    }
+    return render(request, 'transaction_detail.html', context)
+
 #this view for admin-logout
 def admin_logout(request):
     logout(request)

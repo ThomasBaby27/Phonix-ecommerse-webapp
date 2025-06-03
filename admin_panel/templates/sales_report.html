@@ -1,15 +1,288 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Report</title>
-    <link rel="stylesheet" href="{% static 'sales_report.css' %}">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        table { border-collapse: collapse; width: 50%; }
-        th, td { border: 1px solid black; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
+        /* General Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e3a8a 0%, #2563eb 100%);
+            color: #fff;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px;
+            transition: width 0.3s ease;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed h2,
+        .sidebar.collapsed ul li a span {
+            display: none;
+        }
+
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: rotate(90deg);
+        }
+
+        .sidebar ul {
+            list-style: none;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .sidebar ul li a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .sidebar.collapsed ul li a {
+            justify-content: center;
+        }
+
+        /* Main Content Styles */
+        .content {
+            margin-left: 250px;
+            padding: 40px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .sidebar.collapsed + .content {
+            margin-left: 70px;
+        }
+
+        .content h1 {
+            font-size: 2rem;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .content p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #1e3a8a;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        td {
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Form Styles */
+        .filter-form {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-form label {
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .filter-form select,
+        .filter-form input[type="date"] {
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 1rem;
+            background: #fff;
+            transition: border-color 0.2s ease;
+        }
+
+        .filter-form select:focus,
+        .filter-form input[type="date"]:focus {
+            border-color: #2563eb;
+            outline: none;
+        }
+
+        .filter-form button {
+            padding: 8px 16px;
+            background-color: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .filter-form button:hover {
+            background-color: #1e3a8a;
+        }
+
+        /* Download Links */
+        .download-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-links a {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #2563eb;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .download-links a:hover {
+            background-color: #1e3a8a;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+
+            .sidebar h2,
+            .sidebar ul li a span {
+                display: none;
+            }
+
+            .content {
+                margin-left: 70px;
+            }
+
+            .toggle-btn {
+                display: block;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 20px;
+            }
+
+            .content h1 {
+                font-size: 1.5rem;
+            }
+
+            .content p {
+                font-size: 1rem;
+            }
+
+            .filter-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-form select,
+            .filter-form input[type="date"],
+            .filter-form button {
+                width: 100%;
+            }
+        }
+
+        /* Accessibility */
+        a:focus,
+        button:focus,
+        select:focus,
+        input:focus {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+        }
     </style>
-    
+    <script>
+        function toggleSidebar() {
+            let sidebar = document.querySelector(".sidebar");
+            sidebar.classList.toggle("collapsed");
+        }
+    </script>
 </head>
 <body>
     <!-- Sidebar -->
@@ -17,77 +290,75 @@
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         <h2>Sales Report</h2>
         <ul>
-            <li><a href="{% url 'admin_panel' %}">Admin Panel</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="{% url 'users' %}">Users</a></li>
-            <li><a href="{% url 'category_list' %}">Category</a></li>
-            <li><a href="{% url 'add_category' %}">Add Category</a></li>
-            <li><a href="{% url 'brand_list' %}">Brand</a></li>
-            <li><a href="{% url 'add_brand' %}">Add Brand</a></li>
-            <li><a href="{% url 'product_list' %}">Product</a></li>
-            <li><a href="{% url 'add_product' %}">Add Product</a></li>
-            <li><a href="{% url 'coupon_list' %}">Coupon</a></li>
-            <li><a href="{% url 'order_list' %}">Order</a></li>
-            <li><a href="{% url 'offer_management' %}">Offers</a></li>
-            <li><a href="#">Return</a></li>
-            <li><a href="{% url 'sales_report' %}">Sales Report</a></li>
-            <li><a href="{% url 'admin_logout' %}">Logout</a></li>
+            <li><a href="{% url 'admin_panel' %}"><i class="fas fa-home"></i> <span>Admin Panel</span></a></li>
+            <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+            <li><a href="{% url 'users' %}"><i class="fas fa-users"></i> <span>Users</span></a></li>
+            <li><a href="{% url 'category_list' %}"><i class="fas fa-list"></i> <span>Category</span></a></li>
+            <li><a href="{% url 'brand_list' %}"><i class="fas fa-tags"></i> <span>Brand</span></a></li>
+            <li><a href="{% url 'product_list' %}"><i class="fas fa-box"></i> <span>Product</span></a></li>
+            <li><a href="{% url 'coupon_list' %}"><i class="fas fa-ticket-alt"></i> <span>Coupon</span></a></li>
+            <li><a href="{% url 'order_list' %}"><i class="fas fa-shopping-cart"></i> <span>Order</span></a></li>
+            <li><a href="{% url 'offer_management' %}"><i class="fas fa-percentage"></i> <span>Offers</span></a></li>
+            <li><a href="{% url 'sales_report' %}"><i class="fas fa-chart-bar"></i> <span>Sales Report</span></a></li>
+            <li><a href="{% url 'wallet_management' %}"><i class="fas fa-wallet"></i> <span>Wallet</span></a></li>
+            <li><a href="{% url 'admin_logout' %}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
         </ul>
     </div>
-    <form method="GET">
-        <label>Filter:</label>
-        <select name="filter_type" onchange="this.form.submit()">
-            <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
-            <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
-            <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-            <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
-            <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom</option>
-        </select>
-        {% if filter_type == 'custom' %}
-            <label>Start Date:</label>
-            <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
-            <label>End Date:</label>
-            <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
-            <button type="submit">Apply</button>
-        {% endif %}
-    </form>
 
-    <p>Period: {{ start_date|date }} to {{ end_date|date }}</p>
-    <table>
-        <tr>
-            <th>Order ID</th>
-            <th>Date</th>
-            <th>Customer</th>
-            <th>Products</th>
-            <th>Payment</th>
-            <th>Status</th>
-            <th>Amount (₹)</th>
-        </tr>
-        {% for order in order_data %}
+    <!-- Main Content -->
+    <div class="content">
+        <h1>Sales Report</h1>
+
+        <form method="GET" class="filter-form">
+            <label>Filter:</label>
+            <select name="filter_type" onchange="this.form.submit()">
+                <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+                <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+                <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom</option>
+            </select>
+            {% if filter_type == 'custom' %}
+                <label>Start Date:</label>
+                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                <label>End Date:</label>
+                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                <button type="submit">Apply</button>
+            {% endif %}
+        </form>
+
+        <p>Period: {{ start_date|date }} to {{ end_date|date }}</p>
+        <table>
             <tr>
-                <td>{{ order.order_id }}</td>
-                <td>{{ order.date|date:"Y-m-d H:i" }}</td>
-                <td>{{ order.customer }}</td>
-                <td>{{ order.products }}</td>
-                <td>{{ order.payment }}</td>
-                <td>{{ order.status }}</td>
-                <td>{{ order.amount|floatformat:2 }}</td>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Products</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Amount (₹)</th>
             </tr>
-        {% empty %}
-            <tr>
-                <td colspan="7">No data available for this period.</td>
-            </tr>
-        {% endfor %}
-    </table>
-    
-    <div style="text-align: center; margin-top: 20px;">
-        <a href="?{% if filter_type %}filter_type={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}&download=pdf">Download PDF</a>
-        <a href="?{% if filter_type %}filter_type={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}&download=excel">Download Excel</a>
+            {% for order in order_data %}
+                <tr>
+                    <td>{{ order.order_id }}</td>
+                    <td>{{ order.date|date:"Y-m-d H:i" }}</td>
+                    <td>{{ order.customer }}</td>
+                    <td>{{ order.products }}</td>
+                    <td>{{ order.payment }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.amount|floatformat:2 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7">No data available for this period.</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <div class="download-links">
+            <a href="?{% if filter_type %}filter_type={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}&download=pdf">Download PDF</a>
+            <a href="?{% if filter_type %}filter_type={{ filter_type }}{% endif %}{% if start_date %}&start_date={{ start_date|date:'Y-m-d' }}{% endif %}{% if end_date %}&end_date={{ end_date|date:'Y-m-d' }}{% endif %}&download=excel">Download Excel</a>
+        </div>
     </div>
-    <script>
-        function toggleSidebar() {
-            document.querySelector('.sidebar').classList.toggle('active');
-        }
-    </script>
 </body>
 </html>

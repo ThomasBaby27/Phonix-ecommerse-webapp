@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Details</title>
-    {% comment %} <link rel="stylesheet" href="{% static 'order_fulldetail.css' %}"> {% endcomment %}
+    <title>Order Full Details</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -35,7 +34,7 @@
             line-height: 1.5;
         }
 
-        /* Header */
+        /* Header (Unchanged) */
         header {
             background-color: #131921;
             color: white;
@@ -162,68 +161,92 @@
             display: block;
         }
 
-        /* Modern Body Content Styles */
-        .container {
+        /* Modernized Main Content Styles */
+        .order-detail {
             max-width: 1200px;
             margin: 30px auto;
             padding: 20px;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
-        .container h2 {
-            font-size: 28px;
+        .order-detail h2 {
+            font-size: 30px;
             font-weight: 700;
             color: #131921;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #febd69;
+            margin-bottom: 25px;
             padding-bottom: 10px;
+            border-bottom: 3px solid #febd69;
+            letter-spacing: 0.5px;
         }
 
-        .container p {
+        .order-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .order-info p {
             font-size: 16px;
-            margin-bottom: 10px;
             color: #333333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .container p strong {
-            color: #131921;
+        .order-info p span:first-child {
             font-weight: 600;
+            color: #131921;
+            min-width: 120px;
         }
 
-        .cancel-btn {
-            background-color: #ff4444;
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
+        .order-info .status {
+            padding: 4px 12px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 500;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            margin: 15px 0;
-            display: inline-block;
         }
 
-        .cancel-btn:hover {
-            background-color: #cc3333;
+        .order-info .status[data-status="Pending"] {
+            background-color: #ffe082;
+            color: #333;
         }
 
-        .container h3 {
-            font-size: 22px;
-            font-weight: 600;
-            color: #131921;
-            margin: 30px 0 15px;
+        .order-info .status[data-status="Shipped"] {
+            background-color: #4caf50;
+            color: #fff;
+        }
+
+        .order-info .status[data-status="Delivered"] {
+            background-color: #2196f3;
+            color: #fff;
+        }
+
+        .order-info .status[data-status="Cancelled"] {
+            background-color: #ff4444;
+            color: #fff;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 8px;
+            margin-bottom: 30px;
         }
 
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            background-color: #fafafa;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: #fff;
             border-radius: 8px;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
         table thead {
@@ -232,68 +255,76 @@
         }
 
         table th {
-            padding: 15px;
+            padding: 16px;
             font-size: 15px;
             font-weight: 600;
             text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         table tbody tr {
-            border-bottom: 1px solid #e0e0e0;
-            transition: background-color 0.2s;
-        }
-
-        table tbody tr:hover {
-            background-color: #f5f5f5;
-        }
-
-        table td {
-            padding: 15px;
-            font-size: 14px;
-            color: #333333;
-        }
-
-        table td img {
-            border-radius: 4px;
-            object-fit: cover;
-        }
-
-        .order-summary {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .order-summary p {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #333333;
-        }
-
-        .order-summary p strong {
-            color: #131921;
-            font-weight: 600;
-        }
-
-        .back-btn {
-            display: inline-block;
-            background-color: #3085d6;
-            color: #ffffff;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            border-radius: 4px;
+            border-bottom: 1px solid #e8ecef;
             transition: background-color 0.3s ease;
         }
 
-        .back-btn:hover {
-            background-color: #2567b1;
+        table tbody tr:hover {
+            background-color: #f8fafc;
         }
 
-        /* Footer */
+        table td {
+            padding: 16px;
+            font-size: 14px;
+            color: #333333;
+            vertical-align: middle;
+        }
+
+        table td img {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #3085d6;
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #2567b1;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-cancel {
+            background-color: #ff4444;
+            color: #ffffff;
+            border: none;
+        }
+
+        .btn-cancel:hover {
+            background-color: #cc3333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Footer (Unchanged) */
         footer {
             background-color: #172337;
             color: #ffffff;
@@ -372,11 +403,11 @@
         .social-icons img {
             width: 24px;
             height: 24px;
-            filter: brightness(0) invert(1); /* Makes icons white */
+            filter: brightness(0) invert(1);
         }
 
         .social-icons a:hover img {
-            filter: brightness(0) invert(0.8); /* Slightly dim on hover */
+            filter: brightness(0) invert(0.8);
         }
 
         .footer-section p {
@@ -400,7 +431,7 @@
         }
 
         .footer-section ul li a:hover {
-            color: #00c4b4; /* Matches the teal color of "Privacy Policy" in the screenshot */
+            color: #00c4b4;
         }
 
         /* Responsive Design */
@@ -419,31 +450,37 @@
                 gap: 20px;
             }
 
-            .container {
+            .order-detail {
                 margin: 20px;
                 padding: 15px;
             }
 
-            .container h2 {
-                font-size: 24px;
+            .order-detail h2 {
+                font-size: 26px;
             }
 
-            .container h3 {
-                font-size: 20px;
+            .order-info {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+
+            .order-info p {
+                font-size: 14px;
             }
 
             table th, table td {
                 font-size: 13px;
-                padding: 10px;
+                padding: 12px;
             }
 
             table td img {
-                width: 40px;
+                width: 50px;
+                height: 50px;
             }
 
-            .cancel-btn, .back-btn {
+            .btn {
                 width: 100%;
-                text-align: center;
+                justify-content: center;
             }
         }
 
@@ -470,7 +507,7 @@
 </head>
 <body>
 
-    <!-- Header -->
+    <!-- Header (Unchanged) -->
     <header>
         <h2><a href="/">Phonix</a></h2>
         <h2><a href="{% url 'shop_page' %}">Shop</a></h2>
@@ -498,63 +535,75 @@
         </nav>
     </header>
 
-    <div class="container">
-        <h2>Order #{{ order.id }}</h2>
-        <p><strong>Placed on:</strong> {{ order.created_at|date:"M d, Y" }}</p>
-        <p><strong>Total Price:</strong> ₹{{ order.total_price }}</p>
-        <p><strong>Status:</strong> {{ order.status }}</p>
-        {% if order.status == "Pending" or order.status == "Confirmed" or order.status == "Shipped" %}
-            <button id="cancel-order-btn" class="cancel-btn">Cancel Order</button>
-        {% endif %}
-
-        <!-- Order Items -->
-        <h3>Order Items:</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Image</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item_data in order_items_with_images %}
-                    <tr>
-                        <td>
-                            {{ item_data.product_name }}
-                            {% if item_data.variant_details != "N/A" %}
-                                <br>({{ item_data.variant_details }})
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if item_data.image %}
-                                <img src="{{ item_data.image.image.url }}" alt="{{ item_data.product_name }} image" width="50">
-                            {% else %}
-                                <p>No Image</p>
-                            {% endif %}
-                        </td>
-                        <td>{{ item_data.item.quantity }}</td>
-                        <td>₹{{ item_data.price|floatformat:2 }}</td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="4">No items found for this order.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Modernized Main Content -->
+    <main class="order-detail">
+        <h2>Order #{{ order.id }} Details</h2>
         
-        <!-- Order Summary -->
-        <div class="order-summary">
-            <p><strong>Subtotal:</strong> ₹{{ subtotal|default:0|floatformat:2 }}</p>
-            <p><strong>Shipping Fee:</strong> ₹{{ shipping_fee|default:0|floatformat:2 }}</p>
-            <p><strong>Grand Total:</strong> ₹{{ grand_total|floatformat:2 }}</p>
+        <div class="order-info">
+            <p><span>Order ID:</span> #{{ order.id }}</p>
+            <p><span>Status:</span> <span class="status" data-status="{{ order.status }}">{{ order.status }}</span></p>
+            <p><span>Order Date:</span> {{ order.created_at|date:"M d, Y" }}</p>
+            <p><span>Grand Total:</span> ₹{{ grand_total }}</p>
+            <p><span>Payment Method:</span> {{ order.get_payment_method_display }}</p>
+            <p><span>Shipping Address:</span> {{ order.shipping_address }}</p>
         </div>
-        
-        <a href="{% url 'order_details' %}" class="back-btn">Back to Orders</a>
-    </div>
 
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Image</th>
+                        <th>Variant</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order_items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>
+                            {% if item.variant.images.first %}
+                                <img src="{{ item.variant.images.first.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <img src="/media/product_images/default.jpg" alt="No Image">
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.variant %}
+                                {{ item.variant.ram }}GB/{{ item.variant.storage }}GB/{{ item.variant.color }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price|floatformat:2 }}</td>
+                        <td>₹{{ item.get_total_price|floatformat:2 }}</td>
+                        <td>
+                            {% if can_return and not item.is_returned %}
+                                <button class="btn btn-cancel return-item-btn" data-item-id="{{ item.id }}" data-order-id="{{ order.id }}">Return</button>
+                            {% elif item.is_returned %}
+                                <span>Returned</span>
+                            {% else %}
+                                <span>-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if order.status == "Pending" %}
+        <button id="cancel-order-btn" class="btn btn-cancel"><i class="fas fa-times"></i> Cancel Order</button>
+        {% endif %}
+        <a href="{% url 'order_details' %}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Orders</a>
+    </main>
+
+    <!-- Footer (Unchanged) -->
     <footer>
         <div class="footer-container">
             <div class="footer-section connect">
@@ -596,85 +645,24 @@
     </footer>
 
     <script>
-        // Clear search functionality
-        document.getElementById('clearSearch').addEventListener('click', function() {
-            document.getElementById('searchInput').value = '';
-            window.location.href = '{% url "home" %}';
+        // Debugging subtotal and grand total in the browser
+        console.log("✅ Subtotal:", "{{ subtotal }}");
+        console.log("✅ Shipping Fee:", "{{ shipping_fee }}");
+        console.log("✅ Grand Total:", "{{ grand_total }}");
+    </script>
+
+    <script>
+        // Debugging order data in the browser
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("✅ Order Loaded:", {{ order.id }});
+            console.log("✅ User Email:", "{{ order.user.email }}");
+            console.log("✅ Order Items:", {{ order_items_with_images|safe }});
         });
+    </script>
 
-        // Dynamic visibility of the "Clear Search" button
-        const searchInput = document.getElementById('searchInput');
-        const clearButton = document.getElementById('clearSearch');
-
-        searchInput.addEventListener('input', function() {
-            clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
-        });
-
-        // Load initial cart and wishlist counts
-        function loadInitialCounts() {
-            fetch('/get_cart_count/', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Initial cart count response:', data);
-                if (data.cart_count !== undefined) {
-                    updateCartCount(data.cart_count);
-                } else {
-                    console.log('No cart_count in initial response, setting to 0');
-                    updateCartCount(0);
-                }
-            })
-            .catch(error => console.error('Error loading cart count:', error));
-        
-            fetch('/get_wishlist_count/', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Initial wishlist count response:', data);
-                if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
-                    updateWishlistCount(data.wishlist_count);
-                } else {
-                    console.log('No valid wishlist_count in initial response, setting to 0');
-                    updateWishlistCount(0);
-                }
-            })
-            .catch(error => {
-                console.error('Error loading wishlist count:', error);
-                updateWishlistCount(0);
-            });
-        }
-
-        // Update cart count in the UI
-        function updateCartCount(count) {
-            const cartCountElement = document.querySelector('.cart-count');
-            cartCountElement.textContent = count || '0';
-            console.log('Updated cart count to:', count || '0');
-        }
-
-        // Update wishlist count in the UI
-        function updateWishlistCount(count) {
-            const wishlistCountElement = document.querySelector('.wishlist-count');
-            wishlistCountElement.textContent = count || '0';
-            wishlistCountElement.style.display = 'inline-block'; // Ensure visibility
-            console.log('Updated wishlist count to:', count || '0');
-        }
-
-        // Load counts when the page loads
-        window.onload = function() {
-            clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
-            loadInitialCounts();
-        };
-
-        // Cancel order functionality
+    <script>
         $(document).ready(function() {
+            // Cancel order functionality
             $("#cancel-order-btn").click(function() {
                 Swal.fire({
                     title: "Are you sure?",
@@ -686,17 +674,15 @@
                     confirmButtonText: "Yes, Cancel it!"
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Get CSRF token from the cookie
                         var csrftoken = getCookie('csrftoken');
-    
                         $.ajax({
                             url: "{% url 'cancel_order' order.id %}",
                             type: "POST",
-                            headers: { "X-CSRFToken": csrftoken }, // Include CSRF token in headers
+                            headers: { "X-CSRFToken": csrftoken },
                             success: function(response) {
                                 if (response.success) {
                                     Swal.fire("Cancelled!", "Your order has been cancelled.", "success").then(() => {
-                                        location.reload(); // Refresh page to show updated status
+                                        window.location.href = "{% url 'order_details' %}";
                                     });
                                 } else {
                                     Swal.fire("Error!", response.message, "error");
@@ -709,8 +695,60 @@
                     }
                 });
             });
-    
-            // Function to get CSRF token from cookies
+
+            // Individual item return functionality
+            $(".return-item-btn").click(function() {
+                const itemId = $(this).data('item-id');
+                const orderId = $(this).data('order-id');
+                
+                Swal.fire({
+                    title: "Request Return",
+                    text: "Please provide a reason for return:",
+                    input: "text",
+                    inputPlaceholder: "Enter reason here...",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Submit Return",
+                    inputValidator: (value) => {
+                        if (!value.trim()) {
+                            return "You must provide a reason for the return!";
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        var csrftoken = getCookie('csrftoken');
+                        $.ajax({
+                            url: "{% url 'return_order' order.id %}",
+                            type: "POST",
+                            headers: {
+                                "X-CSRFToken": csrftoken,
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest"
+                            },
+                            data: JSON.stringify({ item_id: itemId, reason: result.value }),
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire("Requested!", "Return request submitted successfully.", "success").then(() => {
+                                        const row = $(`button[data-item-id="${itemId}"]`).closest('tr');
+                                        row.find('td:last').html('<span>Returned</span>');
+                                        if (response.all_returned) {
+                                            $('.order-info .status').text('Returned').attr('data-status', 'Returned');
+                                            $("#cancel-order-btn").remove();
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire("Error!", response.message, "error");
+                                }
+                            },
+                            error: function() {
+                                Swal.fire("Error!", "Something went wrong. Try again!", "error");
+                            }
+                        });
+                    }
+                });
+            });
+
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -725,6 +763,74 @@
                 }
                 return cookieValue;
             }
+
+            // Clear search functionality
+            document.getElementById('clearSearch').addEventListener('click', function() {
+                document.getElementById('searchInput').value = '';
+                window.location.href = '{% url "home" %}';
+            });
+
+            // Dynamic visibility of the "Clear Search" button
+            const searchInput = document.getElementById('searchInput');
+            const clearButton = document.getElementById('clearSearch');
+
+            searchInput.addEventListener('input', function() {
+                clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
+            });
+
+            // Load initial cart and wishlist counts
+            function loadInitialCounts() {
+                fetch('/get_cart_count/', {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Initial cart count response:', data);
+                    if (data.cart_count !== undefined) {
+                        updateCartCount(data.cart_count);
+                    } else {
+                        updateCartCount(0);
+                    }
+                })
+                .catch(error => console.error('Error loading cart count:', error));
+
+                fetch('/get_wishlist_count/', {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Initial wishlist count response:', data);
+                    if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
+                        updateWishlistCount(data.wishlist_count);
+                    } else {
+                        updateWishlistCount(0);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading wishlist count:', error);
+                    updateWishlistCount(0);
+                });
+            }
+
+            function updateCartCount(count) {
+                const cartCountElement = document.querySelector('.cart-count');
+                cartCountElement.textContent = count || '0';
+                console.log('Updated cart count to:', count || '0');
+            }
+
+            function updateWishlistCount(count) {
+                const wishlistCountElement = document.querySelector('.wishlist-count');
+                wishlistCountElement.textContent = count || '0';
+                wishlistCountElement.style.display = 'inline-block';
+                console.log('Updated wishlist count to:', count || '0');
+            }
+
+            window.onload = function() {
+                clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
+                loadInitialCounts();
+            };
         });
     </script>
 </body>

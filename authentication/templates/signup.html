@@ -7,30 +7,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Signup Page</title>
-    <link rel="stylesheet" href="{% static 'signup.css' %}">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .signup-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .google-btn {
+            width: 100%;
+            padding: 10px;
+            background: #db4437;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .google-btn:hover {
+            background: #c1351d;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        .input-group.invalid input {
+            border-color: red;
+        }
+        .input-group {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 35px; /* Adjust based on your input height */
+            cursor: pointer;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
     <div class="signup-container">
         <h2>Sign Up</h2>
         
         <!-- Signup Form -->
-        <form action="{% url 'signup' %}" method="POST">
+        <form action="{% url 'signup' %}" method="POST" id="signupForm" novalidate>
             {% csrf_token %}
             <div class="input-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required>
+                <span class="error" id="emailError">Please enter a valid email address</span>
             </div>
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" required>
+                <span class="error" id="usernameError">Username must be at least 3 characters long and contain no spaces</span>
             </div>
             <div class="input-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                <span class="error" id="passwordError">Password must be at least 8 characters and include uppercase, lowercase, number, and special character</span>
             </div>
             <div class="input-group">
                 <label for="confirm_password">Confirm Password</label>
                 <input type="password" id="confirm_password" name="confirm_password" required>
+                <i class="fas fa-eye toggle-password" id="toggleConfirmPassword"></i>
+                <span class="error" id="confirmPasswordError">Passwords do not match</span>
             </div>
             <button type="submit" class="btn">Register</button>
 
@@ -44,5 +143,105 @@
             </div>
         </form>
     </div>
+
+    <script>
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+            const confirmPassword = document.getElementById('confirm_password');
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // Existing validation logic
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            const email = document.getElementById('email');
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirm_password');
+
+            // Reset error states
+            document.querySelectorAll('.error').forEach(error => error.style.display = 'none');
+            document.querySelectorAll('.input-group').forEach(group => group.classList.remove('invalid'));
+
+            // Email validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(email.value)) {
+                document.getElementById('emailError').style.display = 'block';
+                email.parentElement.classList.add('invalid');
+                isValid = false;
+            }
+
+            // Username validation
+            if (username.value.length < 3 || username.value.includes(' ')) {
+                document.getElementById('usernameError').style.display = 'block';
+                username.parentElement.classList.add('invalid');
+                isValid = false;
+            }
+
+            // Password validation
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            if (!passwordPattern.test(password.value)) {
+                document.getElementById('passwordError').style.display = 'block';
+                password.parentElement.classList.add('invalid');
+                isValid = false;
+            }
+
+            // Confirm password validation
+            if (password.value !== confirmPassword.value) {
+                document.getElementById('confirmPasswordError').style.display = 'block';
+                confirmPassword.parentElement.classList.add('invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        // Real-time validation on input
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', function() {
+                const errorElement = document.getElementById(this.id + 'Error');
+                const parent = this.parentElement;
+                errorElement.style.display = 'none';
+                parent.classList.remove('invalid');
+
+                if (this.id === 'email') {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (this.value && !emailPattern.test(this.value)) {
+                        errorElement.style.display = 'block';
+                        parent.classList.add('invalid');
+                    }
+                } else if (this.id === 'username') {
+                    if (this.value && (this.value.length < 3 || this.value.includes(' '))) {
+                        errorElement.style.display = 'block';
+                        parent.classList.add('invalid');
+                    }
+                } else if (this.id === 'password') {
+                    const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                    if (this.value && !passwordPattern.test(this.value)) {
+                        errorElement.style.display = 'block';
+                        parent.classList.add('invalid');
+                    }
+                } else if (this.id === 'confirm_password') {
+                    if (this.value && this.value !== document.getElementById('password').value) {
+                        errorElement.style.display = 'block';
+                        parent.classList.add('invalid');
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
