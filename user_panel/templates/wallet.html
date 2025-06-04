@@ -1036,7 +1036,6 @@
             })
             .then(response => {
                 // Log the response status for debugging
-                console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
@@ -1044,7 +1043,7 @@
             })
             .then(data => {
                 // Log the response data for debugging
-                console.log('Response data:', data);
+                
                 if (data.success) {
                     // Update the balance display
                     document.querySelector('.wallet-balance').textContent = `₹${parseFloat(data.new_balance).toFixed(2)}`;
@@ -1102,7 +1101,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial cart count response:', data);
+                
                 updateCartCount(data.cart_count !== undefined ? data.cart_count : 0);
             })
             .catch(error => console.error('Error loading cart count:', error));
@@ -1113,7 +1112,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial wishlist count response:', data);
+                
                 updateWishlistCount(data.wishlist_count !== undefined && data.wishlist_count !== null ? data.wishlist_count : 0);
             })
             .catch(error => {
@@ -1125,14 +1124,14 @@
         function updateCartCount(count) {
             const cartCountElement = document.querySelector('.cart-count');
             cartCountElement.textContent = count || '0';
-            console.log('Updated cart count to:', count || '0');
+            
         }
 
         function updateWishlistCount(count) {
             const wishlistCountElement = document.querySelector('.wishlist-count');
             wishlistCountElement.textContent = count || '0';
             wishlistCountElement.style.display = 'inline-block';
-            console.log('Updated wishlist count to:', count || '0');
+            
         }
 
         loadInitialCounts();

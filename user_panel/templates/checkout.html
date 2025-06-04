@@ -1261,7 +1261,7 @@
         });
     }
 
-    console.log("Script Loaded");
+    
 
     // Search bar functionality
     const searchInput = document.getElementById('searchInput');
@@ -1291,7 +1291,7 @@
 
     if (openAddressModalBtn && addressModal) {
         openAddressModalBtn.addEventListener("click", () => {
-            console.log("Opening Address Modal");
+            
             // Close any other open modals first
             if (couponsModal) couponsModal.style.display = "none";
             if (addMoneyModal) addMoneyModal.style.display = "none";
@@ -1310,7 +1310,7 @@
 
     window.addEventListener("click", function(event) {
         if (event.target === addressModal) {
-            console.log("Closing Address Modal on Outside Click");
+            
             addressModal.style.display = "none";
             document.body.classList.remove("modal-open");
         }
@@ -1598,7 +1598,7 @@
                 body: formData
             })
             .then(response => {
-                console.log('Response Status:', response.status); // Debug: Log status
+                
                 if (!response.ok) {
                     return response.text().then(text => {
                         throw new Error(`Network response was not ok: ${response.status} - ${text}`);
@@ -1607,7 +1607,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Parsed Response Data:', data); // Debug: Log parsed data
+                
                 if (data.success && data.address && data.address.id) {
                     const addressList = document.getElementById('address-list');
                     const noAddressMsg = addressList.querySelector('.no-address');
@@ -1936,7 +1936,7 @@
             const finalPrice = Number.parseFloat(finalPriceText) || 0;
             const codAllowed = {{ cod_allowed|lower }};
 
-            console.log('Place Order Clicked - Payment Method:', paymentMethod, 'Shipping Address:', shippingAddress, 'Total Price:', finalPrice);
+            
 
             if (!shippingAddress || shippingAddress === 'undefined' || isNaN(parseInt(shippingAddress))) {
                 showToast('Please select a valid shipping address.', 'error');
@@ -1969,7 +1969,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('COD Response:', data);
+                    
                     if (data.success) {
                         window.location.href = `/order-success/${data.order_id}/`;
                     } else {
@@ -1982,7 +1982,7 @@
                 });
             } else if (paymentMethod === 'razorpay') {
                 const amountInPaise = Math.round(finalPrice * 100);
-                console.log('Sending Amount to Razorpay (in paise):', amountInPaise);
+                
                 if (amountInPaise <= 0) {
                     showToast('Invalid amount for payment', 'error');
                     return;
@@ -2003,7 +2003,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Razorpay Order Creation Response:', data);
+                    
                     if (data.error) {
                         showToast(data.error, 'error');
                         return;
@@ -2017,7 +2017,7 @@
                         description: "Order Payment",
                         order_id: data.order_id,
                         handler: (response) => {
-                            console.log('Razorpay Payment Response:', response);
+                            
                             fetch('{% url "verify_payment" %}', {
                                 method: 'POST',
                                 headers: {
@@ -2032,7 +2032,7 @@
                             })
                             .then(verifyResponse => verifyResponse.json())
                             .then(verifyData => {
-                                console.log('Verify Payment Response:', verifyData);
+                                
                                 if (verifyData.status === 'success') {
                                     fetch('{% url "place_order" %}', {
                                         method: 'POST',
@@ -2051,7 +2051,7 @@
                                     })
                                     .then(orderResponse => orderResponse.json())
                                     .then(orderData => {
-                                        console.log('Place Order Response:', orderData);
+                                        
                                         if (orderData.success) {
                                             window.location.href = `/order-success/${orderData.order_id}/`;
                                         } else {
@@ -2073,7 +2073,7 @@
                         },
                         modal: {
                             ondismiss: () => {
-                                console.log('Payment modal dismissed');
+                                
                                 showToast('Payment cancelled', 'error');
                             }
                         }

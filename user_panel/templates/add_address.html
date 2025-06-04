@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {% endcomment %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -837,11 +837,11 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial cart count response:', data);
+                    
                     if (data.cart_count !== undefined) {
                         updateCartCount(data.cart_count);
                     } else {
-                        console.log('No cart_count in initial response, setting to 0');
+                        
                         updateCartCount(0);
                     }
                 })
@@ -855,11 +855,11 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial wishlist count response:', data);
+                    
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                         updateWishlistCount(data.wishlist_count);
                     } else {
-                        console.log('No valid wishlist_count in initial response, setting to 0');
+                        
                         updateWishlistCount(0);
                     }
                 })
@@ -873,7 +873,7 @@
                 const cartCountElement = document.querySelector('.cart-count');
                 if (cartCountElement) {
                     cartCountElement.textContent = count || '0';
-                    console.log('Updated cart count to:', count || '0');
+                    
                 }
             }
     
@@ -882,7 +882,7 @@
                 if (wishlistCountElement) {
                     wishlistCountElement.textContent = count || '0';
                     wishlistCountElement.style.display = 'inline-block';
-                    console.log('Updated wishlist count to:', count || '0');
+                    
                 }
             }
     
@@ -921,11 +921,11 @@
                         },
                     })
                     .then(response => {
-                        console.log('Response status:', response.status);
+                        
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Response data:', data);
+                        
                         
                         if (status === 200 && data.success) {
                            Swal.fire({

@@ -834,18 +834,18 @@
                     return;
                 }
                 const url = this.getAttribute('href');
-                console.log('Clicked URL:', url);
+                
                 const parts = url.split('/').filter(Boolean);
                 const productId = parts[parts.length - 1];
-                console.log('Extracted Product ID:', productId);
+                
                 if (url.includes('add_to_cart')) {
-                    console.log('Calling addToCart for product:', productId);
+                    
                     addToCart(productId, this);
                 } else if (url.includes('wishlist/add')) {
-                    console.log('Calling addToWishlist for product:', productId);
+                    
                     addToWishlist(productId, this);
                 } else {
-                    console.log('Unknown action for URL:', url);
+                    
                 }
             });
         });
@@ -941,9 +941,8 @@
     
         // Add to Wishlist
         function addToWishlist(productId, button) {
-            console.log('addToWishlist called with productId:', productId);
+            
             const requestBody = JSON.stringify({ product_id: productId });
-            console.log('Request body:', requestBody);
     
             fetch(`/wishlist/add/${productId}/`, {
                 method: 'POST',
@@ -954,7 +953,7 @@
                 body: requestBody
             })
             .then(response => {
-                console.log('Wishlist response status:', response.status);
+                
                 if (response.status === 302) {
                     showToast('Please log in to add to wishlist.', false);
                     window.location.href = '/login';
@@ -966,7 +965,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Wishlist response data:', data);
+                
                 if (data.success) {
                     const isAdded = data.message.toLowerCase().includes('added');
                     const productCard = button.closest('.product');
@@ -996,7 +995,7 @@
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                         updateWishlistCount(data.wishlist_count);
                     } else {
-                        console.log('No wishlist_count in response, fetching manually');
+                        
                         fetchWishlistCount();
                     }
                 } else {

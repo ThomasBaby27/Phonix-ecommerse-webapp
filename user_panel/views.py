@@ -69,7 +69,7 @@ def home(request):
                 category_products[category] = paginated_products
 
     except Exception as e:
-        print(f"Error fetching data: {e}")
+        
         category_products = {}
         brands = Brand.objects.none()
 
@@ -219,7 +219,7 @@ def shop_page(request):
                 category_products[category] = paginated_products
 
     except Exception as e:
-        print(f"Error fetching data: {e}")
+        
         category_products = {}
         unique_brands = Brand.objects.none()
 
@@ -1451,7 +1451,6 @@ def order_details(request):
     paginator = Paginator(user_orders, 5)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    print(f"User orders fetched at {timezone.now()}: {[(o.id, o.status) for o in page_obj]}")
     return render(request, 'order_details.html', {'page_obj': page_obj})
 
 @login_required
@@ -1472,11 +1471,6 @@ def order_fulldetail_view(request, order_id):
     can_return = order.status == 'Delivered' and (
         timezone.now() - order.created_at
     ).days <= 7  # Example: 7-day return policy
-    
-    print(f"Order #{order_id} details fetched at {timezone.now()}: "
-          f"Status={order.status}, Grand Total={grand_total}, "
-          f"Items={[(item.product.name, item.quantity, item.price, item.is_returned) for item in order_items]}, "
-          f"Can Return={can_return}")
     
     return render(request, 'order_fulldetail.html', {
         'order': order,
@@ -1614,22 +1608,16 @@ def cancel_order(request, order_id):
                     for item in order.items.all():
                         # Check if the OrderItem has a Variant
                         if item.variant:
-                            variant = item.variant
-                            print(f"Before increment - Variant: {variant}, Stock: {variant.stock}, Item Quantity: {item.quantity}")
-                            variant.stock += item.quantity  # Increment variant stock
-                            print(f"After increment (pre-save) - Variant: {variant}, Stock: {variant.stock}")
+                            variant = item.variant                           
+                            variant.stock += item.quantity  # Increment variant stock                           
                             variant.save() 
-                            variant.refresh_from_db()  
-                            print(f"After save - Variant: {variant}, Stock: {variant.stock}")
+                            variant.refresh_from_db()                             
                             stock_updates[variant.id] = variant.stock
                         else:
-                            product = item.product
-                            print(f"Before increment - Product: {product.name}, Stock: {product.stock}, Item Quantity: {item.quantity}")
-                            product.stock += item.quantity
-                            print(f"After increment (pre-save) - Product: {product.name}, Stock: {product.stock}")
+                            product = item.product                          
+                            product.stock += item.quantity                          
                             product.save()
-                            product.refresh_from_db()
-                            print(f"After save - Product: {product.name}, Stock: {product.stock}")
+                            product.refresh_from_db()                           
                             stock_updates[product.id] = product.stock
                     # Refund logic for online payments
                     if order.payment_method in ['Razorpay', 'Wallet'] and order.payment_status == 'Success':
@@ -1640,7 +1628,6 @@ def cancel_order(request, order_id):
                             description=f"Refund for cancelled order #{order.id}",
                             order=order
                         )
-                        print(f"Refunded ₹{refund_amount} to wallet for cancelled order #{order.id}")
 
                     return JsonResponse({
                         "success": True,
@@ -1648,7 +1635,6 @@ def cancel_order(request, order_id):
                         "stock_updates": stock_updates
                     })
             except Exception as e:
-                print(f"Transaction error: {e}")
                 return JsonResponse({"success": False, "message": f"Transaction failed: {str(e)}"}, status=500)
         return JsonResponse({"success": False, "message": "Order cannot be cancelled!"}, status=400)
 
@@ -1700,12 +1686,12 @@ def return_order(request, order_id):
                 order_item.variant.stock += order_item.quantity
                 order_item.variant.save()
                 order_item.variant.refresh_from_db()
-                print(f"Incremented stock for {order_item.variant} by {order_item.quantity}. New stock: {order_item.variant.stock}")
+                
             else:
                 order_item.product.stock += order_item.quantity
                 order_item.product.save()
                 order_item.product.refresh_from_db()
-                print(f"Incremented stock for {order_item.product.name} by {order_item.quantity}. New stock: {order_item.product.stock}")
+                
             
             # Check if all items are returned
             order.check_all_items_returned()
@@ -1727,7 +1713,7 @@ def return_order(request, order_id):
             "message": "Order item not found."
         })
     except Exception as e:
-        print(f"Error processing return request: {str(e)}")
+        
         return JsonResponse({
             "success": False,
             "message": f"An error occurred: {str(e)}"
@@ -1738,16 +1724,13 @@ def return_order(request, order_id):
 @csrf_protect
 @require_POST
 def approve_return(request, order_id):
-    print(f"Approve return endpoint hit for Order {order_id} at {timezone.now()}")
+    
     try:
         order = Order.objects.get(id=order_id)
-        print(f"Order {order_id} found - Current status: {order.status}")
+        
 
-        if order.status != "Return Requested":
-            print(f"Order {order_id} not eligible for return - Status: {order.status}")
+        if order.status != "Return Requested":    
             return JsonResponse({"success": False, "message": "Order is not in Return Requested status"})
-
-        print(f"Approving return for Order {order_id} - Current status: {order.status}")
 
         # Use a transaction to ensure atomicity
         with transaction.atomic():
@@ -1767,8 +1750,6 @@ def approve_return(request, order_id):
             transaction_type="CREDIT"
         ).order_by('-created_at').first()
 
-        print(f"Return approved - Order {order_id} now: {updated_order.status}")
-
         return JsonResponse({
             "success": True, 
             "message": "Return approved and refund processed",
@@ -1779,7 +1760,6 @@ def approve_return(request, order_id):
     except Order.DoesNotExist:
         return JsonResponse({"success": False, "message": "Order not found"})
     except Exception as e:
-        print(f"Error approving return for order {order_id}: {str(e)}")
         return JsonResponse({"success": False, "message": str(e)})
     
 # This view seems redundant given approve_return handles the full order return
@@ -1980,17 +1960,9 @@ def wallet_view(request):
     ).order_by('-created_at')
     
     for transaction in transactions:
-        print(f"Transaction ID: {transaction.id}")
-        print(f"Type: {transaction.transaction_type}")
-        print(f"Amount: {transaction.amount}")
-        print(f"Order: {transaction.order_id if transaction.order else 'No Order'}")
-        print(f"Description: {transaction.description}")
-        
         # If it's a returned order, print more details
         if transaction.order and transaction.order.status == 'Returned':
-            print("Returned Order Details:")
             for item in transaction.order.items.all():
-                print(f"  - Product: {item.product.name}")
                 if item.variant:
                     print(f"    Variant: {item.variant.ram}/{item.variant.storage}/{item.variant.color}")
                 print(f"    Quantity: {item.quantity}")
@@ -2046,7 +2018,7 @@ def process_return_request(request, order_id):
 def test_return_refund(request, order_id):
     try:
         order = Order.objects.get(id=order_id, user=request.user)
-        print(f"Testing return for order #{order_id}, current status: {order.status}")
+        
         if order.status not in ['Delivered', 'Shipped']:
             return JsonResponse({'success': False, 'message': 'This order is not eligible for return'})
         order.status = 'Returned'

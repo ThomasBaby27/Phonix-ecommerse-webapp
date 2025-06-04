@@ -1041,7 +1041,7 @@
             button.addEventListener('click', function() {
                 const orderId = this.getAttribute('data-order-id');
                 // Add your cancel order logic here
-                console.log('Cancel order:', orderId);
+                
             });
         });
         
@@ -1050,7 +1050,7 @@
             button.addEventListener('click', function() {
                 const orderId = this.getAttribute('data-order-id');
                 // Add your return order logic here
-                console.log('Return order:', orderId);
+                
             });
         });
     </script>
@@ -1224,14 +1224,14 @@
                 })
                 .then(data => {
                     if (data.success) {
-                        console.log("Polled statuses:", data.statuses);
+                        
                         const currentRows = document.querySelectorAll('tbody tr');
                         currentRows.forEach(row => {
                             const orderId = row.cells[0].textContent.slice(1);
                             const currentStatus = row.cells[3].textContent.trim();
                             const newStatus = data.statuses[orderId];
                             if (newStatus && newStatus !== currentStatus) {
-                                console.log(`Order #${orderId} updating from ${currentStatus} to ${newStatus}`);
+                                
                                 row.cells[3].textContent = newStatus;
                                 row.cells[3].setAttribute('data-status', newStatus);
                                 const actionCell = row.cells[5];
@@ -1311,7 +1311,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial cart count response:', data);
+                    
                     if (data.cart_count !== undefined) updateCartCount(data.cart_count);
                     else updateCartCount(0);
                 })
@@ -1323,7 +1323,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial wishlist count response:', data);
+                    
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) updateWishlistCount(data.wishlist_count);
                     else updateWishlistCount(0);
                 })
@@ -1336,14 +1336,14 @@
             function updateCartCount(count) {
                 const cartCountElement = document.querySelector('.cart-count');
                 cartCountElement.textContent = count || '0';
-                console.log('Updated cart count to:', count || '0');
+                
             }
         
             function updateWishlistCount(count) {
                 const wishlistCountElement = document.querySelector('.wishlist-count');
                 wishlistCountElement.textContent = count || '0';
                 wishlistCountElement.style.display = 'inline-block';
-                console.log('Updated wishlist count to:', count || '0');
+                
             }
         
             loadInitialCounts();

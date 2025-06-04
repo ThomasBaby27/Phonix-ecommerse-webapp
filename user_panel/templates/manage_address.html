@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {% endcomment %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -1126,7 +1126,7 @@
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Initiating delete request for address ID:', addressId);
+                    
                     fetch(`/delete_address/${addressId}/`, {
                         method: 'POST',
                         headers: {
@@ -1137,12 +1137,10 @@
                         body: JSON.stringify({})
                     })
                     .then(response => {
-                        console.log('Response status:', response.status);
-                        console.log('Response headers:', response.headers);
                         return response.json().then(data => ({ status: response.status, data }));
                     })
                     .then(({ status, data }) => {
-                        console.log('Response data:', data);
+                        
                         if (status === 200 && data.success) {
                             const addressElement = document.getElementById(`address-${addressId}`);
                             if (addressElement) {
@@ -1234,7 +1232,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Initial cart count response:', data);
+                
                 updateCartCount(data.cart_count !== undefined && data.cart_count !== null ? data.cart_count : 0);
             })
             .catch(error => {
@@ -1254,7 +1252,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Initial wishlist count response:', data);
+                
                 updateWishlistCount(data.wishlist_count !== undefined && data.wishlist_count !== null ? data.wishlist_count : 0);
             })
             .catch(error => {

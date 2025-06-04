@@ -822,14 +822,14 @@
                     return;
                 }
                 const variantId = this.getAttribute('data-variant-id');
-                console.log('Button variant ID:', variantId);
+                
                 const productId = this.getAttribute('data-product-id');
                 
                 if (variantId && variantId !== '') {
-                    console.log('Adding variant to cart:', variantId);
+                    
                     addToCart(variantId, this);
                 } else if (productId) {
-                    console.log('No variant specified, fetching default variant for product:', productId);
+                    
                     showToast('Checking product availability...');
                     
                     fetch(`/get_default_variant/${productId}/`, {
@@ -876,7 +876,7 @@
                     return;
                 }
                 const productId = this.getAttribute('data-product-id');
-                console.log('Adding product to wishlist:', productId);
+                
                 addToWishlist(productId, this);
             });
         });
@@ -908,7 +908,7 @@
         }
 
         function addToCart(variantId, button) {
-            console.log('Adding to cart, variant ID:', variantId);
+            
             fetch(`/api/add_to_cart/${variantId}/`, {
                 method: 'POST',
                 headers: {
@@ -925,7 +925,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Cart response:', data);
+                
                 if (data.success) {
                     showToast(data.message, true);
                     if (data.cart_count !== undefined) {
@@ -985,7 +985,7 @@
                 return response.json();
             })
             .then(data => {
-                console.log('Wishlist response:', data);
+                
                 if (data.success) {
                     const isAdded = data.message.toLowerCase().includes('added');
                     const productCard = button.closest('.product');
@@ -1015,7 +1015,7 @@
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                         updateWishlistCount(data.wishlist_count);
                     } else {
-                        console.log('No wishlist_count in response, fetching manually');
+                        
                         fetchWishlistCount();
                     }
                 } else {
@@ -1045,11 +1045,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial cart count response:', data);
+                
                 if (data.cart_count !== undefined) {
                     updateCartCount(data.cart_count);
                 } else {
-                    console.log('No cart_count in initial response, setting to 0');
+                    
                     updateCartCount(0);
                 }
             })
@@ -1063,11 +1063,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial wishlist count response:', data);
+                
                 if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                     updateWishlistCount(data.wishlist_count);
                 } else {
-                    console.log('No valid wishlist_count in initial response, setting to 0');
+                    
                     updateWishlistCount(0);
                 }
             })
@@ -1087,7 +1087,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Fetched cart count:', data);
+                
                 if (data.cart_count !== undefined) {
                     updateCartCount(data.cart_count);
                 }
@@ -1105,7 +1105,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Fetched wishlist count:', data);
+                
                 if (data.wishlist_count !== undefined) {
                     updateWishlistCount(data.wishlist_count);
                 }
@@ -1136,7 +1136,7 @@
                     }
                 }
             }
-            console.log('CSRF Token:', cookieValue); // Debug log
+            
             return cookieValue;
         }
 
@@ -1144,7 +1144,7 @@
         function updateCartCount(count) {
             const cartCountElement = document.querySelector('.cart-count');
             cartCountElement.textContent = count || '0';
-            console.log('Updated cart count to:', count || '0');
+            
         }
 
         // Update wishlist count in the UI
@@ -1152,7 +1152,7 @@
             const wishlistCountElement = document.querySelector('.wishlist-count');
             wishlistCountElement.textContent = count || '0';
             wishlistCountElement.style.display = 'inline-block';
-            console.log('Updated wishlist count to:', count || '0');
+            
         }
     </script>
     <!-- Add SweetAlert2 JS -->

@@ -860,11 +860,11 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial cart count response:', data);
+                    
                     if (data.cart_count !== undefined) {
                         updateCartCount(data.cart_count);
                     } else {
-                        console.log('No cart_count in initial response, setting to 0');
+                        
                         updateCartCount(0);
                     }
                 })
@@ -878,11 +878,11 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial wishlist count response:', data);
+                    
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                         updateWishlistCount(data.wishlist_count);
                     } else {
-                        console.log('No valid wishlist_count in initial response, setting to 0');
+                        
                         updateWishlistCount(0);
                     }
                 })
@@ -895,14 +895,14 @@
             function updateCartCount(count) {
                 const cartCountElement = document.querySelector('.cart-count');
                 cartCountElement.textContent = count || '0';
-                console.log('Updated cart count to:', count || '0');
+                
             }
 
             function updateWishlistCount(count) {
                 const wishlistCountElement = document.querySelector('.wishlist-count');
                 wishlistCountElement.textContent = count || '0';
                 wishlistCountElement.style.display = 'inline-block'; // Ensure visibility
-                console.log('Updated wishlist count to:', count || '0');
+                
             }
 
             // Load counts on page load

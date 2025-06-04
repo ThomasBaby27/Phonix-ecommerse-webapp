@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Profile</title>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    {% comment %} <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> {% endcomment %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -932,13 +932,13 @@
         let editDetails = document.getElementById("editDetails");
 
         editButton.addEventListener("click", function () {
-            console.log("Edit button clicked");
+            
             displayDetails.style.display = "none";
             editDetails.style.display = "block";
         });
 
         cancelEdit.addEventListener("click", function () {
-            console.log("Cancel button clicked");
+            
             displayDetails.style.display = "block";
             editDetails.style.display = "none";
         });
@@ -954,13 +954,13 @@
 
             let formData = new FormData(editForm);
             let fetchUrl = "{% url 'update_profile' %}";
-            console.log("Fetching URL:", fetchUrl);
+            
 
             let headers = new Headers({
                 "X-Requested-With": "XMLHttpRequest",
                 "X-CSRFToken": csrfToken
             });
-            console.log("Request Headers:", [...headers.entries()]);
+            
 
             fetch(fetchUrl, {
                 method: "POST",
@@ -968,18 +968,17 @@
                 headers: headers
             })
             .then(response => {
-                console.log("Response Status:", response.status);
-                console.log("Response Headers:", [...response.headers.entries()]);
+               
                 if (!response.ok) {
                     return response.text().then(text => {
-                        console.log("Raw Response:", text);
+                        
                         throw new Error(`HTTP error! Status: ${response.status}, Response: ${text.substring(0, 100)}...`);
                     });
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Parsed JSON Response:", data);
+                
                 if (data.success) {
                     usernameDisplay.textContent = data.username;
                     emailDisplay.textContent = data.email;
@@ -1008,19 +1007,19 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial counts response:', data);
+                
                 // Update cart count
                 if (data.cart_count !== undefined && data.cart_count !== null) {
                     updateCartCount(data.cart_count);
                 } else {
-                    console.log('No valid cart_count in response, setting to 0');
+                    
                     updateCartCount(0);
                 }
                 // Update wishlist count
                 if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                     updateWishlistCount(data.wishlist_count);
                 } else {
-                    console.log('No valid wishlist_count in response, setting to 0');
+                    
                     updateWishlistCount(0);
                 }
             })
@@ -1036,7 +1035,7 @@
             if (cartCountElement) {
                 cartCountElement.textContent = count || '0';
                 cartCountElement.style.display = 'inline-block'; // Ensure visibility
-                console.log('Updated cart count to:', count || '0');
+                
             } else {
                 console.error('Cart count element not found');
             }
@@ -1048,9 +1047,9 @@
                 const displayCount = (count !== undefined && count !== null && count >= 0) ? count : '0';
                 wishlistCountElement.textContent = displayCount;
                 wishlistCountElement.style.display = displayCount === '0' ? 'none' : 'inline-block'; // Hide if count is 0
-                console.log('Updated wishlist count to:', displayCount);
+                
             } else {
-                console.error('Wishlist count element not found in DOM');
+                
             }
         }
 

@@ -866,7 +866,7 @@
                         }
                         // Only intervene if it's an anchor tag
                         if (this.tagName === 'A') {
-                            console.log("Checkout button clicked - proceeding to checkout");
+                            
                             // Add a small delay to ensure any pending operations complete
                             setTimeout(() => {
                                 window.location.href = this.getAttribute('href');
@@ -930,7 +930,7 @@
                 window.updateCartCount = function(count) {
                     const cartCountElement = document.querySelector('.cart-count');
                     if (cartCountElement) {
-                        console.log('Updating cart count to:', count);
+                        
                         cartCountElement.textContent = count || '0';
                     } else {
                         console.error('Cart count element not found');
@@ -1168,7 +1168,7 @@
                         
                         // Update cart count in the header
                         if (typeof data.cart_count !== 'undefined') {
-                            console.log('Received cart count from server:', data.cart_count);
+                            
                             window.updateCartCount(data.cart_count);
                         } else {
                             console.warn('Cart count not received from server');
@@ -1227,7 +1227,7 @@
                 document.querySelectorAll('.remove-btn').forEach(button => {
                     button.addEventListener('click', function(event) {
                         event.preventDefault();
-                        console.log("Remove button clicked!"); 
+                         
                         const productId = this.getAttribute('data-variant-id');
                         const cartItem = this.closest('.cart-item');
                         const productName = cartItem.querySelector('.product-details h3').textContent;
@@ -1238,7 +1238,7 @@
             }
         
             function removeItem(variantId, cartItem, productName) {
-                console.log(`Attempting to remove product ID: ${variantId}`);
+                
                 
                 const csrfToken = getCookie('csrftoken');
                 if (!csrfToken) {
@@ -1265,7 +1265,7 @@
                     }
                 })
                 .then(response => {
-                    console.log('Response status:', response.status);
+                    
                     if (!response.ok) {
                         return response.json().then(errorData => {
                             throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
@@ -1274,11 +1274,11 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Remove response:", data);
+                    
                     
                     if (data.success) {
                         // Remove item from DOM
-                        console.log(`Removing cart item from DOM: ${productName}`);
+                        
                         cartItem.remove();
                         
                         // Show SweetAlert for successful removal
@@ -1348,11 +1348,7 @@
                 const totalPriceElement = document.getElementById('total-price');
                 
                 if (subtotalElement && deliveryChargeElement && totalPriceElement) {
-                    console.log('Updating order summary with:', {
-                        subtotal: subtotal,
-                        delivery_charge: deliveryCharge,
-                        total_price: totalPrice
-                    });
+                    
                     
                     subtotalElement.textContent = subtotal || '0';
                     deliveryChargeElement.textContent = deliveryCharge || '0';
@@ -1370,10 +1366,10 @@
                 const orderSummary = document.querySelector('.order-summary');
                 const cartDynamicContent = document.getElementById('cart-dynamic-content');
 
-                console.log(`Updating cart visibility, cart items count: ${cartItems.length}`);
+                
 
                 if (cartItems.length === 0) {
-                    console.log('Cart is empty, hiding content and summary, showing empty message');
+                    
                     // Hide cart content container if it exists
                     if (cartContent) {
                         cartContent.style.display = 'none';
@@ -1381,7 +1377,7 @@
                     
                     // Create empty message if it doesn't exist
                     if (!emptyCartMessage) {
-                        console.log('Creating new empty cart message');
+                        
                         cartDynamicContent.innerHTML = `
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart empty-icon"></i>
@@ -1393,7 +1389,7 @@
                         emptyCartMessage.style.display = 'block';
                     }
                 } else {
-                    console.log('Cart has items, showing content and summary, hiding empty message');
+                    
                     if (cartContent) cartContent.style.display = 'flex';
                     if (orderSummary) orderSummary.style.display = 'block';
                     if (emptyCartMessage) emptyCartMessage.style.display = 'none';
@@ -1404,18 +1400,18 @@
                 const checkoutBtn = document.querySelector('.checkout-btn');
                 const cartItems = document.querySelectorAll('.cart-item');
             
-                console.log(`Updating checkout button, cart items count: ${cartItems.length}`);
+                
             
                 if (checkoutBtn) {
                     if (cartItems.length === 0) {
-                        console.log('Disabling checkout button');
+                        
                         checkoutBtn.classList.add('disabled');
                         checkoutBtn.setAttribute('disabled', 'disabled');
                         if (checkoutBtn.tagName === 'A') {
                             checkoutBtn.removeAttribute('href');
                         }
                     } else {
-                        console.log('Enabling checkout button');
+                        
                         checkoutBtn.classList.remove('disabled');
                         checkoutBtn.removeAttribute('disabled');
                         if (checkoutBtn.tagName === 'A' && !checkoutBtn.getAttribute('href')) {
@@ -1423,7 +1419,7 @@
                         }
                     }
                 } else {
-                    console.log('Checkout button not found');
+                    
                 }
             }
         
@@ -1445,7 +1441,7 @@
         </script>
         <script>
             document.addEventListener('DOMContentLoaded', (event) => {
-                console.log('Processing Django messages');
+                
                 {% if messages %}
                     const messages = [
                         {% for message in messages %}

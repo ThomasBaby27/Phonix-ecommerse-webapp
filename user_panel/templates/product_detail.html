@@ -1032,14 +1032,14 @@
     let selectedVariantId = {% with first_variant=product.variants.first %}{{ first_variant.id|default:'null' }}{% endwith %};
 
     function setupVariantSelection() {
-    console.log('Setting up variant selection...');
+    
     const variantRows = document.querySelectorAll('.variant-row');
-    console.log(`Found ${variantRows.length} variant rows`);
+    
     
     variantRows.forEach((row, index) => {
-        console.log(`Setting up variant row ${index + 1}`, row);
+        
         row.addEventListener('click', function() {
-            console.log('Variant clicked:', this);
+            
             const variantId = this.getAttribute('data-variant-id');
             const price = this.getAttribute('data-price');
             const stock = parseInt(this.getAttribute('data-stock'));
@@ -1053,8 +1053,6 @@
             try {
                 const imagesJsonRaw = imagesJsonElement.textContent;
                 const imagesJson = imagesJsonRaw.trim();
-                console.log(`Raw JSON for variant ${variantId}:`, imagesJsonRaw);
-                console.log(`Trimmed JSON for variant ${variantId}:`, imagesJson);
                 const images = JSON.parse(imagesJson);
                 
                 if (!images || images.length === 0) {
@@ -1068,7 +1066,7 @@
                 updateProductImages(images);
                 variantRows.forEach(r => r.classList.remove('selected'));
                 this.classList.add('selected');
-                console.log(`Variant ${variantId} selected successfully`);
+                
                 
             } catch (error) {
                 console.error('Error processing variant selection:', error);
@@ -1080,7 +1078,7 @@
     if (variantRows.length > 0 && selectedVariantId) {
         const firstRow = variantRows[0];
         firstRow.classList.add('selected');
-        console.log('Auto-selected first variant');
+        
     } else {
         selectedVariantId = null;
     }
@@ -1089,7 +1087,7 @@
     // Make sure thumbnails work correctly
     function setupThumbnailListeners() {
         const thumbnails = document.querySelectorAll('.thumbnail');
-        console.log(`Setting up ${thumbnails.length} thumbnail listeners`);
+        
         
         thumbnails.forEach((thumbnail, index) => {
             // Remove existing click handlers and add fresh ones
@@ -1098,7 +1096,7 @@
             });
             
             thumbnail.addEventListener('click', function() {
-                console.log(`Thumbnail ${index + 1} clicked: ${this.src}`);
+                
                 changeImage(this.src);
             });
         });
@@ -1127,103 +1125,6 @@
             backdrop: false
         });
     }
-
-    // Fix the addToCartWithSelectedVariant function
-    {% comment %} async function addToCartWithSelectedVariant() {
-        console.log('Adding to cart...');
-
-        if (!isAuthenticated) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Please Login',
-                text: 'Please login to add items to your cart or wishlist.',
-                confirmButtonText: 'Login',
-                showCancelButton: true,
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '/login';
-                }
-            });
-            return;
-        }
-
-        if (!selectedVariantId) {
-            console.error('No variant selected');
-            showSweetAlert('Please select a variant first.', 'error');
-            return;
-        }
-
-        const button = document.querySelector('.add-to-cart');
-        if (!button) {
-            console.error('Add to cart button not found');
-            return;
-        }
-
-        // Prevent multiple simultaneous clicks
-        if (button.disabled) {
-            console.log('Button already disabled, ignoring click');
-            return;
-        }
-
-        button.disabled = true;
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        console.log(`Adding variant ${selectedVariantId} to cart`);
-
-        try {
-            const csrftoken = getCookie('csrftoken');
-            if (!csrftoken) {
-                console.error('CSRF token not found');
-                throw new Error('CSRF token missing');
-            }
-
-            const response = await fetch(`/add_to_cart_with_variant/${selectedVariantId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrftoken
-                },
-                credentials: 'same-origin'
-            });
-
-            console.log('Response status:', response.status);
-            
-            const data = await response.json();
-            console.log('Cart response data:', data);
-
-            if (!data.success) {
-                throw new Error(data.message || 'Failed to add to cart');
-            }
-
-            const productName = document.querySelector('h2').textContent || "Product";
-            let message = '';
-            if (data.status === 'max_quantity') {
-                message = `Cannot add more. Stock limit reached.`;
-            } else if (data.is_new_item) {
-                message = `added to cart successfully!`;
-            } else {
-                message = `quantity increased to ${data.current_quantity || data.quantity}`;
-            }
-
-            showSweetAlert(message, 'success', productName);
-
-            if (data.cart_count !== undefined) {
-                updateCartCount(data.cart_count);
-            }
-            
-            if (data.stock !== undefined) {
-                updateStockDisplay(data.stock);
-            }
-        } catch (error) {
-            console.error("Cart Error:", error);
-            showSweetAlert(error.message || 'Failed to add to cart. Please try again.', 'error');
-        } finally {
-            button.disabled = false;
-            button.innerHTML = originalText;
-        }
-    } {% endcomment %}
     
     $(document).ajaxError(function(event, xhr, settings) {
         if (xhr.status === 403) {
@@ -1232,7 +1133,6 @@
     });
 
     function addToWishlist(productId, variantId) {
-        console.log(`Adding product ${productId} with variant ${variantId} to wishlist`);
 
         if (!isAuthenticated) {
             Swal.fire({
@@ -1276,14 +1176,14 @@
             body: JSON.stringify({ variant_id: variantId })  // Send variant_id to backend
         })
         .then(response => {
-            console.log('Wishlist response status:', response.status);
+            
             if (!response.ok) {
                 throw new Error(`Server error: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log('Wishlist response data:', data);
+            
             if (data.success) {
                 showSweetAlert(data.message || 'added to wishlist', 'success', productName);
                 fetchWishlistCount();
@@ -1314,7 +1214,7 @@
     const csrftoken = getCookie('csrftoken');
 
     function addToCart(productId) {
-        console.log('Adding to cart, product ID:', productId);
+        
         const button = document.querySelector('.add-to-cart');
         if (!button) return;
         
@@ -1338,7 +1238,7 @@
             return response.json();
         })
         .then(data => {
-            console.log('Cart response:', data);
+            
             if (data.success) {
                 const productName = document.querySelector('h2').textContent || "Product";
                 const message = data.is_new_item 
@@ -1372,7 +1272,7 @@
 
     // Improved document ready handler to properly initialize everything
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Document ready - initializing everything');
+        
 
         // Handle Cart navigation click
         document.querySelector('nav a[href="/cart"]').addEventListener('click', function(event) {
@@ -1503,11 +1403,11 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Initial cart count response:', data);
+            
             if (data.cart_count !== undefined) {
                 updateCartCount(data.cart_count);
             } else {
-                console.log('No cart_count in initial response, setting to 0');
+                
                 updateCartCount(0);
             }
         })
@@ -1519,11 +1419,11 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Initial wishlist count response:', data);
+            
             if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                 updateWishlistCount(data.wishlist_count);
             } else {
-                console.log('No valid wishlist_count in initial response, setting to 0');
+                
                 updateWishlistCount(0);
             }
         })
@@ -1542,7 +1442,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Fetched cart count:', data);
+            
             if (data.cart_count !== undefined) {
                 updateCartCount(data.cart_count);
             }
@@ -1557,7 +1457,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Fetched wishlist count:', data);
+            
             if (data.wishlist_count !== undefined) {
                 updateWishlistCount(data.wishlist_count);
             }
@@ -1577,14 +1477,14 @@
     function updateCartCount(count) {
         const cartCountElement = document.querySelector('.cart-count');
         cartCountElement.textContent = count || '0';
-        console.log('Updated cart count to:', count || '0');
+        
     }
 
     function updateWishlistCount(count) {
         const wishlistCountElement = document.querySelector('.wishlist-count');
         wishlistCountElement.textContent = count || '0';
         wishlistCountElement.style.display = 'inline-block';
-        console.log('Updated wishlist count to:', count || '0');
+        
     }
 
     // Updated stock display function
@@ -1778,7 +1678,6 @@
 
     // Fix for the add to cart issue
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Document ready - initializing everything');
         
         // Clear any existing event listeners to prevent duplicates
         const addToCartBtn = document.querySelector('.add-to-cart');
@@ -1809,14 +1708,10 @@
                 mainImage.onload = setupImageZoom;
             }
         }
-    });
-
-    // Remove duplicate DOMContentLoaded event - this is redundant with the one above
-    // document.addEventListener('DOMContentLoaded', function() { ... }); 
+    }); 
 
     // Fix the addToCartWithSelectedVariant function
     async function addToCartWithSelectedVariant() {
-        console.log('Adding to cart...');
 
         if (!isAuthenticated) {
             Swal.fire({
@@ -1848,7 +1743,7 @@
 
         // Prevent multiple simultaneous clicks
         if (button.disabled) {
-            console.log('Button already disabled, ignoring click');
+            
             return;
         }
 
@@ -1858,7 +1753,7 @@
         button.disabled = true;
         const originalText = button.innerHTML;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        console.log(`Adding variant ${selectedVariantId} to cart`);
+        
 
         try {
             // Make sure CSRF token is properly obtained
@@ -1878,10 +1773,7 @@
                 credentials: 'same-origin'
             });
 
-            console.log('Response status:', response.status);
-            
             const data = await response.json();
-            console.log('Cart response data:', data);
 
             if (!data.success) {
                 throw new Error(data.message || 'Failed to add to cart');

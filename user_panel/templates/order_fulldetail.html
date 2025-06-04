@@ -645,22 +645,6 @@
     </footer>
 
     <script>
-        // Debugging subtotal and grand total in the browser
-        console.log("✅ Subtotal:", "{{ subtotal }}");
-        console.log("✅ Shipping Fee:", "{{ shipping_fee }}");
-        console.log("✅ Grand Total:", "{{ grand_total }}");
-    </script>
-
-    <script>
-        // Debugging order data in the browser
-        document.addEventListener("DOMContentLoaded", function() {
-            console.log("✅ Order Loaded:", {{ order.id }});
-            console.log("✅ User Email:", "{{ order.user.email }}");
-            console.log("✅ Order Items:", {{ order_items_with_images|safe }});
-        });
-    </script>
-
-    <script>
         $(document).ready(function() {
             // Cancel order functionality
             $("#cancel-order-btn").click(function() {
@@ -786,7 +770,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial cart count response:', data);
+                    
                     if (data.cart_count !== undefined) {
                         updateCartCount(data.cart_count);
                     } else {
@@ -801,7 +785,7 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Initial wishlist count response:', data);
+                    
                     if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
                         updateWishlistCount(data.wishlist_count);
                     } else {
@@ -817,14 +801,14 @@
             function updateCartCount(count) {
                 const cartCountElement = document.querySelector('.cart-count');
                 cartCountElement.textContent = count || '0';
-                console.log('Updated cart count to:', count || '0');
+                
             }
 
             function updateWishlistCount(count) {
                 const wishlistCountElement = document.querySelector('.wishlist-count');
                 wishlistCountElement.textContent = count || '0';
                 wishlistCountElement.style.display = 'inline-block';
-                console.log('Updated wishlist count to:', count || '0');
+                
             }
 
             window.onload = function() {

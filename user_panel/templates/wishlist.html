@@ -985,7 +985,7 @@
                     const h3Element = itemElement.querySelector('.wishlist-item-details h3');
                     productName = h3Element ? h3Element.textContent.trim() : 'Product';
                 }
-                console.log(`addToCart: Product name extracted: "${productName}"`);
+                
                 itemElement.style.opacity = '0.5';
                 itemElement.style.pointerEvents = 'none';
             } else {
@@ -1014,7 +1014,7 @@
                 // Check if variantData includes product name (optional enhancement)
                 if (variantData.product_name && productName === 'Product') {
                     productName = variantData.product_name;
-                    console.log(`addToCart: Updated product name from server: "${productName}"`);
+                    
                 }
 
                 const formData = new URLSearchParams();
@@ -1082,7 +1082,7 @@
                     const h3Element = itemElement.querySelector('.wishlist-item-details h3');
                     productName = h3Element ? h3Element.textContent.trim() : 'Product';
                 }
-                console.log(`removeFromWishlist: Product name extracted: "${productName}"`);
+                
             } else {
                 console.error(`removeFromWishlist: Wishlist item with ID wishlist-item-${wishlistId} not found`);
             }

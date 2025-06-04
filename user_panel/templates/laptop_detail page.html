@@ -1128,14 +1128,14 @@
         } 
 
         function setupVariantSelection() {
-            console.log('Setting up variant selection...');
+            
             const variantRows = document.querySelectorAll('.variant-row');
-            console.log(`Found ${variantRows.length} variant rows`);
+            
             
             variantRows.forEach((row, index) => {
-                console.log(`Setting up variant row ${index + 1}`, row);
+                
                 row.addEventListener('click', function() {
-                    console.log('Variant clicked:', this);
+                    
                     const variantId = this.getAttribute('data-variant-id');
                     const price = this.getAttribute('data-price');
                     const stock = parseInt(this.getAttribute('data-stock'));
@@ -1151,7 +1151,7 @@
                         const images = JSON.parse(imagesJson);
                         
                         selectedVariantId = variantId;
-                        console.log('Updated selectedVariantId:', selectedVariantId);
+                        
                         
                         updatePriceDisplay(price);
                         updateStockDisplay(stock);
@@ -1159,7 +1159,7 @@
                         
                         variantRows.forEach(r => r.classList.remove('selected'));
                         this.classList.add('selected');
-                        console.log(`Variant ${variantId} selected successfully`);
+                        
 
                     } catch (error) {
                         console.error('Error processing variant selection:', error);
@@ -1172,16 +1172,16 @@
                 const firstRow = variantRows[0];
                 selectedVariantId = firstRow.getAttribute('data-variant-id');
                 firstRow.classList.add('selected');
-                console.log('Auto-selected first variant:', selectedVariantId);
+                
                 firstRow.click();
             } else {
-                console.log('No variants available, setting selectedVariantId to null');
+                
                 selectedVariantId = null;
             }
         }
 
         async function addToCartWithSelectedVariant() {
-            console.log('Adding to cart...');
+            
             if (!isAuthenticated) {
                 Swal.fire({
                     icon: 'warning',
@@ -1212,7 +1212,7 @@
             button.disabled = true;
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-            console.log(`Adding variant ${selectedVariantId} to cart`);
+            
 
             try {
                 const csrftoken = getCookie('csrftoken');
@@ -1231,10 +1231,10 @@
                     credentials: 'same-origin'
                 });
 
-                console.log('Response status:', response.status);
+                
                 
                 const data = await response.json();
-                console.log('Cart response data:', data);
+                
 
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to add to cart');
@@ -1327,7 +1327,7 @@
                     return;
                 }
 
-                console.log('Reinitializing zoom for:', mainImage.src);
+                
 
                 // Remove existing event listeners to prevent duplicates
                 const newContainer = imageContainer.cloneNode(true);
@@ -1369,7 +1369,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Document ready - initializing everything');
+            
 
             document.querySelector('nav a[href="/cart"]').addEventListener('click', function(event) {
                 event.preventDefault();
@@ -1467,7 +1467,7 @@
 
         function setupThumbnailListeners() {
             const thumbnails = document.querySelectorAll('.thumbnail');
-            console.log(`Setting up ${thumbnails.length} thumbnail listeners`);
+            
             
             thumbnails.forEach((thumbnail, index) => {
                 thumbnail.removeEventListener('click', function() {
@@ -1475,7 +1475,7 @@
                 });
                 
                 thumbnail.addEventListener('click', function() {
-                    console.log(`Thumbnail ${index + 1} clicked: ${this.src}`);
+                    
                     changeImage(this.src);
                 });
             });
@@ -1582,7 +1582,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial cart count response:', data);
+                
                 updateCartCount(data.cart_count || 0);
             })
             .catch(error => console.error('Error loading cart count:', error));
@@ -1593,7 +1593,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Initial wishlist count response:', data);
+                
                 updateWishlistCount(data.wishlist_count || 0);
             })
             .catch(error => console.error('Error loading wishlist count:', error));
@@ -1606,7 +1606,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Fetched cart count:', data);
+                
                 if (data.cart_count !== undefined) {
                     updateCartCount(data.cart_count);
                 }
@@ -1621,7 +1621,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Fetched wishlist count:', data);
+                
                 if (data.wishlist_count !== undefined) {
                     updateWishlistCount(data.wishlist_count);
                 }
@@ -1632,14 +1632,14 @@
         function updateCartCount(count) {
             const cartCountElement = document.querySelector('.cart-count');
             cartCountElement.textContent = count || '0';
-            console.log('Updated cart count to:', count || '0');
+            
         }
 
         function updateWishlistCount(count) {
             const wishlistCountElement = document.querySelector('.wishlist-count');
             wishlistCountElement.textContent = count || '0';
             wishlistCountElement.style.display = 'inline-block';
-            console.log('Updated wishlist count to:', count || '0');
+            
         }
 
         function updatePriceDisplay(price) {
@@ -1692,23 +1692,10 @@
             })
             .catch(error => showSweetAlert('Order placement failed', 'error'));
         }
-        
-        {% comment %} function checkStockUpdates() {
-            fetch(`/product-stock/${laptop.id}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Updated stock:', data.stock);
-                updateStockDisplay(data.stock);
-            });
-        }
-        setInterval(checkStockUpdates, 10000); {% endcomment %}
 
         // Fix for the add to cart issue
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Document ready - initializing everything');
+            
             
             // Clear any existing event listeners to prevent duplicates
             const addToCartBtn = document.querySelector('.add-to-cart');
@@ -1741,12 +1728,8 @@
             }
         });
 
-        // Remove duplicate DOMContentLoaded event - this is redundant with the one above
-        // document.addEventListener('DOMContentLoaded', function() { ... }); 
-
         // Fix the addToCartWithSelectedVariant function
         async function addToCartWithSelectedVariant() {
-            console.log('Adding to cart...');
 
             if (!isAuthenticated) {
                 Swal.fire({
@@ -1778,14 +1761,14 @@
 
             // Prevent multiple simultaneous clicks
             if (button.disabled) {
-                console.log('Button already disabled, ignoring click');
+                
                 return;
             }
 
             button.disabled = true;
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-            console.log(`Adding variant ${selectedVariantId} to cart`);
+            
 
             try {
                 // Make sure CSRF token is properly obtained
@@ -1805,11 +1788,8 @@
                     credentials: 'same-origin'
                 });
 
-                console.log('Response status:', response.status);
-                
                 const data = await response.json();
-                console.log('Cart response data:', data);
-
+                
                 if (!data.success) {
                     throw new Error(data.message || 'Failed to add to cart');
                 }
