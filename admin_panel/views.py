@@ -1695,7 +1695,7 @@ def wallet_management(request):
         'wallets': wallets,
         'transactions': transactions_paginated,  
     }
-    return render(request, 'wallet_management.html', context)
+    return render(request, 'Wallet_Management.html', context)
 
 def transaction_detail(request, transaction_id):
     if not request.user.is_staff:
