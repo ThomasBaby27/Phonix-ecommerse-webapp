@@ -130,7 +130,7 @@ LOGOUT_REDIRECT_URL = '/'
 #         'PASSWORD': '8848662204',
 #         'HOST': 'localhost',
 #         'PORT': '5432',
-#     }
+#     }   
 # }
 
 DATABASES = {
