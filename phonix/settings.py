@@ -28,8 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG =  config('DEBUG', default=False, cast=bool)
 
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['13.60.134.12','phonix.thomasbaby.site','www.thomasbaby.site','127.0.0.1','localhost' ]
 
 # Application definition
 
@@ -134,6 +133,15 @@ DATABASES = {
     }
 }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,  # Seconds to wait for the lock to be released
+        }
+    }
+}
                     
 
 
