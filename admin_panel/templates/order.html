@@ -318,16 +318,25 @@
                     <td>${{ order.total_price }}</td>
                     <td>{{ order.payment_method }}</td>
                     <td>
-                        <select class="order-status" data-order-id="{{ order.id }}" {% if order.status == 'Cancelled' or order.status == 'Returned' %}disabled{% endif %}>
+                        <select class="order-status" data-order-id="{{ order.id }}" {% if order.status == 'Canceled' or order.status == 'Returned' %}disabled{% endif %}>
                             <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
                             <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
                             <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
-                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            <option value="Canceled" {% if order.status == 'Canceled' %}selected{% endif %}>Cancelled</option>
                             <option value="Return Requested" {% if order.status == 'Return Requested' %}selected{% endif %}>Return Requested</option>
                             <option value="Returned" {% if order.status == 'Returned' %}selected{% endif %}>Returned</option>
                         </select>
-                        {% if order.status == "Return Requested" %}
-                            <button class="confirm-return" data-order-id="{{ order.id }}">Confirm Return</button>
+                        {% if order.items.exists and order.status == 'Return Requested' %}
+                            <div class="return-items">
+                                {% for item in order.items.all %}
+                                    {% if item.is_returned and not item.return_approved %}
+                                        <div class="return-item">
+                                            <span>{{ item.product.name }} (Qty: {{ item.quantity }}) - Reason: {{ item.return_reason }}</span>
+                                            <button class="confirm-return-item" data-order-id="{{ order.id }}" data-item-id="{{ item.id }}">Confirm Return</button>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
                         {% endif %}
                     </td>
                     <td>{{ order.created_at|date:"Y-m-d h:i A" }}</td>
@@ -363,59 +372,13 @@
             sidebar.classList.toggle("collapsed");
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".confirm-return").forEach(button => {
-                button.addEventListener("click", function () {
-                    let orderId = this.getAttribute("data-order-id");
-                    Swal.fire({
-                        title: "Are you sure?",
-                        text: "Do you want to confirm the return for this order?",
-                        icon: "warning",
-                        showCancelButton: true,
-                        confirmButtonText: "Yes, confirm it!",
-                        cancelButtonText: "No, keep it"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            confirmReturn(orderId, this);
-                        }
-                    });
-                });
-            });
-        
-            function confirmReturn(orderId, button) {
-                fetch(`/approve-return/${orderId}/`, {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json",
-                        "X-Requested-With": "XMLHttpRequest"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        Swal.fire("Confirmed!", "Return has been confirmed.", "success")
-                        .then(() => {
-                            const row = button.closest('tr');
-                            const statusSelect = row.querySelector('.order-status');
-                            statusSelect.value = "Returned"; // Update the dropdown value
-                            statusSelect.disabled = true;    // Disable the dropdown
-                            button.remove();                 // Remove the button
-                        });
-                    } else {
-                        Swal.fire("Error", data.message, "error");
-                    }
-                })
-                .catch(error => Swal.fire("Error", "Something went wrong!", "error"));
-            }
-        });
-
         $(document).ready(function(){
             // Log initial statuses
             $(".order-status").each(function() {
                 console.log(`Initial UI status for order ${$(this).data("order-id")}: ${$(this).val()}`);
             });
-        
+
+            // Handle order status changes
             $(".order-status").change(function(e){
                 e.preventDefault();
                 var selectElement = $(this);
@@ -449,111 +412,180 @@
                             // Handle UI updates based on new status
                             if (response.status === "Cancelled" || response.status === "Returned") {
                                 selectElement.prop("disabled", true);
-                                selectElement.closest('tr').find('.confirm-return').remove();
-                            } else if (response.status === "Return Requested") {
-                                // Add confirm return button if not already present
-                                if (selectElement.closest('tr').find('.confirm-return').length === 0) {
-                                    $("<button>")
-                                        .addClass("confirm-return")
-                                        .attr("data-order-id", orderId)
-                                        .text("Confirm Return")
-                                        .insertAfter(selectElement);
-                                        
-                                    // Attach event listener to the new button
-                                    attachConfirmReturnHandler(selectElement.closest('tr').find('.confirm-return'));
-                                }
                             }
                         } else {
                             console.error("Update failed:", response.error);    
-                            alert("Failed to update status: " + response.error);
+                            Swal.fire("Error!", "Failed to update status: " + response.error, "error");
                             selectElement.val(originalStatus);  // Revert on error
                         }
                     },
                     error: function(xhr, status, error) {
-                        console.log("AJAX error:", error);
-                        alert("Error updating status: " + error);
+                        console.error("AJAX error:", error);
+                        Swal.fire("Error!", "Error updating status: " + error, "error");
                         selectElement.val(originalStatus);  // Revert on error
                     }
                 });
             });
             
-            // Function to attach confirm return handler
+            // Function to attach confirm return handler for .confirm-return-item buttons
             function attachConfirmReturnHandler(button) {
-                button.on("click", function(){
-                    var btn = $(this);
-                    var orderId = btn.data("order-id");
-                    console.log(`Confirm Return clicked for order ${orderId}`);
+                button.off('click').on('click', function() { // Prevent duplicate bindings
+                    const orderId = $(this).data('order-id');
+                    const itemId = $(this).data('item-id');
+                    console.log('Confirm Return clicked:', { orderId, itemId }); // Debug log
                     
-                    if (confirm("Are you sure you want to approve this return?")) {
-                        $.ajax({
-                            url: `/approve-return/${orderId}/`,
-                            type: "POST",
-                            data: {
-                                csrfmiddlewaretoken: "{{ csrf_token }}"
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    console.log(`Return confirmed for order ${orderId}`);
-                                    const row = btn.closest('tr');
-                                    row.find('.order-status').val("Returned").prop("disabled", true);
-                                    btn.remove();
-                                } else {
-                                    console.error("Return approval failed:", response.message);
-                                    alert("Failed to approve return: " + response.message);
+                    // Validate itemId
+                    if (!itemId) {
+                        console.error('Invalid item ID:', itemId);
+                        Swal.fire('Error!', 'Invalid item ID. Please try again.', 'error');
+                        return;
+                    }
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: 'Do you want to approve this return for the item?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, confirm it!',
+                        cancelButtonText: 'No, cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $(this).prop('disabled', true).text('Processing...'); // Loading state
+                            $.ajax({
+                                url: `/orders/approve_return/${orderId}/`,
+                                type: 'POST',
+                                data: JSON.stringify({ item_id: parseInt(itemId) }), // Ensure item_id is a number
+                                contentType: 'application/json',
+                                headers: {
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire('Success!', response.message, 'success');
+                                        // Update UI: Remove only the specific item
+                                        const row = $(button).closest('tr');
+                                        $(button).parent('.return-item').remove();
+                                        row.find('.order-status').val(response.status);
+                                        if (response.status === 'Returned') {
+                                            row.find('.order-status').prop('disabled', true);
+                                            row.find('.return-items').remove(); // Remove all return items if fully returned
+                                        } else {
+                                            // Check if there are remaining return items
+                                            const returnItemsDiv = row.find('.return-items');
+                                            if (returnItemsDiv.children().length === 0) {
+                                                returnItemsDiv.remove(); // Clean up empty div
+                                            }
+                                        }
+                                        // Trigger a manual fetch to ensure remaining items are displayed
+                                        fetchOrderItems(row, orderId);
+                                    } else {
+                                        Swal.fire('Error!', response.message, 'error');
+                                    }
+                                },
+                                error: function(xhr) {
+                                    console.error('AJAX Error:', { status: xhr.status, response: xhr.responseText }); // Debug log
+                                    Swal.fire('Error!', xhr.responseJSON?.message || 'An error occurred while approving the return.', 'error');
+                                },
+                                complete: function() {
+                                    $(this).prop('disabled', false).text('Confirm Return'); // Reset button
                                 }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Return AJAX error:", error);
-                                alert("Error approving return: " + error);
+                            });
+                        }
+                    });
+                });
+            }
+            
+            // Function to fetch order items and update UI
+            function fetchOrderItems(row, orderId) {
+                $.ajax({
+                    url: `/orders/items/${orderId}/`,
+                    type: 'GET',
+                    success: function(itemsResponse) {
+                        row.find('.return-items').remove(); // Clear existing items
+                        if (itemsResponse.items && itemsResponse.items.length > 0) {
+                            const returnItemsDiv = $('<div>').addClass('return-items');
+                            itemsResponse.items.forEach(item => {
+                                if (item.is_returned && !item.return_approved) {
+                                    const itemDiv = $('<div>').addClass('return-item');
+                                    itemDiv.append(`<span>${item.product_name} (Qty: ${item.quantity}) - Reason: ${item.return_reason}</span>`);
+                                    const button = $('<button>')
+                                        .addClass('confirm-return-item')
+                                        .attr('data-order-id', orderId)
+                                        .attr('data-item-id', item.id)
+                                        .text('Confirm Return');
+                                    itemDiv.append(button);
+                                    returnItemsDiv.append(itemDiv);
+                                    attachConfirmReturnHandler(button);
+                                }
+                            });
+                            if (returnItemsDiv.children().length > 0) {
+                                row.find('.order-status').after(returnItemsDiv);
                             }
-                        });
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Items fetch error:', { orderId, status: xhr.status });
                     }
                 });
             }
             
-            // Attach handlers to existing confirm return buttons
-            $(document).on("click", ".confirm-return", function(){
-                var button = $(this);
-                var orderId = button.data("order-id");
-                console.log(`Confirm Return clicked for order ${orderId}`);
-                
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "Do you want to confirm the return for this order?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonText: "Yes, confirm it!",
-                    cancelButtonText: "No, keep it"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: `/approve-return/${orderId}/`,
-                            type: "POST",
-                            headers: {
-                                "X-CSRFToken": "{{ csrf_token }}",
-                                "Content-Type": "application/json",
-                                "X-Requested-With": "XMLHttpRequest"
-                            },
-                            success: function(response) {
-                                if (response.success) {
-                                    console.log(`Return confirmed for order ${orderId}`);
-                                    const row = button.closest('tr');
-                                    row.find('.order-status').val("Returned").prop("disabled", true);
-                                    button.remove();
-                                    Swal.fire("Confirmed!", "Return has been processed.", "success");
-                                } else {
-                                    console.error("Return approval failed:", response.message);
-                                    Swal.fire("Error", response.message, "error");
+            // Polling for Order Status Updates
+            function updateOrderStatuses() {
+                $('.order-status').each(function() {
+                    const row = $(this).closest('tr');
+                    const orderId = $(this).data('order-id');
+                    const currentStatus = $(this).val();
+                    
+                    $.ajax({
+                        url: `/orders/status/${orderId}/`,
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.status && response.status !== currentStatus) {
+                                console.log(`Updating order ${orderId} from ${currentStatus} to ${response.status}`);
+                                row.find('.order-status').val(response.status);
+                                
+                                if (response.status === 'Cancelled' || response.status === 'Returned') {
+                                    row.find('.order-status').prop('disabled', true);
+                                    row.find('.return-items').remove();
+                                } else if (response.status === 'Return Requested') {
+                                    fetchOrderItems(row, orderId); // Fetch items if status allows returns
                                 }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Return AJAX error:", error);
-                                Swal.fire("Error", "Something went wrong: " + error, "error");
                             }
-                        });
-                    }
+                        },
+                        error: function(xhr) {
+                            console.error('Status fetch error:', { orderId, status: xhr.status });
+                        }
+                    });
                 });
+            }
+
+            // Utility function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // Initialize handlers
+            $(document).ready(function() {
+                $('.confirm-return-item').each(function() {
+                    attachConfirmReturnHandler($(this));
+                });
+                setInterval(updateOrderStatuses, 5000); // Poll every 5 seconds
             });
+
+            // Run polling every 5 seconds
+            setInterval(updateOrderStatuses, 5000);
+            updateOrderStatuses(); // Run immediately on page load
         });
     </script>
 </body>

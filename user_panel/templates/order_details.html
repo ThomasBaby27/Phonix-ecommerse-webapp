@@ -834,8 +834,12 @@
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-user"></i></button>
                 <div class="dropdown-content">
-                    <a href="{% url 'account_profile' %}">Profile</a> 
-                    <a href="{% url 'logout' %}">Logout</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'account_profile' %}">Profile</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>
@@ -900,11 +904,11 @@
                                                         <i class="fas fa-times"></i> Cancel
                                                     </button>
                                                 {% endif %}
-                                                {% if order.status == "Delivered" %}
+                                                {% comment %} {% if order.status == "Delivered" %}
                                                     <button class="action-btn btn-return return-btn" data-order-id="{{ order.id }}">
                                                         <i class="fas fa-undo"></i> Return
                                                     </button>
-                                                {% endif %}
+                                                {% endif %} {% endcomment %}
                                             </td>
                                             <td>
                                                 <a href="{% url 'generate_invoice_pdf' order.id %}" class="action-btn btn-invoice download-invoice-btn" data-order-id="{{ order.id }}">

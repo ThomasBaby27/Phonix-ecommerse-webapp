@@ -40,7 +40,7 @@ import openpyxl
 import json
 from authentication.models import Transaction, Wallet, Order
 from django.views.decorators.cache import cache_control
-
+from decimal import Decimal
 
 User = get_user_model()  # Get the custom user model
  
@@ -773,35 +773,135 @@ def update_order_status(request):
 @csrf_protect
 @require_POST
 def approve_return(request, order_id):
+    logger.debug(f"Processing return approval for order_id: {order_id}, user: {request.user}")
     if not request.user.is_staff:
-        return redirect("admin_login")
+        logger.warning(f"Unauthorized access attempt by user: {request.user}")
+        return JsonResponse({"success": False, "message": "Admin access required"}, status=403)
+    
     try:
-        order = Order.objects.get(id=order_id)
-        
+        order = get_object_or_404(Order, id=order_id)
+        logger.debug(f"Order found: {order.id}, status: {order.status}")
         if order.status != "Return Requested":
+            logger.warning(f"Order {order.id} not in Return Requested status: {order.status}")
             return JsonResponse({"success": False, "message": "Order is not in Return Requested status"})
-        
-        print(f"Approving return for Order {order_id} - Current status: {order.status}")
-        order.status = "Returned"
-        order.save()
-        
-        for item in order.items.all():
-            product = item.product
-            product.stock += item.quantity
-            product.quantity = product.stock  
-            product.save()
-        
-        updated_order = Order.objects.get(id=order_id)
-        
+
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            logger.debug(f"Request data: item_id={item_id}")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
+            return JsonResponse({"success": False, "message": "Invalid request data"})
+
+        if not item_id:
+            logger.error("Item ID is missing")
+            return JsonResponse({"success": False, "message": "Item ID is required"})
+
+        transaction_id = None  # Initialize outside atomic block
+        with transaction.atomic():
+            order_item = get_object_or_404(OrderItem, id=item_id, order=order, is_returned=True)
+            logger.debug(f"OrderItem found: {order_item.id}")
+            if order_item.return_approved:
+                logger.warning(f"Item {order_item.id} return already approved")
+                return JsonResponse({"success": False, "message": "This item’s return is already approved"})
+
+            # Validate price
+            if order_item.price is None:
+                logger.error(f"OrderItem {order_item.id} has no price defined")
+                return JsonResponse({"success": False, "message": "Item price is not set"}, status=400)
+
+            # Mark item as approved
+            order_item.return_approved = True
+            order_item.save()
+            logger.debug(f"Updated OrderItem {order_item.id}: return_approved=True")
+
+            # Increment stock
+            if order_item.variant:
+                order_item.variant.stock += order_item.quantity
+                order_item.variant.save()
+                logger.debug(f"Updated variant stock: {order_item.variant.id}, new stock: {order_item.variant.stock}")
+            else:
+                order_item.product.stock += order_item.quantity
+                order_item.product.save()
+                logger.debug(f"Updated product stock: {order_item.product.id}, new stock: {order_item.product.stock}")
+
+            # Credit wallet
+            wallet, created = Wallet.objects.get_or_create(user=order.user)
+            amount = Decimal(str(order_item.get_total_price()))
+            wallet.balance += amount
+            wallet.save()
+            logger.debug(f"Credited wallet for user {order.user.id}: amount={amount}, new balance={wallet.balance}")
+
+            # Create transaction
+            try:
+                product_details = f"{order_item.product.name}"
+                if order_item.variant:
+                    product_details += f" ({order_item.variant.ram}/{order_item.variant.storage}/{order_item.variant.color})"
+                product_details += f" × {order_item.quantity}"
+                if len(product_details) > 255:
+                    product_details = product_details[:252] + "..."  # Truncate to fit max_length
+                new_transaction = Transaction.objects.create(
+                    wallet=wallet,
+                    amount=amount,
+                    transaction_type='CREDIT',
+                    description=f"Refund for returned item in order #{order.id}: {product_details}",
+                    order=order
+                )
+                transaction_id = new_transaction.id
+                logger.debug(f"Created transaction: id={transaction_id}")
+            except IntegrityError as e:
+                logger.error(f"Transaction creation failed: {str(e)}")
+                return JsonResponse({"success": False, "message": f"Failed to create transaction: {str(e)}"}, status=400)
+
+            # Check if all items are returned and approved
+            try:
+                order.check_all_items_returned()
+                logger.debug(f"Updated order status: {order.status}")
+            except Exception as e:
+                logger.error(f"Error in check_all_items_returned: {str(e)}")
+                return JsonResponse({"success": False, "message": f"Failed to update order status: {str(e)}"}, status=400)
+
+        # Return success response
         return JsonResponse({
-            "success": True, 
-            "message": "Return approved", 
-            "status": updated_order.status
+            "success": True,
+            "message": "Return approved and refund processed for item",
+            "status": order.status,
+            "wallet_balance": float(wallet.balance),
+            "transaction_id": transaction_id,
+            "item_id": item_id
+        })
+    
+    except Order.DoesNotExist:
+        logger.error(f"Order {order_id} not found")
+        return JsonResponse({"success": False, "message": "Order not found"}, status=404)
+    except OrderItem.DoesNotExist:
+        logger.error(f"OrderItem {item_id} not found for order {order_id}")
+        return JsonResponse({"success": False, "message": "Order item not found or not requested for return"}, status=404)
+    except Exception as e:
+        logger.exception(f"Unexpected error in approve_return: {str(e)}")
+        return JsonResponse({"success": False, "message": f"An error occurred: {str(e)}"}, status=500)
+    
+def get_order_items(request, order_id):
+    logger.debug(f"Fetching items for order_id: {order_id}")
+    if not request.user.is_staff:
+        logger.warning(f"Unauthorized access attempt by user: {request.user}")
+        return JsonResponse({"success": False, "message": "Admin access required"}, status=403)
+    
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        items = order.items.all().values(
+            'id', 'product__name', 'quantity', 'is_returned', 'return_reason', 'return_approved'
+        )
+        return JsonResponse({
+            "success": True,
+            "items": list(items)
         })
     except Order.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Order not found"})
+        logger.error(f"Order {order_id} not found")
+        return JsonResponse({"success": False, "message": "Order not found"}, status=404)
     except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)})
+        logger.exception(f"Error fetching items for order {order_id}: {str(e)}")
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
     
 #this view for seeing all orders details
 def order_detail(request, order_id):

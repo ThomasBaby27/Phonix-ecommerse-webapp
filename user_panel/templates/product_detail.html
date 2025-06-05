@@ -806,8 +806,12 @@
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-user"></i></button>
                 <div class="dropdown-content">
-                    <a href="{% url 'account_profile' %}">Profile</a> 
-                    <a href="/logout">Logout</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'account_profile' %}">Profile</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>
@@ -1712,7 +1716,6 @@
 
     // Fix the addToCartWithSelectedVariant function
     async function addToCartWithSelectedVariant() {
-
         if (!isAuthenticated) {
             Swal.fire({
                 icon: 'warning',
@@ -1743,7 +1746,6 @@
 
         // Prevent multiple simultaneous clicks
         if (button.disabled) {
-            
             return;
         }
 
@@ -1753,7 +1755,6 @@
         button.disabled = true;
         const originalText = button.innerHTML;
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-        
 
         try {
             // Make sure CSRF token is properly obtained
@@ -1776,26 +1777,38 @@
             const data = await response.json();
 
             if (!data.success) {
-                throw new Error(data.message || 'Failed to add to cart');
+                let message = data.message || 'Failed to add to cart';
+                let icon = 'error';
+                if (data.status === 'max_quantity') {
+                    message = `Cannot add more. Maximum quantity of 5 reached in cart.`;
+                    icon = 'warning';
+                } else if (data.status === 'max_stock') {
+                    message = `Cannot add more. Stock limit reached.`;
+                    icon = 'warning';
+                } else if (data.status === 'out_of_stock') {
+                    message = `This product is out of stock.`;
+                    icon = 'error';
+                }
+                showSweetAlert(message, icon, productName);
+                throw new Error(message);
             }
 
-            // Custom messages based on response
+            // Success case
             let message = '';
-            if (data.status === 'max_quantity') {
-                message = `Cannot add more. Stock limit reached.`;
-            } else if (data.is_new_item) {
+            if (data.is_new_item) {
                 message = `added to cart successfully!`;
             } else {
-                message = `quantity increased to ${data.current_quantity || data.quantity}`;
+                message = `quantity increased to ${data.current_quantity}`;
             }
-
             showSweetAlert(message, 'success', productName);
 
             // Update UI
             if (data.cart_count !== undefined) {
                 updateCartCount(data.cart_count);
             }
-            
+            if (data.wishlist_count !== undefined) {
+                updateWishlistCount(data.wishlist_count);
+            }
             if (data.stock !== undefined) {
                 updateStockDisplay(data.stock);
             }

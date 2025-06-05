@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{% csrf_token %}">
     <title>Order Full Details</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -528,8 +529,12 @@
             <div class="dropdown">
                 <button class="dropbtn"><i class="fas fa-user"></i></button>
                 <div class="dropdown-content">
-                    <a href="{% url 'account_profile' %}">Profile</a> 
-                    <a href="/logout">Logout</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'account_profile' %}">Profile</a>
+                        <a href="{% url 'logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>
@@ -563,7 +568,7 @@
                 </thead>
                 <tbody>
                     {% for item in order_items %}
-                    <tr>
+                    <tr data-order-id="{{ order.id }}">
                         <td>{{ item.product.name }}</td>
                         <td>
                             {% if item.variant.images.first %}
@@ -582,13 +587,13 @@
                         <td>{{ item.quantity }}</td>
                         <td>₹{{ item.price|floatformat:2 }}</td>
                         <td>₹{{ item.get_total_price|floatformat:2 }}</td>
-                        <td>
-                            {% if can_return and not item.is_returned %}
-                                <button class="btn btn-cancel return-item-btn" data-item-id="{{ item.id }}" data-order-id="{{ order.id }}">Return</button>
-                            {% elif item.is_returned %}
-                                <span>Returned</span>
-                            {% else %}
-                                <span>-</span>
+                        <td class="action">
+                            {% if order.status in "Delivered,Return Requested" and not item.is_returned and item.order.created_at|timesince|slice:":2"|floatformat:0|add:0 < 7 %}
+                                <button class="btn btn-return" data-item-id="{{ item.id }}">Return</button>
+                            {% elif item.is_returned and not item.return_approved %}
+                                <span>Return Requested (Reason: {{ item.return_reason }})</span>
+                            {% elif item.is_returned and item.return_approved %}
+                                <span>Return Approved</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -597,7 +602,7 @@
             </table>
         </div>
 
-        {% if order.status == "Pending" %}
+        {% if order.status == "Pending" or order.status == "Confirmed" %}
         <button id="cancel-order-btn" class="btn btn-cancel"><i class="fas fa-times"></i> Cancel Order</button>
         {% endif %}
         <a href="{% url 'order_details' %}" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back to Orders</a>
@@ -646,176 +651,175 @@
 
     <script>
         $(document).ready(function() {
-            // Cancel order functionality
-            $("#cancel-order-btn").click(function() {
-                Swal.fire({
-                    title: "Are you sure?",
-                    text: "Do you want to cancel this order?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Yes, Cancel it!"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var csrftoken = getCookie('csrftoken');
-                        $.ajax({
-                            url: "{% url 'cancel_order' order.id %}",
-                            type: "POST",
-                            headers: { "X-CSRFToken": csrftoken },
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire("Cancelled!", "Your order has been cancelled.", "success").then(() => {
-                                        window.location.href = "{% url 'order_details' %}";
-                                    });
-                                } else {
-                                    Swal.fire("Error!", response.message, "error");
-                                }
-                            },
-                            error: function() {
-                                Swal.fire("Error!", "Something went wrong. Try again!", "error");
-                            }
-                        });
-                    }
-                });
-            });
-
-            // Individual item return functionality
-            $(".return-item-btn").click(function() {
+            $('.btn-return').on('click', function() {
                 const itemId = $(this).data('item-id');
-                const orderId = $(this).data('order-id');
-                
-                Swal.fire({
-                    title: "Request Return",
-                    text: "Please provide a reason for return:",
-                    input: "text",
-                    inputPlaceholder: "Enter reason here...",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Submit Return",
-                    inputValidator: (value) => {
-                        if (!value.trim()) {
-                            return "You must provide a reason for the return!";
+                const reason = prompt("Enter return reason:");
+                if (!reason) {
+                    Swal.fire('Error!', 'Return reason is required.', 'error');
+                    return;
+                }
+
+                $(this).prop('disabled', true).text('Processing...'); // Loading state
+                $.ajax({
+                    url: `/orders/return_item/${itemId}/`,
+                    type: 'POST',
+                    data: JSON.stringify({ reason: reason }),
+                    contentType: 'application/json',
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('Success!', 'Return requested.', 'success');
+                            location.reload(); // Refresh to update UI
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                            $(this).prop('disabled', false).text('Return'); // Reset button
                         }
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        var csrftoken = getCookie('csrftoken');
-                        $.ajax({
-                            url: "{% url 'return_order' order.id %}",
-                            type: "POST",
-                            headers: {
-                                "X-CSRFToken": csrftoken,
-                                "Content-Type": "application/json",
-                                "X-Requested-With": "XMLHttpRequest"
-                            },
-                            data: JSON.stringify({ item_id: itemId, reason: result.value }),
-                            success: function(response) {
-                                if (response.success) {
-                                    Swal.fire("Requested!", "Return request submitted successfully.", "success").then(() => {
-                                        const row = $(`button[data-item-id="${itemId}"]`).closest('tr');
-                                        row.find('td:last').html('<span>Returned</span>');
-                                        if (response.all_returned) {
-                                            $('.order-info .status').text('Returned').attr('data-status', 'Returned');
-                                            $("#cancel-order-btn").remove();
-                                        }
-                                    });
-                                } else {
-                                    Swal.fire("Error!", response.message, "error");
-                                }
-                            },
-                            error: function() {
-                                Swal.fire("Error!", "Something went wrong. Try again!", "error");
-                            }
-                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire('Error!', 'Failed to request return.', 'error');
+                        $(this).prop('disabled', false).text('Return'); // Reset button
+                    },
+                    complete: function() {
+                        $(this).prop('disabled', false).text('Return'); // Ensure reset
                     }
                 });
             });
 
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.startsWith(name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
+            
+
+        // Individual item return functionality
+        $('.btn-return').on('click', function() {
+            const itemId = $(this).data('item-id');
+            const orderId = $(this).closest('tr').data('order-id');
+            console.log('Submitting return for:', { itemId, orderId }); // Debug log
+
+            Swal.fire({
+                title: 'Return Item',
+                input: 'textarea',
+                inputLabel: 'Please provide a reason for the return:',
+                inputPlaceholder: 'Enter reason here...',
+                showCancelButton: true,
+                confirmButtonText: 'Submit Return',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return 'Return reason is required.';
                     }
                 }
-                return cookieValue;
-            }
-
-            // Clear search functionality
-            document.getElementById('clearSearch').addEventListener('click', function() {
-                document.getElementById('searchInput').value = '';
-                window.location.href = '{% url "home" %}';
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const reason = result.value.trim();
+                    $(this).prop('disabled', true).text('Submitting...'); // Loading state
+                    $.ajax({
+                        url: `/orders/return/${orderId}/`,
+                        type: 'POST',
+                        data: JSON.stringify({ item_id: itemId, reason: reason }),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire('Success!', response.message, 'success');
+                                const cell = $(`button[data-item-id="${itemId}"]`).closest('td');
+                                cell.html(`<span>Return Requested (Reason: ${reason})</span>`);
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('AJAX Error:', { status: xhr.status, response: xhr.responseText }); // Debug log
+                            const message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to submit return request.';
+                            Swal.fire('Error!', message, 'error');
+                        },
+                        complete: function() {
+                            $(`button[data-item-id="${itemId}"]`).prop('disabled', false).text('Return'); // Reset button
+                        }
+                    });
+                }
             });
-
-            // Dynamic visibility of the "Clear Search" button
-            const searchInput = document.getElementById('searchInput');
-            const clearButton = document.getElementById('clearSearch');
-
-            searchInput.addEventListener('input', function() {
-                clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
-            });
-
-            // Load initial cart and wishlist counts
-            function loadInitialCounts() {
-                fetch('/get_cart_count/', {
-                    method: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    
-                    if (data.cart_count !== undefined) {
-                        updateCartCount(data.cart_count);
-                    } else {
-                        updateCartCount(0);
-                    }
-                })
-                .catch(error => console.error('Error loading cart count:', error));
-
-                fetch('/get_wishlist_count/', {
-                    method: 'GET',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    
-                    if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
-                        updateWishlistCount(data.wishlist_count);
-                    } else {
-                        updateWishlistCount(0);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading wishlist count:', error);
-                    updateWishlistCount(0);
-                });
-            }
-
-            function updateCartCount(count) {
-                const cartCountElement = document.querySelector('.cart-count');
-                cartCountElement.textContent = count || '0';
-                
-            }
-
-            function updateWishlistCount(count) {
-                const wishlistCountElement = document.querySelector('.wishlist-count');
-                wishlistCountElement.textContent = count || '0';
-                wishlistCountElement.style.display = 'inline-block';
-                
-            }
-
-            window.onload = function() {
-                clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
-                loadInitialCounts();
-            };
         });
+
+        // Utility function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Clear search functionality
+        document.getElementById('clearSearch').addEventListener('click', function() {
+            document.getElementById('searchInput').value = '';
+            window.location.href = '{% url "home" %}';
+        });
+
+        // Dynamic visibility of the "Clear Search" button
+        const searchInput = document.getElementById('searchInput');
+        const clearButton = document.getElementById('clearSearch');
+
+        searchInput.addEventListener('input', function() {
+            clearButton.style.display = this.value.trim() ? 'inline-block' : 'none';
+        });
+
+        // Load initial cart and wishlist counts
+        function loadInitialCounts() {
+            fetch('/get_cart_count/', {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.cart_count !== undefined) {
+                    updateCartCount(data.cart_count);
+                } else {
+                    updateCartCount(0);
+                }
+            })
+            .catch(error => console.error('Error loading cart count:', error));
+
+            fetch('/get_wishlist_count/', {
+                method: 'GET',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.wishlist_count !== undefined && data.wishlist_count !== null) {
+                    updateWishlistCount(data.wishlist_count);
+                } else {
+                    updateWishlistCount(0);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading wishlist count:', error);
+                updateWishlistCount(0);
+            });
+        }
+
+        function updateCartCount(count) {
+            const cartCountElement = document.querySelector('.cart-count');
+            cartCountElement.textContent = count || '0';
+        }
+
+        function updateWishlistCount(count) {
+            const wishlistCountElement = document.querySelector('.wishlist-count');
+            wishlistCountElement.textContent = count || '0';
+            wishlistCountElement.style.display = 'inline-block';
+        }
+
+        window.onload = function() {
+            clearButton.style.display = searchInput.value.trim() ? 'inline-block' : 'none';
+            loadInitialCounts();
+        };
+    });
     </script>
 </body>
 </html>

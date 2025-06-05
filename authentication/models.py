@@ -239,12 +239,12 @@ class Order(models.Model):
         ('Failed', 'Failed'),
     ]
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="orders")
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE, related_name="orders")
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES)
     transaction_id = models.CharField(max_length=255, blank=True, null=True)  # Only for Razorpay
-    shipping_address = models.ForeignKey(Address, on_delete=models.CASCADE) 
+    shipping_address = models.ForeignKey('Address', on_delete=models.CASCADE) 
     shipping_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)  # New field
     razorpay_payment_id = models.CharField(max_length=100, blank=True, null=True)
     razorpay_order_id = models.CharField(max_length=100, blank=True, null=True)
@@ -265,10 +265,10 @@ class Order(models.Model):
         self.save()
 
     def check_all_items_returned(self):
-        """Check if all items in the order are returned and update status"""
-        if self.items.exists() and all(item.is_returned for item in self.items.all()):
+        """Check if any items in the order are returned and approved"""
+        # If any item is both returned and approved, set status to 'Returned'
+        if self.items.exists() and any(item.is_returned and item.return_approved for item in self.items.all()):
             self.status = 'Returned'
-            self.process_return()
         self.save()
 
     def delete(self, *args, **kwargs):
@@ -284,7 +284,6 @@ class Order(models.Model):
             if old_order.status != 'Returned' and self.status == 'Returned':
                 print(f"[SAVE] Order #{self.pk} marked for return processing")
                 super().save(*args, **kwargs)
-                self.process_return()
             else:
                 print(f"[SAVE] Order #{self.pk}: No return needed")
                 super().save(*args, **kwargs)
@@ -292,60 +291,64 @@ class Order(models.Model):
             print(f"[SAVE] Creating new order")
             super().save(*args, **kwargs)
 
-    
-    def process_return(self):
-        print(f"[RETURN] Starting process_return for Order #{self.id}, Status: {self.status}, Payment: {self.payment_method}")
-        if self.status != 'Returned':
-            print(f"[RETURN] Order #{self.id} not in 'Returned' status, skipping")
-            return
-        
+    def process_cancellation(self):
+        print(f"[CANCEL] Starting process_cancellation for Order #{self.id}, Status: {self.status}, Payment: {self.payment_method}")
+        if self.status not in ['Pending', 'Confirmed', 'Shipped']:
+            print(f"[CANCEL] Order #{self.id} cannot be canceled, status: {self.status}")
+            return False, "Order cannot be canceled in its current status"
+
         try:
             with transaction.atomic():
                 # Build product details for transaction description
                 product_details = ""
-                for item in self.items.filter(is_returned=True):
+                for item in self.items.all():
                     variant_info = f" ({item.variant.ram}/{item.variant.storage}/{item.variant.color})" if item.variant else ""
                     product_details += f"{item.product.name}{variant_info} × {item.quantity}, "
-                    # Update stock for returned items
+                    # Update stock for canceled items
                     if item.variant:
                         item.variant.stock += item.quantity
                         item.variant.save()
-                        print(f"[RETURN] Updated stock for variant {item.variant} to {item.variant.stock}")
+                        print(f"[CANCEL] Updated stock for variant {item.variant} to {item.variant.stock}")
                     else:
                         item.product.stock += item.quantity
                         item.product.save()
-                        print(f"[RETURN] Updated stock for product {item.product} to {item.product.stock}")
-                
+                        print(f"[CANCEL] Updated stock for product {item.product} to {item.product.stock}")
+
                 product_details = product_details.rstrip(", ") or "No items"
-                print(f"[RETURN] Product details: {product_details}")
-                
-                # Update wallet for returned items
-                total_returned_amount = sum(
-                    item.get_total_price() for item in self.items.filter(is_returned=True)
-                )
-                if total_returned_amount > 0:
+                print(f"[CANCEL] Product details: {product_details}")
+
+                # Update wallet for canceled order
+                total_refunded_amount = self.calculate_total_price()  # Includes total_price + shipping_fee
+                if total_refunded_amount > 0:
                     wallet, created = Wallet.objects.get_or_create(user=self.user)
-                    print(f"[RETURN] Wallet before: {wallet.balance}, Total Returned Amount: {total_returned_amount}")
-                    wallet.balance += Decimal(str(total_returned_amount))
+                    print(f"[CANCEL] Wallet before: {wallet.balance}, Total Refunded Amount: {total_refunded_amount}")
+                    wallet.balance += Decimal(str(total_refunded_amount))
                     wallet.save()
-                    print(f"[RETURN] Wallet after: {wallet.balance}")
-                    
+                    print(f"[CANCEL] Wallet after: {wallet.balance}")
+
                     # Create transaction record
                     import uuid
                     unique_ref = str(uuid.uuid4())
                     txn = Transaction.objects.create(
                         wallet=wallet,
-                        amount=total_returned_amount,
+                        amount=total_refunded_amount,
                         transaction_type='CREDIT',
-                        description=f"Refund for returned items in order #{self.id}: {product_details}",
+                        description=f"Refund for canceled order #{self.id}: {product_details}",
                         order=self
                     )
-                    print(f"[RETURN] Transaction created: ID {txn.id}")
+                    print(f"[CANCEL] Transaction created: ID {txn.id}")
+
+                # Update order status
+                self.status = 'Canceled'
+                self.is_deleted = True
+                self.save()
+                print(f"[CANCEL] Order #{self.id} status updated to Canceled")
+
+                return True, "Order canceled successfully"
         except Exception as e:
-            print(f"[RETURN] Error in process_return for Order #{self.id}: {str(e)}")
-            raise
-   
-    
+            print(f"[CANCEL] Error in process_cancellation for Order #{self.id}: {str(e)}")
+            return False, f"Error canceling order: {str(e)}"
+        
     def calculate_total_price(self):
         return self.total_price + self.shipping_fee
 
@@ -362,18 +365,18 @@ class OrderItem(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) 
     is_returned = models.BooleanField(default=False)  
     return_reason = models.TextField(blank=True, null=True)
+    return_approved = models.BooleanField(default=False)
 
     def get_total_price(self):
-        """Calculate the total price for this item"""
-        return self.quantity * self.price if self.price is not None else 0
-
+        return self.quantity * self.price
+    
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.order.update_total_price()
         self.order.check_all_items_returned()
 
     def __str__(self):
-        return f"{self.product.name} - {self.quantity} pcs"
+        return f"{self.product.name} x {self.quantity}"
 
     class Meta:
         ordering = ['order']

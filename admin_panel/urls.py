@@ -27,7 +27,7 @@ urlpatterns = [
     path("update-order-status/",views.update_order_status, name="update_order_status"),
     path('orders/<int:order_id>/', views.order_detail, name='order_detail'),
     path('get-product-quantities/', views.get_product_quantities, name='get_product_quantities'),
-    path('approve-return/<int:order_id>/', views.approve_return, name='approve_return'),
+    path('orders/approve_return/<int:order_id>/', views.approve_return, name='approve_return'),
     path('offers/', views.offer_management, name='offer_management'),
     #path('edit-offer/<int:offer_id>/', views.edit_offer, name='edit_offer'),
     path('offers/add/', views.add_offer, name='add_offer'),
@@ -41,6 +41,7 @@ urlpatterns = [
     path('sales_report/', views.sales_report, name='sales_report'),
     path('wallets/', views.wallet_management, name='wallet_management'),
     path('transactions/<int:transaction_id>/', views.transaction_detail, name='transaction_detail'),
+    path('orders/items/<int:order_id>/', views.get_order_items, name='get_order_items'),
     path("admin_logout/", views.admin_logout, name="admin_logout"),
 ]
 

@@ -589,7 +589,8 @@ def add_to_cart_with_variant(request, variant_id):
         max_retries = 3
         retry_count = 0
         retry_delay = 0.5
-        
+        MAX_CART_QUANTITY = 5  # Define the maximum quantity limit
+
         while retry_count < max_retries:
             try:
                 logger.info(f"Add to cart request from {request.user} for variant {variant_id}")
@@ -620,12 +621,23 @@ def add_to_cart_with_variant(request, variant_id):
                     )
                     
                     if not created:
+                        # Check if adding one more would exceed the max cart quantity
+                        if cart_item.quantity >= MAX_CART_QUANTITY:
+                            logger.warning(f"Max cart quantity limit of {MAX_CART_QUANTITY} reached for variant {variant_id}")
+                            return JsonResponse({
+                                'success': False,
+                                'message': f'Cannot add more. Maximum quantity of {MAX_CART_QUANTITY} reached in cart.',
+                                'status': 'max_quantity',
+                                'stock': variant.stock,
+                                'current_quantity': cart_item.quantity
+                            }, status=400)
+                        
                         if cart_item.quantity >= variant.stock:
                             logger.warning(f"Stock limit reached for variant {variant_id}")
                             return JsonResponse({
                                 'success': False,
                                 'message': 'Cannot add more items. Stock limit reached.',
-                                'status': 'max_quantity',
+                                'status': 'max_stock',
                                 'stock': variant.stock,
                                 'current_quantity': cart_item.quantity
                             }, status=400)
@@ -637,15 +649,19 @@ def add_to_cart_with_variant(request, variant_id):
                     Wishlist.objects.filter(user=request.user, product=variant.product, variant=variant).delete()
                     logger.info(f"Removed wishlist item for product {variant.product.id} and variant {variant_id} during add_to_cart_with_variant")
 
+                    # Update stock
+                
+                    variant.save()
+
                     logger.info(f"Cart updated for {request.user}. New quantity: {cart_item.quantity}. New stock: {variant.stock}")
                     
                     return JsonResponse({
                         'success': True,
-                        'message': 'Added to cart successfully!',
+                        'message': 'Added to cart successfully!' if created else f'Quantity increased to {cart_item.quantity}',
                         'stock': variant.stock,
                         'current_quantity': cart_item.quantity,
                         'cart_count': Cart.objects.filter(user=request.user).count(),
-                        'wishlist_count': Wishlist.objects.filter(user=request.user).count(),  # Added
+                        'wishlist_count': Wishlist.objects.filter(user=request.user).count(),
                         'is_new_item': created
                     })
                     
@@ -694,7 +710,7 @@ def add_to_cart_with_variant(request, variant_id):
         'status': 'invalid_request'
     }, status=400)
 
-    
+ 
 @require_POST
 @login_required
 def update_cart_quantity(request, variant_id, action):
@@ -1454,10 +1470,24 @@ def order_details(request):
     return render(request, 'order_details.html', {'page_obj': page_obj})
 
 @login_required
-def get_order_statuses(request):
-    orders = Order.objects.filter(user=request.user).values('id', 'status')
-    statuses = {str(order['id']): order['status'] for order in orders}
-    return JsonResponse({'success': True, 'statuses': statuses})
+def get_order_status(request, order_id):
+    logger.debug(f"Fetching status for order_id: {order_id}")
+    if not request.user.is_staff:
+        logger.warning(f"Unauthorized access attempt by user: {request.user}")
+        return JsonResponse({"success": False, "message": "Admin access required"}, status=403)
+    
+    try:
+        order = get_object_or_404(Order, id=order_id)
+        return JsonResponse({
+            "success": True,
+            "status": order.status
+        })
+    except Order.DoesNotExist:
+        logger.error(f"Order {order_id} not found")
+        return JsonResponse({"success": False, "message": "Order not found"}, status=404)
+    except Exception as e:
+        logger.exception(f"Error fetching status for order {order_id}: {str(e)}")
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 @login_required
 @never_cache
@@ -1599,71 +1629,69 @@ def is_admin(user):
 def cancel_order(request, order_id):
     if request.method == "POST":
         order = get_object_or_404(Order, id=order_id, user=request.user)
-        if order.status in ["Pending", "Confirmed", "Shipped"]:
-            try:
-                with transaction.atomic():
-                    order.status = "Cancelled"
-                    order.save()
-                    stock_updates = {}
-                    for item in order.items.all():
-                        # Check if the OrderItem has a Variant
-                        if item.variant:
-                            variant = item.variant                           
-                            variant.stock += item.quantity  # Increment variant stock                           
-                            variant.save() 
-                            variant.refresh_from_db()                             
-                            stock_updates[variant.id] = variant.stock
-                        else:
-                            product = item.product                          
-                            product.stock += item.quantity                          
-                            product.save()
-                            product.refresh_from_db()                           
-                            stock_updates[product.id] = product.stock
-                    # Refund logic for online payments
-                    if order.payment_method in ['Razorpay', 'Wallet'] and order.payment_status == 'Success':
-                        wallet, created = Wallet.objects.get_or_create(user=request.user)
-                        refund_amount = order.total_price
-                        wallet.add_funds(
-                            amount=refund_amount,
-                            description=f"Refund for cancelled order #{order.id}",
-                            order=order
-                        )
-
-                    return JsonResponse({
-                        "success": True,
-                        "message": "Order cancelled successfully!",
-                        "stock_updates": stock_updates
-                    })
-            except Exception as e:
-                return JsonResponse({"success": False, "message": f"Transaction failed: {str(e)}"}, status=500)
-        return JsonResponse({"success": False, "message": "Order cannot be cancelled!"}, status=400)
-
+        success, message = order.process_cancellation()
+        
+        if success:
+            # Prepare stock_updates for response compatibility
+            stock_updates = {}
+            for item in order.items.all():
+                if item.variant:
+                    stock_updates[item.variant.id] = item.variant.stock
+                else:
+                    stock_updates[item.product.id] = item.product.stock
+            return JsonResponse({
+                "success": True,
+                "message": message,
+                "stock_updates": stock_updates
+            })
+        return JsonResponse({"success": False, "message": message}, status=400)
+    
     return JsonResponse({"success": False, "message": "Invalid request!"}, status=400)
-
 
 @login_required
 @require_POST
+@csrf_protect
 def return_order(request, order_id):
+    logger.debug(f"Processing return request for order_id: {order_id}, user: {request.user}")
     try:
         order = get_object_or_404(Order, id=order_id, user=request.user)
+        logger.debug(f"Order found: {order.id}, status: {order.status}")
+        
         if order.status != "Delivered":
+            logger.warning(f"Order {order.id} not in Delivered status: {order.status}")
             return JsonResponse({
                 "success": False,
                 "message": "Only delivered orders can be returned."
             })
         
-        # Check return window (e.g., 7 days)
         if (timezone.now() - order.created_at).days > 7:
+            logger.warning(f"Order {order.id} return period expired")
             return JsonResponse({
                 "success": False,
                 "message": "Return period has expired (7 days)."
             })
         
-        data = json.loads(request.body)
-        item_id = data.get('item_id')
-        reason = data.get('reason', '').strip()
+        try:
+            data = json.loads(request.body)
+            item_id = data.get('item_id')
+            reason = data.get('reason', '').strip()
+            logger.debug(f"Request data: item_id={item_id}, reason={reason}")
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON decode error: {str(e)}")
+            return JsonResponse({
+                "success": False,
+                "message": "Invalid request data."
+            })
+        
+        if not item_id:
+            logger.error("Item ID is missing")
+            return JsonResponse({
+                "success": False,
+                "message": "Item ID is required."
+            })
         
         if not reason:
+            logger.warning("Return reason is empty")
             return JsonResponse({
                 "success": False,
                 "message": "Please provide a reason for the return."
@@ -1671,7 +1699,9 @@ def return_order(request, order_id):
         
         with transaction.atomic():
             order_item = get_object_or_404(OrderItem, id=item_id, order=order)
+            logger.debug(f"OrderItem found: {order_item.id}")
             if order_item.is_returned:
+                logger.warning(f"Item {order_item.id} already returned")
                 return JsonResponse({
                     "success": False,
                     "message": "This item has already been returned."
@@ -1680,21 +1710,15 @@ def return_order(request, order_id):
             order_item.is_returned = True
             order_item.return_reason = reason
             order_item.save()
+            logger.debug(f"Updated OrderItem {order_item.id}: is_returned=True, reason={reason}")
             
-            # Increment stock
-            if order_item.variant:
-                order_item.variant.stock += order_item.quantity
-                order_item.variant.save()
-                order_item.variant.refresh_from_db()
-                
-            else:
-                order_item.product.stock += order_item.quantity
-                order_item.product.save()
-                order_item.product.refresh_from_db()
-                
+            if order.status != "Returned":
+                order.status = "Return Requested"
+                order.save()
+                logger.debug(f"Updated Order {order.id} status to Return Requested")
             
-            # Check if all items are returned
             order.check_all_items_returned()
+            logger.debug(f"Checked all items returned, order status: {order.status}")
             
             return JsonResponse({
                 "success": True,
@@ -1703,22 +1727,65 @@ def return_order(request, order_id):
                 "item_id": item_id
             })
     except Order.DoesNotExist:
+        logger.error(f"Order {order_id} not found or does not belong to user {request.user}")
         return JsonResponse({
             "success": False,
             "message": "Order not found or does not belong to you."
         })
     except OrderItem.DoesNotExist:
+        logger.error(f"OrderItem {item_id} not found for order {order_id}")
         return JsonResponse({
             "success": False,
             "message": "Order item not found."
         })
     except Exception as e:
-        
+        logger.exception(f"Unexpected error in return_order: {str(e)}")
         return JsonResponse({
             "success": False,
             "message": f"An error occurred: {str(e)}"
         })
     
+@csrf_protect
+@require_POST
+def return_item(request, item_id):
+    logger.debug(f"Processing return request for item_id: {item_id}, user: {request.user}")
+    try:
+        order_item = get_object_or_404(OrderItem, id=item_id, order__user=request.user)
+        order = order_item.order
+
+        # Allow returns for "Delivered" or "Return Requested" orders
+        if order.status not in ['Delivered', 'Return Requested']:
+            logger.warning(f"Order {order.id} not eligible for return, status: {order.status}")
+            return JsonResponse({"success": False, "message": "Only delivered or return requested orders can be returned"}, status=400)
+        
+        if order_item.is_returned:
+            logger.warning(f"Item {order_item.id} already marked for return")
+            return JsonResponse({"success": False, "message": "Item is already marked for return"}, status=400)
+
+        data = json.loads(request.body)
+        reason = data.get('reason')
+        if not reason:
+            logger.error(f"Return reason missing for item {order_item.id}")
+            return JsonResponse({"success": False, "message": "Return reason is required"}, status=400)
+
+        order_item.is_returned = True
+        order_item.return_reason = reason
+        order_item.save()
+
+        # Ensure order status is "Return Requested"
+        if order.status != "Return Requested":
+            order.status = "Return Requested"
+            order.save()
+            logger.debug(f"Updated order {order.id} status to Return Requested")
+
+        logger.info(f"Return requested for item {order_item.id} in order {order.id}")
+        return JsonResponse({"success": True, "message": "Return requested successfully"})
+    except OrderItem.DoesNotExist:
+        logger.error(f"OrderItem {item_id} not found")
+        return JsonResponse({"success": False, "message": "Item not found"}, status=404)
+    except Exception as e:
+        logger.exception(f"Error processing return for item {item_id}: {str(e)}")
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
     
 @login_required
 @csrf_protect
